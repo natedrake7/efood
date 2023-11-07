@@ -11,3 +11,17 @@ export interface JwtPayload{
 
     phonenumber: string;
 }
+
+export interface ProfessionalJwtPayload{
+    id: number;
+
+    username: string;
+
+    address: string;
+
+    description: string;
+
+    email: string;
+
+    phonenumber: string;
+}

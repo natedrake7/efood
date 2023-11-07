@@ -1,5 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn,OneToMany} from 'typeorm';
-import { Restaurant } from './restaurant.entity';
+import { Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
 
 @Entity('User')
 export class User{
@@ -23,10 +22,4 @@ export class User{
 
     @Column()
     phonenumber: string;
-
-    @Column({length:10})
-    role: string;
-
-    @OneToMany(() => Restaurant,(restaurant) => restaurant.owner)
-    restaurants: Restaurant[];
 }

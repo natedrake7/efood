@@ -1,21 +1,18 @@
 import { IsString,MinLength,MaxLength,IsStrongPassword,IsEmail,IsPhoneNumber} from "class-validator";
+import { Column } from "typeorm";
 
 
-export class UserDto{
+export class ProfessionalUserDto{
     @IsString()
     @MinLength(4)
     @MaxLength(20)
     username: string;
 
     @IsString()
-    @MinLength(4)
-    @MaxLength(20)
-    firstname: string;
+    address: string;
 
-    @IsString()
-    @MinLength(4)
-    @MaxLength(20)
-    lastname: string;
+    @Column()
+    delivery_time: number;
 
     @IsString()
     @MinLength(8)
@@ -29,5 +26,6 @@ export class UserDto{
     @IsPhoneNumber()
     phonenumber: string;
 
-    role: string;
+    @Column({length:500})
+    description: string;
 }

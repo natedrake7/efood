@@ -1,13 +1,13 @@
-import { Injectable,Body, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/Entities/user.entity';
-import { UserDto } from 'src/Entities/userDto';
+import { User } from 'src/Entities/user/user.entity';
+import { UserDto } from 'src/Entities/user/UserDto';
 import { Repository} from 'typeorm';
 import * as bcrypt from 'bcrypt'
 import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { JwtService } from '@nestjs/jwt/dist';
 import { JwtPayload } from 'src/Entities/jwt-payload.interface';
-import { UserEdit } from 'src/Entities/useredit.entity';
+import { UserEdit } from 'src/Entities/user/useredit.entity';
 
 @Injectable()
 export class UserService {
@@ -16,8 +16,8 @@ export class UserService {
     private userRepostory: Repository<User>,
     private jwtService: JwtService){}
 
-  async Create(userDto: UserDto):Promise<User>{
-    const {username,firstname,lastname,password,email,phonenumber,role} = userDto;
+  async Create(userDto: UserDto):Promise<void>{
+    const {username,firstname,lastname,password,email,phonenumber} = userDto;
     
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password,salt);
@@ -28,11 +28,9 @@ export class UserService {
       lastname,
       password: hashedPassword,
       email,
-      phonenumber,
-      role
+      phonenumber
     });
     await this.userRepostory.save(new_user);
-    return new_user;
   }
 
   async SignIn(userDto: AuthSignIn):Promise<{accessToken: string}>{

@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './Modules/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ProfessionalUsersModule } from './Modules/professional_user.module';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -18,7 +19,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     ],
     synchronize: true
   }),
-    UsersModule],
+  UsersModule,
+  ProfessionalUsersModule],
   controllers: [AppController],
   providers: [AppService],
 })

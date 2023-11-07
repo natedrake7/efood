@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn,OneToMany, ManyToOne } from 'typeorm';
 import { ProductAddon } from './product_addon.entity';
 import { Order } from './order.entity';
-import { Restaurant } from './restaurant.entity';
+import { ProfessionalUser } from './professionaluser.entity';
 
 @Entity('Product')
 export class Product{
@@ -32,6 +32,6 @@ export class Product{
     @ManyToOne(() => Order, (order) => order.products)
     order: Order;
 
-    @ManyToOne(() => Restaurant,(restaurant) => restaurant.products)
-    restaurant: Restaurant;
+    @ManyToOne(() => ProfessionalUser,(user) => user.products)
+    user: ProfessionalUser;
 }
