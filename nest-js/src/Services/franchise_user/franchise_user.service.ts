@@ -44,7 +44,7 @@ export class FranchiseUserService {
           throw new UnauthorizedException("Incorrect Password!");
     
         const {id,description,email,phonenumber} = user;
-        const payload: FranchiseJwtPayload = {id,username,type:'franchise',description,email,phonenumber};
+        const payload: FranchiseJwtPayload = {id,username,type:'franchise',franchise_payload:true,description,email,phonenumber};
         const accessToken: string = await this.jwtService.sign(payload);
     
         return {accessToken};
@@ -83,7 +83,7 @@ export class FranchiseUserService {
       await this.userRepository.save(user);
       
       const {username,description,email,phonenumber} = user;
-      const payload: FranchiseJwtPayload = {id,username,type:'franchise',description,email,phonenumber};
+      const payload: FranchiseJwtPayload = {id,username,type:'franchise',franchise_payload:true,description,email,phonenumber};
       const accessToken: string = await this.jwtService.sign(payload);
   
       return {accessToken};

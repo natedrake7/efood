@@ -9,6 +9,8 @@ import { Product } from 'src/Entities/products/product.entity';
 import { ProductService } from 'src/Services/product/product.service';
 import { ProductsController } from 'src/Controllers/product/products.controller';
 import { ProductAddon } from 'src/Entities/products/product_addon.entity';
+import { JwtStrategy } from 'src/jwt.strategy';
+import { User } from 'src/Entities/user/user.entity';
 
 @Module({
   imports: [
@@ -20,8 +22,12 @@ import { ProductAddon } from 'src/Entities/products/product_addon.entity';
       },
     }),
     TypeOrmModule.forFeature([Product]),
-    TypeOrmModule.forFeature([ProductAddon])],
-  providers: [ProductService],
+    TypeOrmModule.forFeature([ProductAddon]),
+    TypeOrmModule.forFeature([FranchiseUser]),
+    TypeOrmModule.forFeature([ProfessionalUser]),
+    TypeOrmModule.forFeature([User]),
+  ],
+  providers: [ProductService,JwtStrategy],
   controllers: [ProductsController],
 })
 export class ProductsModule {}

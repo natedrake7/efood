@@ -75,7 +75,7 @@ export class ProfessionalUserService {
           throw new UnauthorizedException("Incorrect Password!");
     
         const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-        const payload: ProfessionalJwtPayload = {id,username,type:"professional",address,delivery_time,city,zipcode,description,email,phonenumber};
+        const payload: ProfessionalJwtPayload = {id,username,type:"professional",address,professional_payload:true,delivery_time,city,zipcode,description,email,phonenumber};
         const accessToken: string = await this.jwtService.sign(payload);
     
         return {accessToken};
@@ -88,7 +88,7 @@ export class ProfessionalUserService {
         throw new UnauthorizedException("User is not registerd!");
 
       const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-      const payload: ProfessionalJwtPayload = {id,username,type:"professional",address,delivery_time,city,zipcode,description,email,phonenumber};
+      const payload: ProfessionalJwtPayload = {id,username,type:"professional",address,delivery_time,professional_payload:true,city,zipcode,description,email,phonenumber};
       const accessToken: string = await this.jwtService.sign(payload);
   
       return {accessToken};
@@ -136,7 +136,7 @@ export class ProfessionalUserService {
       await this.userRepository.save(user);
       
       const {username,address,description,city,zipcode,delivery_time,email,phonenumber} = user;
-      const payload: ProfessionalJwtPayload = {id,username,type:"professional",address,description,city,zipcode,delivery_time,email,phonenumber};
+      const payload: ProfessionalJwtPayload = {id,username,type:"professional",professional_payload:true,address,description,city,zipcode,delivery_time,email,phonenumber};
 
       const accessToken: string = await this.jwtService.sign(payload);
   

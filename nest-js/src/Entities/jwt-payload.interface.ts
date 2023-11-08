@@ -12,6 +12,8 @@ export interface JwtPayload{
     email: string;
 
     phonenumber: string;
+
+    normal_payload: boolean;
 }
 
 export interface ProfessionalJwtPayload{
@@ -34,6 +36,8 @@ export interface ProfessionalJwtPayload{
     zipcode: string;
     
     delivery_time: number;
+
+    professional_payload: boolean;
 }
 
 export interface FranchiseJwtPayload{
@@ -48,4 +52,6 @@ export interface FranchiseJwtPayload{
     email: string;
 
     phonenumber: string;
+
+    franchise_payload: boolean;
 }

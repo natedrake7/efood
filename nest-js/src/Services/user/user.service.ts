@@ -44,7 +44,7 @@ export class UserService {
       throw new UnauthorizedException("Incorrect Password!");
 
     const {id,firstname,lastname,email,phonenumber} = user;
-    const payload: JwtPayload = {id,username,type:"user",firstname,lastname,email,phonenumber};
+    const payload: JwtPayload = {id,username,type:"user",firstname,normal_payload:true,lastname,email,phonenumber};
     const accessToken: string = await this.jwtService.sign(payload);
 
     return {accessToken};
@@ -85,7 +85,7 @@ export class UserService {
     await this.userRepostory.save(user);
     
     const {username,firstname,lastname,email,phonenumber} = user;
-    const payload: JwtPayload = {id,username,type:"user",firstname,lastname,email,phonenumber};
+    const payload: JwtPayload = {id,username,type:"user",firstname,normal_payload:true,lastname,email,phonenumber};
     const accessToken: string = await this.jwtService.sign(payload);
 
     return {accessToken};

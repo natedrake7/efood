@@ -8,6 +8,7 @@ import { FranchiseJwtPayload, JwtPayload, ProfessionalJwtPayload } from "./Entit
 import { UnauthorizedException } from "@nestjs/common/exceptions";
 import { ProfessionalUser } from "./Entities/professional_user/professionaluser.entity";
 import { FranchiseUser } from "./Entities/franchise_user/franchise_user.entity";
+import { IsInstance } from "class-validator";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy){
@@ -27,6 +28,8 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         const { id } = payload;
         if(payload.type === 'user')
         {
+            if(!('normal_payload' in payload))
+                throw new UnauthorizedException("User is not verified!"); 
             const user = await this.userRepository.findOne({where: [{id}]});
             if(!user)
             {
@@ -36,6 +39,8 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         }
         else if(payload.type === 'professional')
         {
+            if(!('professional_payload' in payload))
+                throw new UnauthorizedException("User is not verified!"); 
             const user = await this.professionalRepository.findOne({where: [{id}]});
             if(!user)
             {
@@ -43,8 +48,10 @@ export class JwtStrategy extends PassportStrategy(Strategy){
             }
             return user;
         }
-        else
+        else if(payload.type === 'franchise')
         {
+            if(!('franchise_payload' in payload))
+                throw new UnauthorizedException("User is not verified!"); 
             const user = await this.franchiseRepository.findOne({where: [{id}]});
             if(!user)
             {
@@ -52,6 +59,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
             }
             return user;
         }
+        throw new UnauthorizedException("User is not verified!"); 
     }
 }
 
