@@ -44,14 +44,13 @@ export class UserService {
       throw new UnauthorizedException("Incorrect Password!");
 
     const {id,firstname,lastname,email,phonenumber} = user;
-    const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
+    const payload: JwtPayload = {id,username,type:"user",firstname,lastname,email,phonenumber};
     const accessToken: string = await this.jwtService.sign(payload);
 
     return {accessToken};
   }
 
-  async Edit(userDto: UserEdit):Promise<{accessToken:string}>{
-    const {id} = userDto;
+  async Edit(id:number,userDto: UserEdit):Promise<{accessToken:string}>{
     const user = await this.userRepostory.findOne({where : [{id: id}]});
 
     if(!user)
@@ -86,7 +85,7 @@ export class UserService {
     await this.userRepostory.save(user);
     
     const {username,firstname,lastname,email,phonenumber} = user;
-    const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
+    const payload: JwtPayload = {id,username,type:"user",firstname,lastname,email,phonenumber};
     const accessToken: string = await this.jwtService.sign(payload);
 
     return {accessToken};

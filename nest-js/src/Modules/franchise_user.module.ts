@@ -1,13 +1,13 @@
+
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserController } from 'src/Controllers/user/user.controller';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
+import { FranchiseUserService } from 'src/Services/franchise_user/franchise_user.service';
+import { FranchiseUserController } from 'src/Controllers/franchise-user/franchise-user.controller';
+import { ProfessionalUserService } from 'src/Services/professional-user/professional-user.service';
 import { ProfessionalUser } from 'src/Entities/professional_user/professionaluser.entity';
-import { User } from 'src/Entities/user/user.entity';
-import { UserService } from 'src/Services/user/user.service';
-import { JwtStrategy } from 'src/jwt.strategy';
 
 @Module({
   imports: [
@@ -18,12 +18,9 @@ import { JwtStrategy } from 'src/jwt.strategy';
         expiresIn: 3600,
       },
     }),
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([ProfessionalUser]),
     TypeOrmModule.forFeature([FranchiseUser]),
-  ],
-  providers: [UserService,JwtStrategy],
-  controllers: [UserController],
-  exports: [JwtStrategy,PassportModule]
+    TypeOrmModule.forFeature([ProfessionalUser])],
+  providers: [FranchiseUserService,ProfessionalUserService],
+  controllers: [FranchiseUserController],
 })
-export class UsersModule {}
+export class FranchiselUsersModule {}

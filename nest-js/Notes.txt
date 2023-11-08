@@ -1,0 +1,4 @@
+1)Franchise users should have access to professional user services(CRUD their professional users)
+2)CRUD products
+3)CRUD Addons
+4)Add Images(Probably Image class)

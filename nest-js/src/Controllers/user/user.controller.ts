@@ -4,6 +4,7 @@ import { User } from 'src/Entities/user/user.entity';
 import { UserDto } from 'src/Entities/user/UserDto';
 import { UserService } from 'src/Services/user/user.service';
 import { AuthGuard } from '@nestjs/passport'
+import { GetUser } from 'src/get-user.decorator';
 import { UserEdit } from 'src/Entities/user/useredit.entity';
 
 @Controller('user')
@@ -27,15 +28,15 @@ export class UserController {
 
   @Post('edit')
   @UseGuards(AuthGuard())
-  async Edit(@Body() userDto: UserEdit): Promise <{accessToken : string} | string>
+  async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <{accessToken : string} | string>
   {
-    return this.userService.Edit(userDto);
+    return this.userService.Edit(user.id,userDto);
   }
 
-  @Delete('delete/:id')
+  @Delete('delete')
   @UseGuards(AuthGuard())
-  async Delete(@Param('id') id:number): Promise<string | number>
+  async Delete(@GetUser() userDto: User): Promise<string>
   {
-    return this.userService.DeleteUserByID(id);
+    return this.userService.DeleteUserByID(userDto.id);
   }
 }
