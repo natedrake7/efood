@@ -1,7 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn,OneToMany, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn,JoinTable, ManyToOne,ManyToMany } from 'typeorm';
 import { ProductAddon } from './product_addon.entity';
 import { Order } from './order.entity';
-import { ProfessionalUser } from './professionaluser.entity';
+import { ProfessionalUser } from '../professional_user/professionaluser.entity';
 import { FranchiseUser } from '../franchise_user/franchise_user.entity';
 
 @Entity('Product')
@@ -12,7 +12,7 @@ export class Product{
     @Column({length: 100})
     name: string;
 
-    @Column({length: 10})
+    @Column({length: 100})
     size: string;
 
     @Column()
@@ -27,11 +27,8 @@ export class Product{
     @Column()
     availability: boolean;
 
-    @OneToMany(() => ProductAddon, (addon) => addon.product)
+    @ManyToMany(() => ProductAddon,productAddon => productAddon.products)
     addons: ProductAddon[];
-
-    @ManyToOne(() => Order, (order) => order.products)
-    order: Order;
 
     @ManyToOne(() => ProfessionalUser,(user) => user.products)
     user: ProfessionalUser;

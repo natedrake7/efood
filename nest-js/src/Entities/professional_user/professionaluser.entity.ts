@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn,OneToMany, ManyToOne } from 'typeorm';
-import { Product } from './product.entity';
+import { Product } from '../products/product.entity';
 import { FranchiseUser } from '../franchise_user/franchise_user.entity';
 
 @Entity('ProfessionalUser')

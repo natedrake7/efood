@@ -15,9 +15,9 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         @InjectRepository(User)
         private userRepository: Repository<User>,        
         @InjectRepository(ProfessionalUser)
-        private professionalserRepository: Repository<ProfessionalUser>,        
+        private professionalRepository: Repository<ProfessionalUser>,        
         @InjectRepository(FranchiseUser)
-        private franchiseuserRepository: Repository<FranchiseUser>){
+        private franchiseRepository: Repository<FranchiseUser>){
             super({
                 secretOrKey: 'topSecret51',
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -36,7 +36,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         }
         else if(payload.type === 'professional')
         {
-            const user = await this.professionalserRepository.findOne({where: [{id}]});
+            const user = await this.professionalRepository.findOne({where: [{id}]});
             if(!user)
             {
                 throw new UnauthorizedException("User is not registered!");
@@ -45,7 +45,7 @@ export class JwtStrategy extends PassportStrategy(Strategy){
         }
         else
         {
-            const user = await this.franchiseuserRepository.findOne({where: [{id}]});
+            const user = await this.franchiseRepository.findOne({where: [{id}]});
             if(!user)
             {
                 throw new UnauthorizedException("User is not registered!");

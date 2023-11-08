@@ -5,6 +5,7 @@ import { UsersModule } from './Modules/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProfessionalUsersModule } from './Modules/professional_user.module';
 import { FranchiselUsersModule } from './Modules/franchise_user.module';
+import { ProductsModule } from './Modules/product.module';
 
 @Module({
   imports: [TypeOrmModule.forRoot({
@@ -22,7 +23,8 @@ import { FranchiselUsersModule } from './Modules/franchise_user.module';
   }),
   UsersModule,
   ProfessionalUsersModule,
-  FranchiselUsersModule],
+  FranchiselUsersModule,
+  ProductsModule],
   controllers: [AppController],
   providers: [AppService],
 })

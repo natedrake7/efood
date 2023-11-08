@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn,OneToMany } from 'typeorm';
 import { ProfessionalUser } from '../professional_user/professionaluser.entity';
-import { Product } from '../professional_user/product.entity';
+import { Product } from '../products/product.entity';
 
 @Entity('FranchiseUser')
 export class FranchiseUser{

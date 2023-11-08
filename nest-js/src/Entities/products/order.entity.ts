@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn,OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn,ManyToMany,JoinTable } from 'typeorm';
 import { Product } from './product.entity';
 
 @Entity('Order')
@@ -21,6 +21,4 @@ export class Order{
     @Column()
     date: Date;
 
-    @OneToMany(() => Product,(product) => product.order)
-    products: Product[];
 }
