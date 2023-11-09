@@ -9,14 +9,15 @@ import { Product } from 'src/Entities/products/product.entity';
 import { ProductService } from 'src/Services/product/product.service';
 import { ProductsController } from 'src/Controllers/product/products.controller';
 import { ProductAddon } from 'src/Entities/products/product_addon.entity';
-import { JwtStrategy } from 'src/jwt.strategy';
 import { User } from 'src/Entities/user/user.entity';
+import { FranchiseJwtStrategy } from 'src/Strategies/franchise.strategy';
+import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
 
 @Module({
   imports: [
     PassportModule.register({defaultStrategy: 'jwt'}),
     JwtModule.register({
-      secret: 'topSecret51',
+      secret: 'topSecret52',
       signOptions:{
         expiresIn: 3600,
       },
@@ -27,7 +28,7 @@ import { User } from 'src/Entities/user/user.entity';
     TypeOrmModule.forFeature([ProfessionalUser]),
     TypeOrmModule.forFeature([User]),
   ],
-  providers: [ProductService,JwtStrategy],
+  providers: [ProductService,ProfesionalJwtStrategy,FranchiseJwtStrategy],
   controllers: [ProductsController],
 })
 export class ProductsModule {}

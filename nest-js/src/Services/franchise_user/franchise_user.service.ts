@@ -44,13 +44,13 @@ export class FranchiseUserService {
           throw new UnauthorizedException("Incorrect Password!");
     
         const {id,description,email,phonenumber} = user;
-        const payload: FranchiseJwtPayload = {id,username,type:'franchise',franchise_payload:true,description,email,phonenumber};
+        const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
         const accessToken: string = await this.jwtService.sign(payload);
     
         return {accessToken};
     }
 
-    async Edit(id:number,userDto: FranchiseUserEdit):Promise<{accessToken:string}>{
+    async Edit(id:string,userDto: FranchiseUserEdit):Promise<{accessToken:string}>{
       const user = await this.userRepository.findOne({where : [{id: id}]});
   
       if(!user)
@@ -83,7 +83,7 @@ export class FranchiseUserService {
       await this.userRepository.save(user);
       
       const {username,description,email,phonenumber} = user;
-      const payload: FranchiseJwtPayload = {id,username,type:'franchise',franchise_payload:true,description,email,phonenumber};
+      const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
       const accessToken: string = await this.jwtService.sign(payload);
   
       return {accessToken};

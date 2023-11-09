@@ -7,13 +7,13 @@ import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity
 import { ProfessionalUser } from 'src/Entities/professional_user/professionaluser.entity';
 import { User } from 'src/Entities/user/user.entity';
 import { UserService } from 'src/Services/user/user.service';
-import { JwtStrategy } from 'src/jwt.strategy';
+import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
 
 @Module({
   imports: [
     PassportModule.register({defaultStrategy: 'jwt'}),
     JwtModule.register({
-      secret: 'topSecret51',
+      secret: 'topSecret52',
       signOptions:{
         expiresIn: 3600,
       },
@@ -22,8 +22,7 @@ import { JwtStrategy } from 'src/jwt.strategy';
     TypeOrmModule.forFeature([ProfessionalUser]),
     TypeOrmModule.forFeature([FranchiseUser]),
   ],
-  providers: [UserService,JwtStrategy],
+  providers: [UserService,UserJwtStrategy],
   controllers: [UserController],
-  exports: [JwtStrategy,PassportModule]
 })
 export class UsersModule {}

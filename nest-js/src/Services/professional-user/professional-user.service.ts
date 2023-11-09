@@ -75,27 +75,26 @@ export class ProfessionalUserService {
           throw new UnauthorizedException("Incorrect Password!");
     
         const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-        const payload: ProfessionalJwtPayload = {id,username,type:"professional",address,professional_payload:true,delivery_time,city,zipcode,description,email,phonenumber};
+        const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
         const accessToken: string = await this.jwtService.sign(payload);
     
         return {accessToken};
     }
 
     async FranchsiseSignIn(userDto: FranchiseUser,username: string):Promise<{accessToken: string}>{
-      const user = await this.userRepository.findOne({where : [{username: username},{franchise_user:userDto}]});
-
+      const user = await this.userRepository.findOne({where : [{username},{franchise_user:userDto}]});
       if(!user)
         throw new UnauthorizedException("User is not registerd!");
 
       const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-      const payload: ProfessionalJwtPayload = {id,username,type:"professional",address,delivery_time,professional_payload:true,city,zipcode,description,email,phonenumber};
+      const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
       const accessToken: string = await this.jwtService.sign(payload);
   
       return {accessToken};
 
     }
 
-    async Edit(id: number,userDto: ProfessionalUserEdit):Promise<{accessToken: string}>{
+    async Edit(id: string,userDto: ProfessionalUserEdit):Promise<{accessToken: string}>{
       const user = await this.userRepository.findOne({where : [{id: id}]});
   
       if(!user)
@@ -136,7 +135,7 @@ export class ProfessionalUserService {
       await this.userRepository.save(user);
       
       const {username,address,description,city,zipcode,delivery_time,email,phonenumber} = user;
-      const payload: ProfessionalJwtPayload = {id,username,type:"professional",professional_payload:true,address,description,city,zipcode,delivery_time,email,phonenumber};
+      const payload: ProfessionalJwtPayload = {id,username,address,description,city,zipcode,delivery_time,email,phonenumber};
 
       const accessToken: string = await this.jwtService.sign(payload);
   

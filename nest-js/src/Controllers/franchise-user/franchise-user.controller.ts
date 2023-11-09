@@ -10,6 +10,8 @@ import { ProfessionalUser } from 'src/Entities/professional_user/professionaluse
 import { ProfessionalUserDto } from 'src/Entities/professional_user/professional_userDto.entity';
 import { ProfessionalUserEdit } from 'src/Entities/professional_user/professional_userEdit.entity';
 import { FranchiseUserEdit } from 'src/Entities/franchise_user/franchise_userEdit.entity';
+import { FranchiseGuard } from 'src/Guards/franchise.guard';
+import { ProfessionalGuard } from 'src/Guards/professional.guard';
 
 @Controller('franchiseuser')
 export class FranchiseUserController {
@@ -32,28 +34,29 @@ export class FranchiseUserController {
     }
 
     @Post('edit')
-    @UseGuards(AuthGuard())
+    @UseGuards(FranchiseGuard)
     async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<{accessToken: string}>
     {
       return this.userService.Edit(franchiseUser.id,userDto);
     }
 
     @Post('professionaluser/create')
-    @UseGuards(AuthGuard())
+    @UseGuards(FranchiseGuard)
     async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto) : Promise<string[] | void>
     {
+      console.log(franchiseuser);
       this.professionaluserService.FranchiseCreate(userDto,franchiseuser);
     }
 
     @Get('professionaluser/signin')
-    @UseGuards(AuthGuard())
+    @UseGuards(FranchiseGuard)
     async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() username: string): Promise<{accessToken: string}>
     {
       return this.professionaluserService.FranchsiseSignIn(userDto,username);
     }
 
     @Post('professionaluser/edit')
-    @UseGuards(AuthGuard())
+    @UseGuards(ProfessionalGuard)
     async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<{accessToken: string}>
     {
       return this.professionaluserService.Edit(professionalUser.id,userDto);

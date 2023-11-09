@@ -4,8 +4,8 @@ import { Product } from '../products/product.entity';
 
 @Entity('FranchiseUser')
 export class FranchiseUser{
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
     @Column({length:100})
     username: string;

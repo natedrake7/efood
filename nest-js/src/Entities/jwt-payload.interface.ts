@@ -1,7 +1,5 @@
 export interface JwtPayload{
-    id: number;
-
-    type: string;
+    id: string;
 
     username: string;
 
@@ -12,14 +10,10 @@ export interface JwtPayload{
     email: string;
 
     phonenumber: string;
-
-    normal_payload: boolean;
 }
 
 export interface ProfessionalJwtPayload{
-    id: number;
-
-    type: string;
+    id: string;
 
     username: string;
 
@@ -36,15 +30,11 @@ export interface ProfessionalJwtPayload{
     zipcode: string;
     
     delivery_time: number;
-
-    professional_payload: boolean;
 }
 
 export interface FranchiseJwtPayload{
-    id: number;
+    id: string;
 
-    type: string;
-    
     username: string;
 
     description: string;
@@ -52,6 +42,4 @@ export interface FranchiseJwtPayload{
     email: string;
 
     phonenumber: string;
-
-    franchise_payload: boolean;
 }
