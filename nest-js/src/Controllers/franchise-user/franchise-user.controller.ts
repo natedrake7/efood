@@ -1,6 +1,5 @@
-import { Controller,Body,Post,Get,UseGuards } from '@nestjs/common';
+import { Controller,Body,Post,Get,UseGuards, UseInterceptors, ParseFilePipe, FileTypeValidator } from '@nestjs/common';
 import { FranchiseUserService } from 'src/Services/franchise_user/franchise_user.service';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { FranchiseUserDto } from 'src/Entities/franchise_user/franchise_userdto.entity';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
@@ -12,6 +11,8 @@ import { ProfessionalUserEdit } from 'src/Entities/professional_user/professiona
 import { FranchiseUserEdit } from 'src/Entities/franchise_user/franchise_userEdit.entity';
 import { FranchiseGuard } from 'src/Guards/franchise.guard';
 import { ProfessionalGuard } from 'src/Guards/professional.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
 
 @Controller('franchiseuser')
 export class FranchiseUserController {
@@ -19,12 +20,13 @@ export class FranchiseUserController {
                 private readonly professionaluserService: ProfessionalUserService) {}
 
     @Post('create')
-    async Create(@Body() userDto: FranchiseUserDto): Promise<string[] | void>
+    @UseInterceptors(FileInterceptor('image'))
+    async Create(@Body() userDto: FranchiseUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<string[] | void>
     {
       const errors = await this.userService.UserExists(userDto);
       if(errors.length > 0)
         return errors
-      this.userService.Create(userDto);
+      this.userService.Create(userDto,file.buffer);
     }
   
     @Get('signin')

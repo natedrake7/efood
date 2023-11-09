@@ -25,6 +25,9 @@ export class FranchiseUser{
     @Column({length:500})
     description: string;
 
+    @Column({type: 'bytea'})
+    image: Buffer;
+
     @OneToMany(() => ProfessionalUser, (professionalUser) => professionalUser.franchise_user)
     professionalUsers: ProfessionalUser[];
     

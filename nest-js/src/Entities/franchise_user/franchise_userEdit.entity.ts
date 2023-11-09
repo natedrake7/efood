@@ -8,4 +8,6 @@ export class FranchiseUserEdit{
     phonenumber: string;
 
     description: string;
+
+    image: File;
 }

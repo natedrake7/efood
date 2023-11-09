@@ -16,7 +16,7 @@ export class FranchiseUserService {
         private userRepository: Repository<FranchiseUser>,
         private jwtService: JwtService){}
     
-    async Create(userDto: FranchiseUserDto):Promise<void>{
+    async Create(userDto: FranchiseUserDto,file: Buffer):Promise<void>{
         const {username,password,description,email,phonenumber} = userDto;
 
         const salt = await bcrypt.genSalt();
@@ -29,6 +29,7 @@ export class FranchiseUserService {
             phonenumber,
             description,
             rating: 0,
+            image:file,
         });
         await this.userRepository.save(new_user);
     }
