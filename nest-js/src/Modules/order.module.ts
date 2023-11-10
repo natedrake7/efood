@@ -6,13 +6,14 @@ import { OrdersController } from 'src/Controllers/orders/orders.controller';
 import { Address } from 'src/Entities/addresses/address.entity';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 import { Order } from 'src/Entities/order/order.entity';
-import { OrderProductAddon } from 'src/Entities/order/order_product_addon.entity';
+import { OrderItem } from 'src/Entities/order/order_item.entity';
 import { Product } from 'src/Entities/products/product.entity';
 import { ProductAddon } from 'src/Entities/products/product_addon.entity';
 import { ProfessionalUser } from 'src/Entities/professional_user/professionaluser.entity';
 import { User } from 'src/Entities/user/user.entity';
 import { OrderService } from 'src/Services/order/order.service';
 import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
+import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
 
 @Module({
   imports: [
@@ -24,8 +25,8 @@ import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
       },
     }),
     TypeOrmModule.forFeature([User,FranchiseUser,ProfessionalUser,ProductAddon
-                            ,Order,Address,OrderProductAddon,Product])],
-  providers: [OrderService,UserJwtStrategy],
+                            ,Order,Address,OrderItem,Product])],
+  providers: [OrderService,UserJwtStrategy,ProfesionalJwtStrategy],
   controllers: [OrdersController],
 })
 export class OrderModule {}

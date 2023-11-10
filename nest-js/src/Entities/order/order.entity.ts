@@ -1,9 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn,ManyToMany,JoinTable, ManyToOne ,OneToMany} from 'typeorm';
-import { Product } from '../products/product.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne ,OneToMany} from 'typeorm';
 import { User } from '../user/user.entity';
 import { ProfessionalUser } from '../professional_user/professionaluser.entity';
 import { Address } from '../addresses/address.entity';
-import { OrderProductAddon } from './order_product_addon.entity';
+import { OrderItem } from './order_item.entity';
 
 @Entity('Order')
 export class Order{
@@ -31,8 +30,8 @@ export class Order{
     @ManyToOne(() => ProfessionalUser,(professionalUser) => professionalUser.orders)
     professionalUser: ProfessionalUser;
 
-    @OneToMany(() => OrderProductAddon, (orderProductAddon) => orderProductAddon.order)
-    orderProductAddons: OrderProductAddon[];
+    @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
+    items: OrderItem[];
 
     @ManyToOne(() => Address,(address) => address.orders)
     address: Address;
