@@ -90,6 +90,19 @@ export class FranchiseUserService {
       return {accessToken};
       }
 
+    async EditPicture(id: string, File:Buffer):Promise<void>{
+      const user = await this.userRepository.findOneBy({id});
+      if(!user)
+        throw new UnauthorizedException("User is not registered!");
+
+      if(File == null)
+        throw new Error("No file was imported!");
+
+      user.image = File;
+
+      await this.userRepository.save(user);
+    }
+
     async UserExists(userDto : FranchiseUserDto): Promise<string[]>{
         const user = await this.userRepository.findOne({ where: [
           {username: userDto.username},

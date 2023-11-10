@@ -9,15 +9,20 @@ import { ProfessionalUser } from 'src/Entities/professional_user/professionaluse
 import { ProfessionalUserDto } from 'src/Entities/professional_user/professional_userDto.entity';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 import { ProfessionalUserEdit } from 'src/Entities/professional_user/professional_userEdit.entity';
+import { error } from 'console';
+import { ProfessionalUserReturnType } from 'src/Entities/professional_user/professional_user_return_type.entity';
+import { Product } from 'src/Entities/products/product.entity';
 
 @Injectable()
 export class ProfessionalUserService {
     constructor(
         @InjectRepository(ProfessionalUser)
         private userRepository: Repository<ProfessionalUser>,
+        @InjectRepository(Product)
+        private productRepository: Repository<Product>,
         private jwtService: JwtService){}
     
-    async Create(userDto: ProfessionalUserDto):Promise<void>{
+    async Create(userDto: ProfessionalUserDto,file: Buffer):Promise<void>{
         const {username,address,password,city,zipcode,description,timetable,email,phonenumber} = userDto;
 
         const salt = await bcrypt.genSalt();
@@ -35,12 +40,13 @@ export class ProfessionalUserService {
             timetable,
             open_status: false,
             rating: 0,
-            delivery_time: 0
+            delivery_time: 0,
+            image:file,
         });
         await this.userRepository.save(new_user);
     }
 
-    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuser: FranchiseUser):Promise<void>{
+    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuser: FranchiseUser,file: Buffer):Promise<void>{
       const {username,address,password,city,zipcode,description,timetable,email,phonenumber} = userDto;
 
       const salt = await bcrypt.genSalt();
@@ -59,7 +65,8 @@ export class ProfessionalUserService {
           open_status: false,
           rating: 0,
           delivery_time: 0,
-          franchise_user:franchiseuser
+          franchise_user:franchiseuser,
+          image:file
       });
       await this.userRepository.save(new_user);
   }
@@ -140,6 +147,45 @@ export class ProfessionalUserService {
       const accessToken: string = await this.jwtService.sign(payload);
   
       return {accessToken};
+    }
+
+    async FranchiseEditPicture(id: string,File: Buffer):Promise<void>{
+      const user = await this.userRepository.findOneBy({id});
+      if(!user)
+        throw new UnauthorizedException("User is not registered!");
+
+      if(File == null)
+        throw new error("No file was imported!");
+
+        user.image = File;
+        
+        await this.userRepository.save(user);
+    }
+
+    async GetAll():Promise<void | ProfessionalUserReturnType[]>{
+      const users = await this.userRepository.find();
+      const ReturnTypes :ProfessionalUserReturnType[] = [] ;
+      users.forEach(user => {
+        ReturnTypes.push(new ProfessionalUserReturnType(user));
+      });
+
+      return ReturnTypes;
+    }
+
+    async Get(id : string):Promise<void | ProfessionalUserReturnType>{
+      const user = await this.userRepository.findOne({where: {id},relations:['franchise_user']});
+      if(!user)
+        throw new UnauthorizedException("No user with that ID exists!");
+      const return_type = new ProfessionalUserReturnType(user);
+      var products: Product[] = [];
+      if(user.franchise_user == null)
+        products = await this.productRepository.findBy({user});
+      else
+        products = await this.productRepository.findBy({franchiseUser:user.franchise_user});
+      if(!products)
+        throw new UnauthorizedException("User has no products")
+      return_type.products = products;
+      return return_type;
     }
 
     async UserExists(userDto : ProfessionalUserDto): Promise<string[]>{

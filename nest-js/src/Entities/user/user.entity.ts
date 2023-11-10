@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, OneToMany, ManyToOne} from 'typeorm';
+import { Address } from '../addresses/address.entity';
+import { Order } from '../order/order.entity';
 
 @Entity('User')
 export class User{
@@ -22,4 +24,10 @@ export class User{
 
     @Column()
     phonenumber: string;
+
+    @OneToMany(() => Address, (address) => address.user)
+    addresses: Address[];
+
+    @ManyToOne(() => Order, (order) => order.user)
+    orders: Order[];
 }

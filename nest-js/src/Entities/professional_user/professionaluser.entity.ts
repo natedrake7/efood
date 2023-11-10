@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn,OneToMany, ManyToOne } from 'typeorm';
 import { Product } from '../products/product.entity';
 import { FranchiseUser } from '../franchise_user/franchise_user.entity';
+import { Order } from '../order/order.entity';
 
 @Entity('ProfessionalUser')
 export class ProfessionalUser{
@@ -44,9 +45,15 @@ export class ProfessionalUser{
     @Column({length:500})
     description: string;
 
+    @Column({type: 'bytea'})
+    image: Buffer;
+
     @OneToMany(() => Product, (product) => product.user)
     products: Product[];
 
     @ManyToOne(() => FranchiseUser,(franchise_user) => franchise_user.professionalUsers)
     franchise_user: FranchiseUser;
+
+    @OneToMany(() => Order, (order) => order.professionalUser)
+    orders: Order[];
 }

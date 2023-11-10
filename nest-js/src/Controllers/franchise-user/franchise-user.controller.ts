@@ -42,12 +42,20 @@ export class FranchiseUserController {
       return this.userService.Edit(franchiseUser.id,userDto);
     }
 
+    @Post('edit/profile-picture')
+    @UseInterceptors(FileInterceptor('image'))
+    @UseGuards(FranchiseGuard)
+    async EditPicture(@GetUser() franchiseUser: FranchiseUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<void>
+    {
+      return this.userService.EditPicture(franchiseUser.id,file.buffer);
+    }
+
     @Post('professionaluser/create')
     @UseGuards(FranchiseGuard)
-    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto) : Promise<string[] | void>
+    @UseInterceptors(FileInterceptor('image'))
+    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File) : Promise<string[] | void>
     {
-      console.log(franchiseuser);
-      this.professionaluserService.FranchiseCreate(userDto,franchiseuser);
+      this.professionaluserService.FranchiseCreate(userDto,franchiseuser,file.buffer);
     }
 
     @Get('professionaluser/signin')
@@ -63,4 +71,13 @@ export class FranchiseUserController {
     {
       return this.professionaluserService.Edit(professionalUser.id,userDto);
     }
+
+    @Post('professionaluser/edit/profile-picture')
+    @UseInterceptors(FileInterceptor('image'))
+    @UseGuards(ProfessionalGuard)
+    async EditProfessionalPicture(@GetUser() professionalUser: ProfessionalUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<void>
+    {
+      return this.professionaluserService.FranchiseEditPicture(professionalUser.id,file.buffer);
+    }
+
 }

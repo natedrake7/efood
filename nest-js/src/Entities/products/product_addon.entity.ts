@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany,JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany,JoinTable,OneToMany } from 'typeorm';
 import { Product } from './product.entity';
+import { OrderProductAddon } from '../order/order_product_addon.entity';
 
 @Entity('ProductAddon')
 export class ProductAddon{
@@ -15,4 +16,7 @@ export class ProductAddon{
     @ManyToMany(() => Product)
     @JoinTable()
     products: Product[];
+
+    @OneToMany(() => OrderProductAddon, (orderProductAddon) => orderProductAddon.addon)
+    orderProductAddons: OrderProductAddon[];
 }
