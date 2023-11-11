@@ -1,5 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany,JoinTable,OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany,JoinTable,OneToMany, ManyToOne } from 'typeorm';
 import { Product } from './product.entity';
+import { ProfessionalUser } from '../professional_user/professionaluser.entity';
+import { FranchiseUser } from '../franchise_user/franchise_user.entity';
 
 @Entity('ProductAddon')
 export class ProductAddon{
@@ -15,4 +17,10 @@ export class ProductAddon{
     @ManyToMany(() => Product)
     @JoinTable()
     products: Product[];
+
+    @ManyToOne(() => ProfessionalUser,(professionalUser) => professionalUser.addons)
+    professionalUser: ProfessionalUser;
+
+    @ManyToOne(() => FranchiseUser,(franchiseUser) => franchiseUser.addons)
+    franchiseUser: FranchiseUser;
 }

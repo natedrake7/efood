@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn,OneToMany } from 'typeorm';
 import { ProfessionalUser } from '../professional_user/professionaluser.entity';
 import { Product } from '../products/product.entity';
+import { ProductAddon } from '../products/product_addon.entity';
 
 @Entity('FranchiseUser')
 export class FranchiseUser{
@@ -33,4 +34,7 @@ export class FranchiseUser{
     
     @OneToMany(() => Product, (product) => product.franchiseUser)
     products: Product[];
+
+    @OneToMany(() => ProductAddon,(productAddon) => productAddon.franchiseUser)
+    addons: ProductAddon[];
 }

@@ -1,3 +1,1 @@
 1)Fix order create(not allow duplicates)
-1)Orders view all of user and view certains by ID
-2)Orders allow companies to also view all their orders

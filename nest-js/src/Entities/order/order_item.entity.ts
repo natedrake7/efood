@@ -11,13 +11,10 @@ export class OrderItem{
     @ManyToOne(() => Order, (order) => order.items)
     order: Order;
 
-    @ManyToOne(() => Product)
+    @ManyToOne(() => Product,{eager: true})
     product: Product;
   
-    @Column()
-    quantity: number;
-  
-    @ManyToMany(() => ProductAddon, { cascade: true })
+    @ManyToMany(() => ProductAddon,{eager:true})
     @JoinTable()
     addons: ProductAddon[];
 }

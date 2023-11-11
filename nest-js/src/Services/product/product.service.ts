@@ -42,6 +42,7 @@ export class ProductService{
                     name,
                     price,
                     products:[item],
+                    professionalUser:user
                 });
                 await queryRunner.manager.save(ProductAddon,new_addon);
             });
@@ -119,6 +120,7 @@ export class ProductService{
                     name,
                     price,
                     products:[item],
+                    franchiseUser:user,
                 });
                 await queryRunner.manager.save(ProductAddon,new_addon);
             });
@@ -173,8 +175,8 @@ export class ProductService{
     }
 
 
-    async AddonEdit(id: string,addonDto : ProductAddonDto):Promise<void>{
-        const addon = await this.addonRepository.findOneBy([{id}])
+    async ProfessionalAddonEdit(id: string,user:ProfessionalUser,addonDto : ProductAddonDto):Promise<void>{
+        const addon = await this.addonRepository.findOneBy([{id,professionalUser:user}]);
         if(!addon)
             throw new UnauthorizedException("Addon doesn't exist!");
         if(addon.name != addonDto.name && addonDto.name != null)
@@ -184,15 +186,40 @@ export class ProductService{
         await this.addonRepository.save(addon);
     }
 
-    async AddonGet(id: string):Promise<void | ProductAddon>{
-        const addon = await this.addonRepository.findOneBy([{id}])
+    async FranchiseAddonEdit(id: string,user:FranchiseUser,addonDto : ProductAddonDto):Promise<void>{
+        const addon = await this.addonRepository.findOneBy([{id,franchiseUser:user}]);
+        if(!addon)
+            throw new UnauthorizedException("Addon doesn't exist!");
+        if(addon.name != addonDto.name && addonDto.name != null)
+            addon.name = addonDto.name;
+        if(addon.price != addonDto.price && addonDto.price != null)
+            addon.price = addonDto.price;
+        await this.addonRepository.save(addon);
+    }
+
+    async ProfessionalAddonGet(id: string,user: ProfessionalUser):Promise<void | ProductAddon>{
+        const addon = await this.addonRepository.findOneBy([{id,professionalUser:user}]);
         if(!addon)
             throw new UnauthorizedException("Addon doesn't exist!");
         return addon;
     }
 
-    async AddonDelete(id: string):Promise<void>{
-        const addon = await this.addonRepository.findOneBy([{id}])
+    async FranchiseAddonGet(id: string,user: FranchiseUser):Promise<void | ProductAddon>{
+        const addon = await this.addonRepository.findOneBy([{id,franchiseUser:user}]);
+        if(!addon)
+            throw new UnauthorizedException("Addon doesn't exist!");
+        return addon;
+    }
+
+    async ProfessionalAddonDelete(id: string,user: ProfessionalUser):Promise<void>{
+        const addon = await this.addonRepository.findOneBy([{id,professionalUser:user}])
+        if(!addon)
+            throw new UnauthorizedException("Addon doesn't exist!");
+        await this.addonRepository.delete(addon);
+    }
+
+    async FranchiseAddonDelete(id: string,user: FranchiseUser):Promise<void>{
+        const addon = await this.addonRepository.findOneBy([{id,franchiseUser:user}])
         if(!addon)
             throw new UnauthorizedException("Addon doesn't exist!");
         await this.addonRepository.delete(addon);

@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn,OneToMany, ManyToOne } from 'typ
 import { Product } from '../products/product.entity';
 import { FranchiseUser } from '../franchise_user/franchise_user.entity';
 import { Order } from '../order/order.entity';
+import { ProductAddon } from '../products/product_addon.entity';
 
 @Entity('ProfessionalUser')
 export class ProfessionalUser{
@@ -56,4 +57,7 @@ export class ProfessionalUser{
 
     @OneToMany(() => Order, (order) => order.professionalUser)
     orders: Order[];
+
+    @OneToMany(() => (ProductAddon),(addon) => addon.professionalUser)
+    addons: ProductAddon[];
 }

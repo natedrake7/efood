@@ -3,6 +3,7 @@ import { User } from '../user/user.entity';
 import { ProfessionalUser } from '../professional_user/professionaluser.entity';
 import { Address } from '../addresses/address.entity';
 import { OrderItem } from './order_item.entity';
+import { Product } from '../products/product.entity';
 
 @Entity('Order')
 export class Order{
@@ -33,6 +34,6 @@ export class Order{
     @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
     items: OrderItem[];
 
-    @ManyToOne(() => Address,(address) => address.orders)
+    @ManyToOne(() => Address,(address) => address.orders,{eager: true})
     address: Address;
 }

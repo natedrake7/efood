@@ -9,6 +9,7 @@ import { ProfessionalGuard } from "src/Guards/professional.guard";
 import { FranchiseGuard } from "src/Guards/franchise.guard";
 import { Product } from "src/Entities/products/product.entity";
 import { ProductAddon } from "src/Entities/products/product_addon.entity";
+import { User } from "src/Entities/user/user.entity";
 
 @Controller('products')
 export class ProductsController {
@@ -52,23 +53,23 @@ export class ProductsController {
 
    @Get('professional/addon/get/:id')
    @UseGuards(ProfessionalGuard)
-   async ProfessionalAddonGet(@Param('id') id: string):Promise<void | ProductAddon>
+   async ProfessionalAddonGet(@Param('id') id: string,@GetUser() user:ProfessionalUser):Promise<void | ProductAddon>
    {
-        return this.productService.AddonGet(id);
+        return this.productService.ProfessionalAddonGet(id,user);
    }
 
    @Post('professional/addon/delete/:id')
    @UseGuards(ProfessionalGuard)
-   async ProfessionalAddonDelete(@Param('id') id: string):Promise<void | ProductAddon>
+   async ProfessionalAddonDelete(@Param('id') id: string,@GetUser() user: ProfessionalUser):Promise<void | ProductAddon>
    {
-        return this.productService.AddonDelete(id);
+        return this.productService.ProfessionalAddonDelete(id,user);
    }
 
    @Post('professional/addon/edit/:id')
    @UseGuards(ProfessionalGuard)
-   async ProfessionalAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto):Promise<void>
+   async ProfessionalAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto,@GetUser() user: ProfessionalUser):Promise<void>
    {
-        return this.productService.AddonEdit(id,addonDto);
+        return this.productService.ProfessionalAddonEdit(id,user,addonDto);
    }
 
 
@@ -110,22 +111,22 @@ export class ProductsController {
 
    @Get('franchise/addon/get/:id')
    @UseGuards(FranchiseGuard)
-   async FranchiseAddonGet(@Param('id') id: string):Promise<void | ProductAddon>
+   async FranchiseAddonGet(@Param('id') id: string,@GetUser() user:FranchiseUser):Promise<void | ProductAddon>
    {
-        return this.productService.AddonGet(id);
+        return this.productService.FranchiseAddonGet(id,user);
    }
 
    @Post('franchise/addon/delete/:id')
    @UseGuards(FranchiseGuard)
-   async FranchiseAddonDelete(@Param('id') id: string):Promise<void | ProductAddon>
+   async FranchiseAddonDelete(@Param('id') id: string,@GetUser() user:FranchiseUser):Promise<void | ProductAddon>
    {
-        return this.productService.AddonDelete(id);
+        return this.productService.FranchiseAddonDelete(id,user);
    }
 
    @Post('franchise/addon/edit/:id')
    @UseGuards(FranchiseGuard)
-   async FranchiseAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto):Promise<void>
+   async FranchiseAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto,@GetUser() user:FranchiseUser):Promise<void>
    {
-        return this.productService.AddonEdit(id,addonDto);
+        return this.productService.FranchiseAddonEdit(id,user,addonDto);
    }
 }
