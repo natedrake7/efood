@@ -9,6 +9,7 @@ import { ProfessionalGuard } from 'src/Guards/professional.guard';
 import { ProfessionalUserReturnType } from 'src/Entities/professional_user/professional_user_return_type.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
+import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/professional_user_password_edit.entity';
 
 @Controller('professionaluser')
 export class ProfessionalUserController {
@@ -25,16 +26,23 @@ export class ProfessionalUserController {
    }
 
    @Get('signin')
-   async SignIn(@Body() userDto: AuthSignIn):Promise<{accessToken: string}>
+   async SignIn(@Body() userDto: AuthSignIn):Promise<string>
    {
         return this.userService.SignIn(userDto);
    }
 
    @Post('edit')
    @UseGuards(ProfessionalGuard)
-   async Edit(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise <{accessToken : string} | string>
+   async Edit(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise <string>
    {
      return this.userService.Edit(professionalUser.id,userDto);
+   }
+
+   @Post('edit/password')
+   @UseGuards(ProfessionalGuard)
+   async EditPassword(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserPasswordEditDto): Promise <void>
+   {
+     return this.userService.EditPassword(professionalUser.id,userDto);
    }
 
    @Get('get/:id')

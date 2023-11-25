@@ -8,20 +8,23 @@ import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { JwtService } from '@nestjs/jwt/dist';
 import { JwtPayload } from 'src/Entities/jwt-payload.interface';
 import { UserEdit } from 'src/Entities/user/useredit.entity';
+import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
+import { UserQueries } from 'src/DbQueries/UserQueries';
+import { IsEmpty } from 'class-validator';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepostory: Repository<User>,
-    private jwtService: JwtService){}
+    private jwtService: JwtService,
+    private readonly Queries: UserQueries){}
 
   async Create(userDto: UserDto):Promise<void>{
     const {username,firstname,lastname,password,email,phonenumber} = userDto;
     
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password,salt);
-
     const new_user = this.userRepostory.create({
       username,
       firstname,
@@ -33,7 +36,7 @@ export class UserService {
     await this.userRepostory.save(new_user);
   }
 
-  async SignIn(userDto: AuthSignIn):Promise<{accessToken: string}>{
+  async SignIn(userDto: AuthSignIn):Promise<string>{
     const {username,password} = userDto;
 
     const user = await this.userRepostory.findOne({where : [{username: username}]});
@@ -45,51 +48,36 @@ export class UserService {
 
     const {id,firstname,lastname,email,phonenumber} = user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
-    const accessToken: string = await this.jwtService.sign(payload);
+    return await this.jwtService.signAsync(payload);
 
-    return {accessToken};
   }
 
-  async Edit(id:string,userDto: UserEdit):Promise<{accessToken:string}>{
+  async Edit(id:string,userDto: UserEdit):Promise<string>{
     const user = await this.userRepostory.findOne({where : [{id: id}]});
 
     if(!user)
       throw new UnauthorizedException("User is not registerd!");
 
-    if(userDto.username != user.username && userDto.username != null)
-    {
-      const {username} = userDto;
-      const username_validation = await this.userRepostory.findOne({where : [{username}]});
-      if(username_validation)
-        throw new UnauthorizedException("Username is taken!");
-      user.username = userDto.username;
-    }
-    if(userDto.firstname != user.firstname && userDto.firstname != null)
-      user.firstname = userDto.firstname;
-    if(userDto.lastname != user.lastname && userDto.lastname != null)
-      user.lastname = userDto.lastname;
-    if(userDto.phonenumber != user.phonenumber && userDto.phonenumber != null)
-      user.phonenumber = userDto.phonenumber;
-    if(userDto.email != user.email && userDto.email != null)
-      user.email = userDto.email;
-    if(userDto.password != null)
-    {
-      const password_compare = await bcrypt.compare(userDto.password,user.password);
-      if(password_compare)
-      {
-        const salt = await bcrypt.genSalt();
-        const hashedPassword = await bcrypt.hash(userDto.password,salt);
-        user.password = hashedPassword;
-      }
-    }
-    await this.userRepostory.save(user);
+    const Edit_user = await this.userRepostory.query(this.Queries.UpdateUserByID(id,userDto));
     
-    const {username,firstname,lastname,email,phonenumber} = user;
+    const {username,firstname,lastname,email,phonenumber} = Edit_user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
-    const accessToken: string = await this.jwtService.sign(payload);
+    return await this.jwtService.signAsync(payload);
+  }
 
-    return {accessToken};
-    }
+  async EditPassword(id: string, userDto: UserPasswordEdit):Promise<void>{
+    const user = await this.userRepostory.findOne({where:[{id:id}]});
+    if(user == null)
+      throw new UnauthorizedException("User doesn't exist!");
+    
+    if(!await bcrypt.compare(user.password,userDto.password))
+      throw new UnauthorizedException("Invalid Password");
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(userDto.password,salt);
+    user.password = hashedPassword;
+    await this.userRepostory.save(user);
+  }
 
   async UserExists(userDto : UserDto): Promise<string[]>{
     const user = await this.userRepostory.findOne({ where: [

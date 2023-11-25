@@ -8,6 +8,8 @@ import { FranchiseJwtPayload} from 'src/Entities/jwt-payload.interface';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 import { FranchiseUserDto } from 'src/Entities/franchise_user/franchise_userdto.entity';
 import { FranchiseUserEdit } from 'src/Entities/franchise_user/franchise_userEdit.entity';
+import { FranchiseUserPasswordEdit } from 'src/Entities/franchise_user/franchise_user_password_edit.entity';
+import passport from 'passport';
 
 @Injectable()
 export class FranchiseUserService {
@@ -34,7 +36,7 @@ export class FranchiseUserService {
         await this.userRepository.save(new_user);
     }
 
-    async SignIn(userDto: AuthSignIn):Promise<{accessToken: string}>{
+    async SignIn(userDto: AuthSignIn):Promise<string>{
         const {username,password} = userDto;
     
         const user = await this.userRepository.findOne({where : [{username: username}]});
@@ -46,12 +48,11 @@ export class FranchiseUserService {
     
         const {id,description,email,phonenumber} = user;
         const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
-        const accessToken: string = await this.jwtService.sign(payload);
+        return await this.jwtService.signAsync(payload);
     
-        return {accessToken};
     }
 
-    async Edit(id:string,userDto: FranchiseUserEdit):Promise<{accessToken:string}>{
+    async Edit(id:string,userDto: FranchiseUserEdit):Promise<string>{
       const user = await this.userRepository.findOne({where : [{id: id}]});
   
       if(!user)
@@ -71,24 +72,28 @@ export class FranchiseUserService {
         user.phonenumber = userDto.phonenumber;
       if(userDto.email != user.email && userDto.email != null)
         user.email = userDto.email;
-      if(userDto.password != null)
-      {
-        const password_compare = await bcrypt.compare(userDto.password,user.password);
-        if(password_compare)
-        {
-          const salt = await bcrypt.genSalt();
-          const hashedPassword = await bcrypt.hash(userDto.password,salt);
-          user.password = hashedPassword;
-        }
-      }
       await this.userRepository.save(user);
       
       const {username,description,email,phonenumber} = user;
       const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
-      const accessToken: string = await this.jwtService.sign(payload);
-  
-      return {accessToken};
-      }
+      return await this.jwtService.signAsync(payload);
+    }
+
+    async EditPassword(id: string, userDto: FranchiseUserPasswordEdit):Promise<void>{
+      const user = await this.userRepository.findOne({where:[{id:id}]});
+
+      if(user == null)
+        throw new UnauthorizedException("User doesn't exist!");
+
+      if(!await bcrypt.compare(user.password,userDto.password))
+        throw new UnauthorizedException("Invalid Password!");
+
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(userDto.password,salt);
+      user.password = hashedPassword;
+      
+      await this.userRepository.save(user);
+    }
 
     async EditPicture(id: string, File:Buffer):Promise<void>{
       const user = await this.userRepository.findOneBy({id});

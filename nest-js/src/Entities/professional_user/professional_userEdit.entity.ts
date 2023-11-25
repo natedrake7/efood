@@ -1,5 +1,3 @@
-import { IsString,IsStrongPassword,IsEmail,IsPhoneNumber, isStrongPassword} from "class-validator";
-
 export class ProfessionalUserEdit{
     username: string;
 
@@ -8,8 +6,6 @@ export class ProfessionalUserEdit{
     delivery_time: number;
 
     description: string;
-
-    password: string;
 
     email: string;
     

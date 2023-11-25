@@ -6,6 +6,7 @@ import { UserService } from 'src/Services/user/user.service';
 import { GetUser } from 'src/get-user.decorator';
 import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserGuard } from 'src/Guards/user.guard';
+import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
 
 @Controller('user')
 export class UserController {
@@ -21,18 +22,24 @@ export class UserController {
   }
 
   @Get('signin')
-  async SignIn(@Body() userDto: AuthSignIn): Promise<{accessToken: string}>
+  async SignIn(@Body() userDto: AuthSignIn): Promise<string>
   {
     return this.userService.SignIn(userDto);
   }
 
   @Post('edit')
   @UseGuards(UserGuard)
-  async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <{accessToken : string} | string>
+  async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <string>
   {
     return this.userService.Edit(user.id,userDto);
   }
 
+  @Post('edit/password')
+  @UseGuards(UserGuard)
+  async EditPassword(@GetUser() user: User,@Body() userDto: UserPasswordEdit): Promise <void>
+  {
+    return this.userService.EditPassword(user.id,userDto);
+  }
   @Delete('delete')
   @UseGuards(UserGuard)
   async Delete(@GetUser() userDto: User): Promise<string>

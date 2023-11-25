@@ -13,6 +13,7 @@ import { FranchiseGuard } from 'src/Guards/franchise.guard';
 import { ProfessionalGuard } from 'src/Guards/professional.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
+import { FranchiseUserPasswordEdit } from 'src/Entities/franchise_user/franchise_user_password_edit.entity';
 
 @Controller('franchiseuser')
 export class FranchiseUserController {
@@ -30,14 +31,14 @@ export class FranchiseUserController {
     }
   
     @Get('signin')
-    async SignIn(@Body() userDto: AuthSignIn): Promise<{accessToken: string}>
+    async SignIn(@Body() userDto: AuthSignIn): Promise<string>
     {
       return this.userService.SignIn(userDto);
     }
 
     @Post('edit')
     @UseGuards(FranchiseGuard)
-    async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<{accessToken: string}>
+    async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<string>
     {
       return this.userService.Edit(franchiseUser.id,userDto);
     }
@@ -50,6 +51,13 @@ export class FranchiseUserController {
       return this.userService.EditPicture(franchiseUser.id,file.buffer);
     }
 
+    @Post('edit/password')
+    @UseGuards(FranchiseGuard)
+    async EditPassword(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserPasswordEdit):Promise<void>
+    {
+      return this.userService.EditPassword(franchiseUser.id,userDto);
+    }
+
     @Post('professionaluser/create')
     @UseGuards(FranchiseGuard)
     @UseInterceptors(FileInterceptor('image'))
@@ -60,14 +68,14 @@ export class FranchiseUserController {
 
     @Get('professionaluser/signin')
     @UseGuards(FranchiseGuard)
-    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() username: string): Promise<{accessToken: string}>
+    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() username: string): Promise<string>
     {
       return this.professionaluserService.FranchsiseSignIn(userDto,username);
     }
 
     @Post('professionaluser/edit')
     @UseGuards(ProfessionalGuard)
-    async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<{accessToken: string}>
+    async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<string>
     {
       return this.professionaluserService.Edit(professionalUser.id,userDto);
     }

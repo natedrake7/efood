@@ -12,6 +12,8 @@ import { ProfessionalUserEdit } from 'src/Entities/professional_user/professiona
 import { error } from 'console';
 import { ProfessionalUserReturnType } from 'src/Entities/professional_user/professional_user_return_type.entity';
 import { Product } from 'src/Entities/products/product.entity';
+import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/professional_user_password_edit.entity';
+import { Http2ServerResponse } from 'http2';
 
 @Injectable()
 export class ProfessionalUserService {
@@ -71,7 +73,7 @@ export class ProfessionalUserService {
       await this.userRepository.save(new_user);
   }
 
-    async SignIn(userDto: AuthSignIn):Promise<{accessToken: string}>{
+    async SignIn(userDto: AuthSignIn):Promise<string>{
         const {username,password} = userDto;
     
         const user = await this.userRepository.findOne({where : [{username: username}]});
@@ -83,25 +85,21 @@ export class ProfessionalUserService {
     
         const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
         const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
-        const accessToken: string = await this.jwtService.sign(payload);
-    
-        return {accessToken};
+        return await this.jwtService.signAsync(payload);
     }
 
-    async FranchsiseSignIn(userDto: FranchiseUser,username: string):Promise<{accessToken: string}>{
+    async FranchsiseSignIn(userDto: FranchiseUser,username: string):Promise<string>{
       const user = await this.userRepository.findOne({where : [{username},{franchise_user:userDto}]});
       if(!user)
         throw new UnauthorizedException("User is not registerd!");
 
       const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
       const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
-      const accessToken: string = await this.jwtService.sign(payload);
-  
-      return {accessToken};
 
+      return await this.jwtService.signAsync(payload);
     }
 
-    async Edit(id: string,userDto: ProfessionalUserEdit):Promise<{accessToken: string}>{
+    async Edit(id: string,userDto: ProfessionalUserEdit):Promise<string>{
       const user = await this.userRepository.findOne({where : [{id: id}]});
   
       if(!user)
@@ -129,24 +127,25 @@ export class ProfessionalUserService {
         user.city = userDto.city;
       if(userDto.zipcode != user.zipcode && userDto.zipcode != null)
         user.zipcode = userDto.zipcode;
-      if(userDto.password != null)
-      {
-        const password_compare = await bcrypt.compare(userDto.password,user.password);
-        if(password_compare)
-        {
-          const salt = await bcrypt.genSalt();
-          const hashedPassword = await bcrypt.hash(userDto.password,salt);
-          user.password = hashedPassword;
-        }
-      }
       await this.userRepository.save(user);
       
       const {username,address,description,city,zipcode,delivery_time,email,phonenumber} = user;
       const payload: ProfessionalJwtPayload = {id,username,address,description,city,zipcode,delivery_time,email,phonenumber};
 
-      const accessToken: string = await this.jwtService.sign(payload);
-  
-      return {accessToken};
+      return await this.jwtService.signAsync(payload);
+    }
+
+    async EditPassword(id: string,userDto: ProfessionalUserPasswordEditDto):Promise<void>{
+      const user = await this.userRepository.findOne({where: [{id:id}]});
+      if(user == null)
+        throw new UnauthorizedException("User doesn't exist!");
+      if(!await bcrypt.compare(userDto.password,user.password))
+        throw new UnauthorizedException("Invalid Password!");
+
+      const salt = await bcrypt.genSalt();
+      const hashedPassword = await bcrypt.hash(userDto.new_password,salt);
+      user.password = hashedPassword;
+      await this.userRepository.save(user);
     }
 
     async FranchiseEditPicture(id: string,File: Buffer):Promise<void>{
