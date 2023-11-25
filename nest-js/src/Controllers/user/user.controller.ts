@@ -13,12 +13,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
-  async Create(@Body() userDto: UserDto): Promise<string[] | void>
+  async Create(@Body() userDto: UserDto): Promise<string | string[]>
   {
-    const errors = await this.userService.UserExists(userDto);
-    if(errors.length > 0)
-      return errors
-    this.userService.Create(userDto);
+    return this.userService.Create(userDto);
   }
 
   @Get('signin')
@@ -39,11 +36,5 @@ export class UserController {
   async EditPassword(@GetUser() user: User,@Body() userDto: UserPasswordEdit): Promise <void>
   {
     return this.userService.EditPassword(user.id,userDto);
-  }
-  @Delete('delete')
-  @UseGuards(UserGuard)
-  async Delete(@GetUser() userDto: User): Promise<string>
-  {
-    return this.userService.DeleteUserByID(userDto.id);
   }
 }

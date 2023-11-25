@@ -14,4 +14,6 @@ export class ProfessionalUserEdit{
     city: string;
 
     zipcode: string;
+
+    timetable: string;
 }

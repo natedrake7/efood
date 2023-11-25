@@ -10,56 +10,50 @@ import { JwtPayload } from 'src/Entities/jwt-payload.interface';
 import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
 import { UserQueries } from 'src/DbQueries/UserQueries';
-import { IsEmpty } from 'class-validator';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private userRepostory: Repository<User>,
     private jwtService: JwtService,
     private readonly Queries: UserQueries){}
 
-  async Create(userDto: UserDto):Promise<void>{
-    const {username,firstname,lastname,password,email,phonenumber} = userDto;
-    
+  async Create(userDto: UserDto):Promise<string | string[]>{
+    const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
+
+    if(errors.length != 0)
+      return errors;
+
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password,salt);
-    const new_user = this.userRepostory.create({
-      username,
-      firstname,
-      lastname,
-      password: hashedPassword,
-      email,
-      phonenumber
-    });
-    await this.userRepostory.save(new_user);
+    const hashedPassword = await bcrypt.hash(userDto.password,salt);
+    userDto.password = hashedPassword;
+    const {id,username,firstname,lastname,email,phonenumber} = await this.Queries.CreateUser(userDto);
+    const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
+
+    return await this.jwtService.signAsync(payload);
   }
 
   async SignIn(userDto: AuthSignIn):Promise<string>{
     const {username,password} = userDto;
 
-    const user = await this.userRepostory.findOne({where : [{username: username}]});
+    const user = await this.Queries.GetUserByUsername(username);
+    
     if(!user)
       throw new UnauthorizedException("User is not registerd!");
-    const password_compare = await bcrypt.compare(password,user.password);
-    if(!password_compare)
+    if(!await bcrypt.compare(password,user.password))
       throw new UnauthorizedException("Incorrect Password!");
 
     const {id,firstname,lastname,email,phonenumber} = user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
     return await this.jwtService.signAsync(payload);
-
   }
 
   async Edit(id:string,userDto: UserEdit):Promise<string>{
-    const user = await this.userRepostory.findOne({where : [{id: id}]});
+    const user = await this.Queries.GetUserById(id);
 
     if(!user)
       throw new UnauthorizedException("User is not registerd!");
 
-    const Edit_user = await this.userRepostory.query(this.Queries.UpdateUserByID(id,userDto));
-    
+    const Edit_user = await this.Queries.UpdateUserById(id,userDto);
     const {username,firstname,lastname,email,phonenumber} = Edit_user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
 
@@ -67,48 +61,39 @@ export class UserService {
   }
 
   async EditPassword(id: string, userDto: UserPasswordEdit):Promise<void>{
-    const user = await this.userRepostory.findOne({where:[{id:id}]});
+    const {password} = await this.Queries.GetPasswordById(id);
 
-    if(!user)
+    if(!password)
       throw new UnauthorizedException("User doesn't exist!");
 
-    if(!await bcrypt.compare(userDto.password,user.password))
+    if(!await bcrypt.compare(userDto.password,password))
       throw new UnauthorizedException("Invalid Password");
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(userDto.new_password,salt);
 
-    await this.userRepostory.query(this.Queries.UpdateUserPasswordById(id,hashedPassword));
+    return await this.Queries.UpdateUserPasswordById(id,hashedPassword);
   }
 
-  async UserExists(userDto : UserDto): Promise<string[]>{
-    const user = await this.userRepostory.findOne({ where: [
-      {username: userDto.username},
-      {email : userDto.email},
-      {phonenumber : userDto.phonenumber}]
-       });
-    if(!user)
+  async UserExists(username: string,email: string, phonenumber: string): Promise<string[]>{
+    const users = await this.Queries.CheckIfUserExists(username,email,phonenumber);
+
+    if(users.length == 0)
        return [];
     
     const errors : string[] = [];
 
-    if(user.username == userDto.username)
-       errors.push("Username is taken!");
+    users.forEach(user=> {
+      if(user.username == username && username != null)
+        errors.push("Username is taken!");
 
-    if(user.email == userDto.email)
-       errors.push("Email is already used!");
-    
-    if(user.phonenumber == userDto.phonenumber)
-       errors.push("Phonenumber already in use!");
+      if(user.email == email && email != null)
+        errors.push("Email is already used!");
+   
+      if(user.phonenumber == phonenumber && phonenumber != null)
+        errors.push("Phonenumber already in use!");
+    });
+
     return errors;
-  }
-
-  async DeleteUserByID(id: string):Promise<string>{
-    const user = await this.userRepostory.findOne({ where: [
-      {id: id}]});
-    if(!user)
-      return "User not found!";
-    await this.userRepostory.delete(id);
-    return "User deleted successfully";
   }
 }

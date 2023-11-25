@@ -17,12 +17,9 @@ export class ProfessionalUserController {
 
    @Post('register')
    @UseInterceptors(FileInterceptor('image'))
-   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File):Promise<string[] | void>
+   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File):Promise<string[] | string>
    {
-        const errors = await this.userService.UserExists(userDto);
-        if(errors.length > 0)
-            return errors;
-        this.userService.Create(userDto,file.buffer);
+        return this.userService.Create(userDto,file.buffer);
    }
 
    @Get('signin')
@@ -33,9 +30,16 @@ export class ProfessionalUserController {
 
    @Post('edit')
    @UseGuards(ProfessionalGuard)
-   async Edit(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise <string>
+   async Edit(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise <string | string[]>
    {
      return this.userService.Edit(professionalUser.id,userDto);
+   }
+   @Post('edit/image')
+   @UseGuards(ProfessionalGuard)
+   @UseInterceptors(FileInterceptor('image'))
+   async EditImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File):Promise<void>
+   {
+    return this.userService.EditImageById(professionalUser.id,file.buffer);
    }
 
    @Post('edit/password')
@@ -48,11 +52,11 @@ export class ProfessionalUserController {
    @Get('get/:id')
    async Get(@Param('id') id: string):Promise<void | ProfessionalUserReturnType>
    {
-     return this.userService.Get(id);
+     return this.userService.GetById(id);
    }
 
    @Get('get')
-   async GetAll():Promise<void | ProfessionalUserReturnType[]>
+   async GetAll():Promise<void | ProfessionalUser[]>
    {
      return this.userService.GetAll();
    }

@@ -61,21 +61,21 @@ export class FranchiseUserController {
     @Post('professionaluser/create')
     @UseGuards(FranchiseGuard)
     @UseInterceptors(FileInterceptor('image'))
-    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File) : Promise<string[] | void>
+    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File) : Promise<string | string[]>
     {
-      this.professionaluserService.FranchiseCreate(userDto,franchiseuser,file.buffer);
+      return this.professionaluserService.FranchiseCreate(userDto,franchiseuser.id,file.buffer);
     }
 
     @Get('professionaluser/signin')
     @UseGuards(FranchiseGuard)
-    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() username: string): Promise<string>
+    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() authSignIn: AuthSignIn): Promise<string>
     {
-      return this.professionaluserService.FranchsiseSignIn(userDto,username);
+      return this.professionaluserService.FranchsiseSignIn(userDto.id,authSignIn);
     }
 
     @Post('professionaluser/edit')
     @UseGuards(ProfessionalGuard)
-    async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<string>
+    async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<string | string[]>
     {
       return this.professionaluserService.Edit(professionalUser.id,userDto);
     }
@@ -85,7 +85,7 @@ export class FranchiseUserController {
     @UseGuards(ProfessionalGuard)
     async EditProfessionalPicture(@GetUser() professionalUser: ProfessionalUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<void>
     {
-      return this.professionaluserService.FranchiseEditPicture(professionalUser.id,file.buffer);
+      return this.professionaluserService.EditImageById(professionalUser.id,file.buffer);
     }
 
 }
