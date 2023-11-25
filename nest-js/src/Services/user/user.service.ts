@@ -62,21 +62,23 @@ export class UserService {
     
     const {username,firstname,lastname,email,phonenumber} = Edit_user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
+
     return await this.jwtService.signAsync(payload);
   }
 
   async EditPassword(id: string, userDto: UserPasswordEdit):Promise<void>{
     const user = await this.userRepostory.findOne({where:[{id:id}]});
-    if(user == null)
+
+    if(!user)
       throw new UnauthorizedException("User doesn't exist!");
-    
-    if(!await bcrypt.compare(user.password,userDto.password))
+
+    if(!await bcrypt.compare(userDto.password,user.password))
       throw new UnauthorizedException("Invalid Password");
 
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(userDto.password,salt);
-    user.password = hashedPassword;
-    await this.userRepostory.save(user);
+    const hashedPassword = await bcrypt.hash(userDto.new_password,salt);
+
+    await this.userRepostory.query(this.Queries.UpdateUserPasswordById(id,hashedPassword));
   }
 
   async UserExists(userDto : UserDto): Promise<string[]>{

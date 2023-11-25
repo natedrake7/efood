@@ -6,34 +6,30 @@ export class UserQueries{
     UpdateUserByID(id: string,userDto: UserEdit):string {    
         const updateClauses = [];
 
-        if (userDto.username != null) {
+        if (userDto.username != null)
             updateClauses.push(`username = '${userDto.username}'`);
-        }
-    
-        if (userDto.firstname != null) {
+        if (userDto.firstname != null) 
             updateClauses.push(`firstname = '${userDto.firstname}'`);
-        }
-    
-        if (userDto.lastname != null) {
+        if (userDto.lastname != null) 
             updateClauses.push(`lastname = '${userDto.lastname}'`);
-        }
-    
-        if (userDto.email != null) {
+        if (userDto.email != null) 
             updateClauses.push(`email = '${userDto.email}'`);
-        }
-    
-        if (userDto.phonenumber !=null) {
+        if (userDto.phonenumber !=null)
             updateClauses.push(`phonenumber = '${userDto.phonenumber}'`);
-        }
         if(updateClauses.length == 0)
             throw new UnauthorizedException("Please make some changes before submitting!");
     
-        const updateQuery = `
+        return `
             UPDATE "User"
             SET 
                 ${updateClauses.join(', ')}
             WHERE id = '${id}'
-            RETURNING id,username,lastname,email,phonenumber;`;
+            RETURNING id,username,lastname,email,phonenumber;`;}
+
+    UpdateUserPasswordById(id : string,password: string): string{
+        return `Update "User"
+                SET password = '${password}'
+                WHERE id = '${id}';`;
+    }
     
-        return updateQuery;}
 }
