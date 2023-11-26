@@ -12,6 +12,7 @@ import { FranchiseJwtStrategy } from 'src/Strategies/franchise.strategy';
 import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
 import { Product } from 'src/Entities/products/product.entity';
 import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
+import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
       },
     }),
     TypeOrmModule.forFeature([FranchiseUser,ProfessionalUser,Product])],
-  providers: [FranchiseUserService,ProfessionalUserService,FranchiseJwtStrategy,ProfesionalJwtStrategy,ProfessionalUserQueries],
+  providers: [FranchiseUserService,ProfessionalUserService,FranchiseJwtStrategy,ProfesionalJwtStrategy,ProfessionalUserQueries,FranchiseUserQueries],
   controllers: [FranchiseUserController],
 })
 export class FranchiselUsersModule {}

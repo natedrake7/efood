@@ -1,8 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/Entities/user/user.entity';
 import { UserDto } from 'src/Entities/user/UserDto';
-import { Repository} from 'typeorm';
 import * as bcrypt from 'bcrypt'
 import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { JwtService } from '@nestjs/jwt/dist';
@@ -10,6 +7,7 @@ import { JwtPayload } from 'src/Entities/jwt-payload.interface';
 import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
 import { UserQueries } from 'src/DbQueries/UserQueries';
+import { isEmail, isPhoneNumber } from 'class-validator';
 
 @Injectable()
 export class UserService {
@@ -76,21 +74,33 @@ export class UserService {
   }
 
   async UserExists(username: string,email: string, phonenumber: string): Promise<string[]>{
-    const users = await this.Queries.CheckIfUserExists(username,email,phonenumber);
-
-    if(users.length == 0)
-       return [];
-    
     const errors : string[] = [];
 
-    users.forEach(user=> {
-      if(user.username == username && username != null)
+    if(phonenumber != null && !isPhoneNumber(phonenumber))
+      errors.push("Invalid Phonenumber (specify region e.g +30 6944444444)");
+
+    if(email != null && !isEmail(email))
+      errors.push("Invalid Email address!");
+
+    if(errors.length > 0)
+      return errors;
+
+    const users = await this.Queries.CheckIfUserExists(username,email,phonenumber);
+    var count = 0;
+    users.forEach(user => {if(user.length == 0)count++;});
+
+    if(count == users.length)
+       return [];
+
+
+    users.forEach(user => {
+      if(user.length != 0 && user[0].username != undefined && user[0].username == username && username != null)
         errors.push("Username is taken!");
 
-      if(user.email == email && email != null)
+      if(user.length != 0  && user[0].email != undefined && user[0].email == email && email != null)
         errors.push("Email is already used!");
    
-      if(user.phonenumber == phonenumber && phonenumber != null)
+      if(user.length != 0  && user[0].phonenumber != undefined && user[0].phonenumber == phonenumber && phonenumber != null)
         errors.push("Phonenumber already in use!");
     });
 

@@ -55,7 +55,7 @@ export class ProfessionalUser{
     @ManyToOne(() => FranchiseUser,(franchise_user) => franchise_user.professionalUsers)
     franchise_user: FranchiseUser;
 
-    franchiseUserId: string;
+    franchiseUserId?: string;
 
     @OneToMany(() => Order, (order) => order.professionalUser)
     orders: Order[];

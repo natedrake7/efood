@@ -1,6 +1,6 @@
 import { Controller,Body,Post,Get,UseGuards, UseInterceptors, ParseFilePipe, FileTypeValidator } from '@nestjs/common';
 import { FranchiseUserService } from 'src/Services/franchise_user/franchise_user.service';
-import { AuthSignIn } from 'src/Entities/authsignin.entity';
+import { AuthSignIn, FranchiseProfessionalSignIn } from 'src/Entities/authsignin.entity';
 import { FranchiseUserDto } from 'src/Entities/franchise_user/franchise_userdto.entity';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 import { GetUser } from 'src/get-user.decorator';
@@ -22,12 +22,9 @@ export class FranchiseUserController {
 
     @Post('create')
     @UseInterceptors(FileInterceptor('image'))
-    async Create(@Body() userDto: FranchiseUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<string[] | void>
+    async Create(@Body() userDto: FranchiseUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<string[] | string>
     {
-      const errors = await this.userService.UserExists(userDto);
-      if(errors.length > 0)
-        return errors
-      this.userService.Create(userDto,file.buffer);
+      return this.userService.Create(userDto,file.buffer);
     }
   
     @Get('signin')
@@ -38,12 +35,12 @@ export class FranchiseUserController {
 
     @Post('edit')
     @UseGuards(FranchiseGuard)
-    async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<string>
+    async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<string | string[]>
     {
       return this.userService.Edit(franchiseUser.id,userDto);
     }
 
-    @Post('edit/profile-picture')
+    @Post('edit/image')
     @UseInterceptors(FileInterceptor('image'))
     @UseGuards(FranchiseGuard)
     async EditPicture(@GetUser() franchiseUser: FranchiseUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<void>
@@ -68,7 +65,7 @@ export class FranchiseUserController {
 
     @Get('professionaluser/signin')
     @UseGuards(FranchiseGuard)
-    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() authSignIn: AuthSignIn): Promise<string>
+    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() authSignIn: FranchiseProfessionalSignIn): Promise<string>
     {
       return this.professionaluserService.FranchsiseSignIn(userDto.id,authSignIn);
     }

@@ -1,14 +1,14 @@
 import { ProfessionalUserDto } from "src/Entities/professional_user/professional_userDto.entity";
 import { ProfessionalUserEdit } from "src/Entities/professional_user/professional_userEdit.entity";
 import { UnauthorizedException } from "@nestjs/common/exceptions";
-import { Repository } from "typeorm";
-import { InjectRepository } from "@nestjs/typeorm";
+import { DataSource} from "typeorm"
 import { ProfessionalUser } from "src/Entities/professional_user/professionaluser.entity";
+import { InjectRepository } from "@nestjs/typeorm";
 
 
 export class ProfessionalUserQueries{
     constructor(@InjectRepository(ProfessionalUser)
-                private UserRepository:Repository<ProfessionalUser>){}
+                private UserRepository:DataSource){}
     async CreateUser(userDto: ProfessionalUserDto, file:Buffer,franchiseUserId : string):Promise<ProfessionalUser>{
         const query = `
             INSERT INTO "ProfessionalUser" (
@@ -45,7 +45,7 @@ export class ProfessionalUserQueries{
         return (await this.UserRepository.query(query,[username]))[0];
     }
     async FranchiseGetUserByUsername(username: string,franchiseuser_id: string):Promise<ProfessionalUser>{
-        const query = `SELECT id,username,address,delivery_time,city,zipcode,timetable,email,password,phonenumber,description FROM "ProfessionalUser" WHERE username = $1 AND "franchiseUserId" = $2 LIMIT 1;`
+        const query = `SELECT id,username,address,delivery_time,city,zipcode,timetable,email,phonenumber,description FROM "ProfessionalUser" WHERE username = $1 AND "franchiseUserId" = $2 LIMIT 1;`
         return (await this.UserRepository.query(query,[username,franchiseuser_id]))[0];
     }
 
@@ -60,9 +60,8 @@ export class ProfessionalUserQueries{
         const query  = `SELECT id,address,delivery_time,city,zipcode,timetable,email,phonenumber,description FROM "ProfessionalUser";`;
         return (await this.UserRepository.query(query));
     }
-    async GetProductsById(id : string):Promise<ProfessionalUser>{
+    async GetUserWithProductsById(id : string):Promise<ProfessionalUser>{
         const user = await this.GetUserById(id);
-        console.log(user.franchiseUserId);
         var clauses: string;
         var values: string;
         if(user.franchiseUserId){
@@ -183,7 +182,9 @@ export class ProfessionalUserQueries{
 
         const FranchiseUserQuery = `SELECT ${return_values.join(',')} FROM "FranchiseUser" WHERE ${queryClauses.join(' OR ')};`;
         const Users = [];
-        Users.push(await (this.UserRepository.query(UserQuery,values), this.UserRepository.query(ProfessionalUserQuery,values), this.UserRepository.query(FranchiseUserQuery,values)));
-        return Users[0];
+        Users.push(await this.UserRepository.query(UserQuery,values));
+        Users.push(await this.UserRepository.query(ProfessionalUserQuery,values));
+        Users.push(await this.UserRepository.query(FranchiseUserQuery,values));
+        return Users;
     }
 }

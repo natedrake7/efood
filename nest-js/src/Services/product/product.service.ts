@@ -8,44 +8,29 @@ import { ProductDto } from "src/Entities/products/productDto.entity";
 import { DataSource } from "typeorm";
 import { FranchiseUser } from "src/Entities/franchise_user/franchise_user.entity";
 import { Product } from "src/Entities/products/product.entity";
+import { ProductQueries } from "src/DbQueries/ProductQueries";
+import { error } from "console";
 
 @Injectable()
 export class ProductService{
-    constructor(
+    constructor( 
         @InjectRepository(Product)
         private productRepository: Repository<Product>,
         @InjectRepository(ProductAddon)
         private addonRepository: Repository<ProductAddon>,
-        private dataSource: DataSource){}
+        private dataSource: DataSource,
+        private readonly Queries: ProductQueries){}
 
     async ProfessionalCreate( product : ProductDto,addons : ProductAddonDto[],user : ProfessionalUser):Promise<void>{
-        const {name , type , size , price , description, availability} = product;
-        const new_product = this.productRepository.create({
-            name,
-            type,
-            size,
-            price,
-            description,
-            availability,
-            user:user,
-        });
         const queryRunner = this.dataSource.createQueryRunner();
 
         await queryRunner.connect();
         await queryRunner.startTransaction();
 
         try{
-            const item = await queryRunner.manager.save(Product,new_product);
-            addons.forEach(async (addon) => {
-                const { name , price } = addon;
-                const new_addon = this.addonRepository.create({
-                    name,
-                    price,
-                    products:[item],
-                    professionalUser:user
-                });
-                await queryRunner.manager.save(ProductAddon,new_addon);
-            });
+            const {id} = await this.Queries.CreateProduct(product,user.id);
+            const ids = await this.Queries.CreateAddons(user.id,id,addons);
+            console.log(ids);
             await queryRunner.commitTransaction();
         }catch(error) {
             await queryRunner.rollbackTransaction();

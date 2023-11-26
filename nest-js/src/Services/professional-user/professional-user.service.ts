@@ -1,25 +1,19 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository} from 'typeorm';
 import * as bcrypt from 'bcrypt'
-import { AuthSignIn } from 'src/Entities/authsignin.entity';
+import { AuthSignIn, FranchiseProfessionalSignIn } from 'src/Entities/authsignin.entity';
 import { JwtService } from '@nestjs/jwt/dist';
 import { ProfessionalJwtPayload } from 'src/Entities/jwt-payload.interface';
 import { ProfessionalUser } from 'src/Entities/professional_user/professionaluser.entity';
 import { ProfessionalUserDto } from 'src/Entities/professional_user/professional_userDto.entity';
 import { ProfessionalUserEdit } from 'src/Entities/professional_user/professional_userEdit.entity';
-import { error } from 'console';
-import { ProfessionalUserReturnType } from 'src/Entities/professional_user/professional_user_return_type.entity';
-import { Product } from 'src/Entities/products/product.entity';
 import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/professional_user_password_edit.entity';
 import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
+import { isEmail, isPhoneNumber } from 'class-validator';
 
 @Injectable()
 export class ProfessionalUserService {
-    constructor(@InjectRepository(ProfessionalUser)
-        private userRepository: Repository<ProfessionalUser>,
-        @InjectRepository(Product)
-        private productRepository: Repository<Product>,
+    constructor(
         private jwtService: JwtService,
         private readonly Queries: ProfessionalUserQueries){}
     
@@ -74,14 +68,11 @@ export class ProfessionalUserService {
         return await this.jwtService.signAsync(payload);
     }
 
-    async FranchsiseSignIn(franchiseuser_id: string,authSignIn: AuthSignIn):Promise<string>{
+    async FranchsiseSignIn(franchiseuser_id: string,authSignIn: FranchiseProfessionalSignIn):Promise<string>{
 
       const user = await this.Queries.FranchiseGetUserByUsername(authSignIn.username,franchiseuser_id);
       if(!user)
         throw new UnauthorizedException("User is not registerd!");
-
-      if(!await bcrypt.compare(authSignIn.password,user.password))
-        throw new UnauthorizedException("Invalid Password!");
 
       const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
       const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
@@ -135,28 +126,40 @@ export class ProfessionalUserService {
     }
 
     async GetById(id : string):Promise<ProfessionalUser>{
-     return await this.Queries.GetProductsById(id);
+     return await this.Queries.GetUserWithProductsById(id);
     }
 
     async UserExists(username: string,email: string, phonenumber: string): Promise<string[]>{
-        const users = await this.Queries.CheckIfUserExists(username,email,phonenumber);
+      const errors : string[] = [];
 
-        if(users.length == 0)
-           return [];
-        
-        const errors : string[] = [];
+      if(phonenumber != null && !isPhoneNumber(phonenumber))
+        errors.push("Invalid Phonenumber (specify region e.g +30 6944444444)");
 
-        users.forEach(user=> {
-          if(user.username == username && username != null)
-            errors.push("Username is taken!");
-   
-          if(user.email == email && email != null)
-            errors.push("Email is already used!");
-       
-          if(user.phonenumber == phonenumber && phonenumber != null)
-            errors.push("Phonenumber already in use!");
-        });
+      if(email != null && !isEmail(email))
+        errors.push("Invalid Email address!");
 
+      if(errors.length > 0)
         return errors;
-      }
+
+      const users = await this.Queries.CheckIfUserExists(username,email,phonenumber);
+      var count = 0;
+      users.forEach(user => {if(user.length == 0)count++;});
+
+      if(count == users.length)
+         return [];
+
+
+      users.forEach(user => {
+        if(user.length != 0 && user[0].username != undefined && user[0].username == username && username != null)
+          errors.push("Username is taken!");
+ 
+        if(user.length != 0  && user[0].email != undefined && user[0].email == email && email != null)
+          errors.push("Email is already used!");
+     
+        if(user.length != 0  && user[0].phonenumber != undefined && user[0].phonenumber == phonenumber && phonenumber != null)
+          errors.push("Phonenumber already in use!");
+      });
+
+      return errors;
+    }
 }

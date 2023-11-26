@@ -7,3 +7,8 @@ export class AuthSignIn{
     @IsString()
     password:string;
 }
+
+export class FranchiseProfessionalSignIn{
+    @IsString()
+    username: string;
+}

@@ -1,13 +1,13 @@
 import { UserEdit } from "src/Entities/user/useredit.entity";
 import { UnauthorizedException } from "@nestjs/common/exceptions";
 import { UserDto } from "src/Entities/user/UserDto";
-import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/Entities/user/user.entity";
-import { Repository } from "typeorm";
+import { DataSource } from "typeorm";
+import { InjectRepository } from "@nestjs/typeorm";
 
 export class UserQueries{
     constructor(@InjectRepository(User)
-                private UserRepository: Repository<User>){}
+                private UserRepository: DataSource){}
 
     async CreateUser(userDto: UserDto):Promise<User>{
         const query =  `INSERT INTO "User" (username,firstname,lastname,email,password,phonenumber)
@@ -102,8 +102,10 @@ export class UserQueries{
 
         const FranchiseUserQuery = `SELECT ${return_values.join(',')} FROM "FranchiseUser" WHERE ${queryClauses.join(' OR ')};`;
         const Users = [];
-        Users.push(await (this.UserRepository.query(UserQuery,values), this.UserRepository.query(ProfessionalUserQuery,values), this.UserRepository.query(FranchiseUserQuery,values)));
-        return Users[0];
+        Users.push(await this.UserRepository.query(UserQuery,values));
+        Users.push(await this.UserRepository.query(ProfessionalUserQuery,values));
+        Users.push(await this.UserRepository.query(FranchiseUserQuery,values));
+        return Users;
     }
     
 }
