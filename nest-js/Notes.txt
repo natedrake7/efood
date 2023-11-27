@@ -1,2 +1,2 @@
-Fix Create Addons Query:
-https://stackoverflow.com/questions/20561254/insert-data-in-3-tables-at-a-time-using-postgres
+1)Finish edit\delete addons queries,add images to products.
+2)Implement order queries.

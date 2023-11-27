@@ -13,6 +13,7 @@ import { User } from 'src/Entities/user/user.entity';
 import { FranchiseJwtStrategy } from 'src/Strategies/franchise.strategy';
 import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
 import { ProductQueries } from 'src/DbQueries/ProductQueries';
+import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { ProductQueries } from 'src/DbQueries/ProductQueries';
     TypeOrmModule.forFeature([ProfessionalUser]),
     TypeOrmModule.forFeature([User]),
   ],
-  providers: [ProductService,ProfesionalJwtStrategy,FranchiseJwtStrategy,ProductQueries],
+  providers: [ProductService,ProfesionalJwtStrategy,FranchiseJwtStrategy,UserJwtStrategy,ProductQueries],
   controllers: [ProductsController],
 })
 export class ProductsModule {}

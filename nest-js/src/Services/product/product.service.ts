@@ -9,7 +9,6 @@ import { DataSource } from "typeorm";
 import { FranchiseUser } from "src/Entities/franchise_user/franchise_user.entity";
 import { Product } from "src/Entities/products/product.entity";
 import { ProductQueries } from "src/DbQueries/ProductQueries";
-import { error } from "console";
 
 @Injectable()
 export class ProductService{
@@ -21,144 +20,33 @@ export class ProductService{
         private dataSource: DataSource,
         private readonly Queries: ProductQueries){}
 
-    async ProfessionalCreate( product : ProductDto,addons : ProductAddonDto[],user : ProfessionalUser):Promise<void>{
-        const queryRunner = this.dataSource.createQueryRunner();
-
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
-        try{
-            const {id} = await this.Queries.CreateProduct(product,user.id);
-            const ids = await this.Queries.CreateAddons(user.id,id,addons);
-            console.log(ids);
-            await queryRunner.commitTransaction();
-        }catch(error) {
-            await queryRunner.rollbackTransaction();
-        }
+    async Create( product : ProductDto,addons : ProductAddonDto[],user_id: string,IsUserProfessional:boolean = true):Promise<void>{
+        return await this.Queries.CreateProductWithAddons(user_id,product,addons,IsUserProfessional);
     }
 
-    async ProfessionalGetAll(user : ProfessionalUser):Promise<void | Product[]>{
-        const products = await this.productRepository.findBy({user:user});
+    async GetAllProducts(id: string,IsUserProfessional:boolean = true):Promise<void | Product[]>{
+        const products = await this.Queries.GetProductsByUserId(id,IsUserProfessional);
         if(!products)
             throw new UnauthorizedException("User doesn't have any products!");
         return products;
     }
 
-    async ProfessionalGetProductById(user: ProfessionalUser,id: string):Promise<void | {product: Product,addons: ProductAddon[]}>{
-        const product = await this.productRepository.findOneBy({id,user});
+    async GetProductById(user_id: string,id: string,IsUserProfessional:boolean = true):Promise<void | Product>{
+        const product = await this.Queries.GetProductById(user_id,id,IsUserProfessional);
+
         if(!product)
             throw new UnauthorizedException("Invalid product!");
-        const addons = await this.addonRepository.findBy({products:[product]});
 
-        return {product,addons};
+        return product;
     }
 
-    async ProfessionalProductEdit(product : ProductDto,user : ProfessionalUser,id: string):Promise<void>{
-        const old_product = await this.productRepository.findOneBy({id,user});
-        if(!old_product)
-            throw new UnauthorizedException("Product doesn't exist!");
-
-        if(old_product.name != product.name && product.name != null)
-            old_product.name = product.name;
-        if(old_product.type != product.type && product.type != null)
-            old_product.type = product.type;
-        if(old_product.size != product.size && product.size != null)
-            old_product.size = product.size;
-        if(old_product.price != product.price && product.price != null)
-            old_product.price= product.price;
-        if(old_product.description != product.description && product.description != null)
-            old_product.description = product.description;
-        if(old_product.availability != product.availability && product.availability != null)
-            old_product.availability = product.availability;
-
-        await this.productRepository.save(old_product);
+    async EditProductById(product : ProductDto,user_id: string,id: string,IsUserProfessional:boolean = true):Promise<void>{
+        return await this.Queries.UpdateProductById(product,user_id,id,IsUserProfessional);
     }
 
-    async ProfessionalProductDelete(id: string,user : ProfessionalUser):Promise<void>{
-        const product = await this.productRepository.findOneBy({id,user});
-        if(!product)
-            throw new UnauthorizedException("Product doesn't exist!");
-        await this.productRepository.delete(id);
+    async DeleteProductById(id: string,user_id: string,IsUserProfessional:boolean = true):Promise<void>{
+        return await this.Queries.DeleteProductById(id,user_id,IsUserProfessional);
     }
-
-    async FranchiseCreate( product : ProductDto,addons : ProductAddonDto[],user : FranchiseUser){
-        const {name , type , size , price , description, availability} = product;
-        const new_product = this.productRepository.create({
-            name,
-            type,
-            size,
-            price,
-            description,
-            availability,
-            franchiseUser:user,
-        });
-        const queryRunner = this.dataSource.createQueryRunner();
-
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
-        try{
-            const item = await queryRunner.manager.save(Product,new_product);
-            addons.forEach(async (addon) => {
-                const { name , price } = addon;
-                const new_addon = this.addonRepository.create({
-                    name,
-                    price,
-                    products:[item],
-                    franchiseUser:user,
-                });
-                await queryRunner.manager.save(ProductAddon,new_addon);
-            });
-            await queryRunner.commitTransaction();
-        }catch(error) {
-            await queryRunner.rollbackTransaction();
-        }
-    }
-
-    async FranchiseGetAll(user : FranchiseUser):Promise<void | Product[]>{
-        const products = await this.productRepository.findBy({franchiseUser:user});
-        if(!products)
-            throw new UnauthorizedException("User doesn't have any products!");
-        return products;
-    }
-
-    async FranchiseGetProductById(user : FranchiseUser,id: string):Promise<void | {product: Product,addons: ProductAddon[]}>{
-        const product = await this.productRepository.findOneBy({id,franchiseUser:user});
-        if(!product)
-            throw new UnauthorizedException("Invalid product!");
-        const addons = await this.addonRepository.findBy({products:[product]});
-
-        return {product,addons};
-    }
-
-    async FranchiseProductEdit(product : ProductDto,user : FranchiseUser,id: string):Promise<void>{
-        const old_product = await this.productRepository.findOneBy({id,franchiseUser:user});
-        if(!old_product)
-            throw new UnauthorizedException("Product doesn't exist!");
-
-        if(old_product.name != product.name && product.name != null)
-            old_product.name = product.name;
-        if(old_product.type != product.type && product.type != null)
-            old_product.type = product.type;
-        if(old_product.size != product.size && product.size != null)
-            old_product.size = product.size;
-        if(old_product.price != product.price && product.price != null)
-            old_product.price= product.price;
-        if(old_product.description != product.description && product.description != null)
-            old_product.description = product.description;
-        if(old_product.availability != product.availability && product.availability != null)
-            old_product.availability = product.availability;
-
-        await this.productRepository.save(old_product);
-    }
-
-    async FranchiseProductDelete(id: string,user : FranchiseUser):Promise<void>{
-        const product = await this.productRepository.findOneBy({id,franchiseUser:user});
-        if(!product)
-            throw new UnauthorizedException("Product doesn't exist!");
-        await this.productRepository.delete(id);
-    }
-
 
     async ProfessionalAddonEdit(id: string,user:ProfessionalUser,addonDto : ProductAddonDto):Promise<void>{
         const addon = await this.addonRepository.findOneBy([{id,professionalUser:user}]);
@@ -182,15 +70,8 @@ export class ProductService{
         await this.addonRepository.save(addon);
     }
 
-    async ProfessionalAddonGet(id: string,user: ProfessionalUser):Promise<void | ProductAddon>{
-        const addon = await this.addonRepository.findOneBy([{id,professionalUser:user}]);
-        if(!addon)
-            throw new UnauthorizedException("Addon doesn't exist!");
-        return addon;
-    }
-
-    async FranchiseAddonGet(id: string,user: FranchiseUser):Promise<void | ProductAddon>{
-        const addon = await this.addonRepository.findOneBy([{id,franchiseUser:user}]);
+    async GetAddonById(id: string,user_id: string,IsUserProfessional:boolean = true):Promise<void | ProductAddon>{
+        const addon = await this.Queries.GetAddonById(id,user_id,IsUserProfessional);
         if(!addon)
             throw new UnauthorizedException("Addon doesn't exist!");
         return addon;
@@ -208,5 +89,13 @@ export class ProductService{
         if(!addon)
             throw new UnauthorizedException("Addon doesn't exist!");
         await this.addonRepository.delete(addon);
+    }
+
+    async GetCommericalProductsByUserId(id: string):Promise<Product[]>{
+        return await this.Queries.GetCommercialProductsByUserId(id);
+    }
+
+    async GetCommercialProductById(id : string):Promise<Product>{
+        return await this.Queries.GetCommercialProductById(id);
     }
 }

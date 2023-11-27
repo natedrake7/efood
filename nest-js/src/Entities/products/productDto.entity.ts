@@ -1,4 +1,8 @@
+import { ProductAddonDto } from "./addonDto.entity";
+
 export class ProductDto{
+    id?: string;
+
     name: string;
 
     size: string;
