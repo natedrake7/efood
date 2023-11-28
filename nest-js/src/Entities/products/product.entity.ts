@@ -34,4 +34,6 @@ export class Product{
 
     @ManyToOne(() => FranchiseUser,(franchiseUser) => franchiseUser.professionalUsers)
     franchiseUser: FranchiseUser;
+
+    productId?: string;
 }

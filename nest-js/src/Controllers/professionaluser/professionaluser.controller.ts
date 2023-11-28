@@ -39,7 +39,7 @@ export class ProfessionalUserController {
    @UseInterceptors(FileInterceptor('image'))
    async EditImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File):Promise<void>
    {
-    return this.userService.EditImageById(professionalUser.id,file.buffer);
+    return this.userService.EditImageById(professionalUser,file.buffer);
    }
 
    @Post('edit/password')

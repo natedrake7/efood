@@ -8,9 +8,4 @@ export class OrderDto{
 
     @IsString()
     payment_method: string;
-
-    completed_status: boolean;
-
-    @IsDate()
-    date: Date;
 }

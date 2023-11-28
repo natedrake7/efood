@@ -62,14 +62,14 @@ export class ProductsController {
    @UseGuards(ProfessionalGuard)
    async ProfessionalAddonDelete(@Param('id') id: string,@GetUser() user: ProfessionalUser):Promise<void | ProductAddon>
    {
-        return this.productService.ProfessionalAddonDelete(id,user);
+        return this.productService.DeleteAddonById(id,user.id);
    }
 
    @Post('professional/addon/edit/:id')
    @UseGuards(ProfessionalGuard)
    async ProfessionalAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto,@GetUser() user: ProfessionalUser):Promise<void>
    {
-        return this.productService.ProfessionalAddonEdit(id,user,addonDto);
+        return this.productService.EditAddonById(id,user.id,addonDto);
    }
 
 
@@ -120,14 +120,14 @@ export class ProductsController {
    @UseGuards(FranchiseGuard)
    async FranchiseAddonDelete(@Param('id') id: string,@GetUser() user:FranchiseUser):Promise<void | ProductAddon>
    {
-        return this.productService.FranchiseAddonDelete(id,user);
+        return this.productService.DeleteAddonById(id,user.id,false);
    }
 
    @Post('franchise/addon/edit/:id')
    @UseGuards(FranchiseGuard)
    async FranchiseAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto,@GetUser() user:FranchiseUser):Promise<void>
    {
-        return this.productService.FranchiseAddonEdit(id,user,addonDto);
+        return this.productService.EditAddonById(id,user.id,addonDto,false);
    }
 
    @Get('commercial/:id')

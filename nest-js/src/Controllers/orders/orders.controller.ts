@@ -7,6 +7,7 @@ import { User } from "src/Entities/user/user.entity";
 import { ProfessionalUser } from "src/Entities/professional_user/professionaluser.entity";
 import { ProfessionalGuard } from "src/Guards/professional.guard"
 import { OrderReturnDto } from "src/Entities/order/order_return.entity";
+import { Order } from "src/Entities/order/order.entity";
 
 @Controller('order')
 export class OrdersController{
@@ -22,7 +23,7 @@ export class OrdersController{
 
     @Get('user/get/:id')
     @UseGuards(UserGuard)
-    async GetUserOrderById(@Param('id') id: string,@GetUser() user: User):Promise<void | OrderReturnDto>
+    async GetUserOrderById(@Param('id') id: string,@GetUser() user: User):Promise<Order>
     {
         return this.orderService.GetUserOrderById(id,user);
     }

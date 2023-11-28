@@ -8,6 +8,7 @@ import { FranchiseUserEdit } from 'src/Entities/franchise_user/franchise_userEdi
 import { FranchiseUserPasswordEdit } from 'src/Entities/franchise_user/franchise_user_password_edit.entity';
 import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
+import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 
 @Injectable()
 export class FranchiseUserService {
@@ -78,15 +79,14 @@ export class FranchiseUserService {
       return await this.Queries.UpdatePasswordById(id,hashedPassword);
     }
 
-    async EditPicture(id: string, File:Buffer):Promise<void>{
-      const user = await this.Queries.FindUserById(id);
+    async EditPicture(user: FranchiseUser, File:Buffer):Promise<void>{
       if(!user)
         throw new UnauthorizedException("User is not registered!");
 
       if(!File)
         throw new Error("No file was imported!");
 
-        return await this.Queries.EditImageById(id,File);
+        return await this.Queries.EditImageById(user.id,File);
     }
 
     async UserExists(username: string,email: string, phonenumber: string): Promise<string[]>{

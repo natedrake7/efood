@@ -19,21 +19,21 @@ export class AddressesController{
 
     @Post('edit/:id')
     async Edit(@Param('id') id: string,@Body() addressDto: AddressEdit,@GetUser() user: User):Promise<void>{
-        return this.addressService.EditAddress(id,addressDto,user);
+        return this.addressService.EditAddressById(id,addressDto,user);
     }
 
     @Get('get/:id')
-    async GetAddress(@Param('id') id: string,@GetUser() user:User):Promise<void | Address>{
-        return this.addressService.GetAddress(id,user);
+    async GetAddress(@Param('id') id: string,@GetUser() user:User):Promise<Address>{
+        return this.addressService.GetAddressById(id,user);
     }
 
     @Get('get')
-    async GetAddressesByUser(@GetUser() user:User):Promise<void | Address[]>{
-        return this.addressService.GetAddressesByUser(user);
+    async GetAddressesByUser(@GetUser() user:User):Promise<Address[]>{
+        return this.addressService.GetAddressesByUserId(user);
     }
 
     @Post('delete/:id')
     async DeleteAddress(@Param('id') id : string,@GetUser() user: User):Promise<void>{
-        return this.addressService.DeleteAddress(id,user);
+        return this.addressService.DeleteAddressById(id,user);
     }
 }

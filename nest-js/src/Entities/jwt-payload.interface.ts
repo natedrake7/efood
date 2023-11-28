@@ -1,5 +1,3 @@
-import { NumericType } from "typeorm";
-
 export interface JwtPayload{
     id: string;
 

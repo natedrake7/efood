@@ -5,12 +5,11 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { Repository } from "typeorm";
 import { ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
 import { ProfessionalUser } from "../Entities/professional_user/professionaluser.entity";
+import { ProfessionalUserQueries } from "src/DbQueries/ProfessionalUserQueries";
 
 @Injectable()
 export class ProfesionalJwtStrategy extends PassportStrategy(Strategy){
-    constructor(    
-        @InjectRepository(ProfessionalUser)
-        private professionalRepository: Repository<ProfessionalUser>){
+    constructor(private readonly Queries: ProfessionalUserQueries){
             super({
                 secretOrKey: 'topSecret52',
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -18,7 +17,7 @@ export class ProfesionalJwtStrategy extends PassportStrategy(Strategy){
         }
     async validate(payload: ProfessionalJwtPayload):Promise<ProfessionalUser | boolean>{
         const { id } = payload;
-        const user = await this.professionalRepository.findOne({where: [{id}]});
+        const user = await this.Queries.GetUserById(id);
         if(!user)
             return false;
         return user;

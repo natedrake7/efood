@@ -163,7 +163,7 @@ export class ProductQueries{
             clauses.push(`availability = $${values.length + 1}`);
             values.push(product.availability);
         }
-        if(values.length == 2)
+        if(clauses.length == 0)
             throw new UnauthorizedException("Please make some changes before submitting!");
 
         const query = `
@@ -179,6 +179,47 @@ export class ProductQueries{
         const query = `SELECT id,name,price FROM "ProductAddon"
                        WHERE id = $1 AND ${userClause} = $2 LIMIT 1;`;
         return (await this.ProductRepository.query(query,[id,user_id]))[0];
+    }
+
+    async EditAddonById(id: string,user_id: string,IsUserProfessional: boolean,addonDto : ProductAddonDto):Promise<void>{
+        const UserClause = this.GetUserClauseForAddon(IsUserProfessional);
+        const values:any[] = [id,user_id];
+        const updateClauses = [];
+        if(addonDto.name != null)
+        {
+            updateClauses.push(`name = $${values.length + 1}`);
+            values.push(addonDto.name);
+        }
+        if(addonDto.price != null)
+        {
+            updateClauses.push(`price = $${values.length + 1}`);
+            values.push(addonDto.price);
+        }
+
+        if(updateClauses.length == 0)
+            throw new UnauthorizedException("Please make some changes before submitting!");
+        
+        const query = `UPDATE "ProductAddon"
+                       SET ${updateClauses.join(`,`)}
+                       WHERE id = $1 AND ${UserClause} = $2;`;
+
+        return await this.ProductRepository.query(query,values);
+    }
+    
+    async DeleteAddonById(id: string,user_id: string,IsUserProfessional: boolean):Promise<void>{
+        const UserClause = this.GetUserClauseForAddon(IsUserProfessional);
+        const query = `WITH Addon as(
+            DELETE FROM "ProductAddon"
+            WHERE id = $1 AND $${UserClause} = $2
+            RETURNING id
+            ),
+            ProductRLAddon as(
+                DELETE FROM "product_addon_products_product"
+                WHERE "productAddonId" = $1 
+                RETURNING "productAddonId"
+            )SELECT * FROM ProductRLAddon;
+            `
+        return await this.ProductRepository.query(query,[id,user_id]);
     }
 
     async DeleteProductById(id: string,user_id: string,IsUserProfessional = true):Promise<void>{
@@ -205,10 +246,10 @@ export class ProductQueries{
             return `"franchiseUserId"`;
     }
 
-    GetCreateUpdateUserClause(IsUserProfessional: boolean = true):string[]{
+    GetUserClauseForAddon(IsUserProfessional: boolean = true):string{
         if(IsUserProfessional)
-            return [`"userId"`,`"professionalUserId"`];
+            return `"professionalUserId"`;
         else
-            return [`"franchiseUserId"`,`"franchiseUserId"`];
+            return `"franchiseUserId"`;
     }
 }

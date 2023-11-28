@@ -3,6 +3,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersController } from 'src/Controllers/orders/orders.controller';
+import { AddressQueries } from 'src/DbQueries/AddressQueries';
+import { OrderQueries } from 'src/DbQueries/OrderQueries';
+import { ProductQueries } from 'src/DbQueries/ProductQueries';
+import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
+import { UserQueries } from 'src/DbQueries/UserQueries';
 import { Address } from 'src/Entities/addresses/address.entity';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 import { Order } from 'src/Entities/order/order.entity';
@@ -26,7 +31,7 @@ import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
     }),
     TypeOrmModule.forFeature([User,FranchiseUser,ProfessionalUser,ProductAddon
                             ,Order,Address,OrderItem,Product])],
-  providers: [OrderService,UserJwtStrategy,ProfesionalJwtStrategy],
+  providers: [OrderService,UserJwtStrategy,ProfesionalJwtStrategy,UserQueries,ProfessionalUserQueries,OrderQueries,AddressQueries,ProductQueries],
   controllers: [OrdersController],
 })
 export class OrderModule {}

@@ -10,6 +10,10 @@ import { OrderDto } from "src/Entities/order/orderDto.entity";
 import { ProductAddon } from "src/Entities/products/product_addon.entity";
 import { OrderItem } from "src/Entities/order/order_item.entity";
 import { OrderReturnDto } from "src/Entities/order/order_return.entity";
+import { OrderQueries } from "src/DbQueries/OrderQueries";
+import { ProfessionalUserQueries } from "src/DbQueries/ProfessionalUserQueries";
+import { AddressQueries } from "src/DbQueries/AddressQueries";
+import { ProductQueries } from "src/DbQueries/ProductQueries";
 
 @Injectable()
 export class OrderService{
@@ -25,90 +29,33 @@ export class OrderService{
                 private AddressRepository: Repository<Address>,
                 @InjectRepository(OrderItem)
                 private OrderItemRepository: Repository<OrderItem>,
-                private dataSource: DataSource){}
+                private dataSource: DataSource,
+                private OrderQueries: OrderQueries,
+                private ProfessionalUserQueries: ProfessionalUserQueries,
+                private AddressQueries: AddressQueries,
+                private ProductQueries: ProductQueries){}
     
     async Create(user: User,orderDto: OrderDto,professionalID: string,completeproducts: {ID :string,addonsID :string[]}[],addressID: string):Promise<void>{
-        const professionalUser = await this.ProfessionalRepository.findOneBy({id:professionalID});
+
+        const professionalUser = await this.ProfessionalUserQueries.GetUserById(professionalID);
+        
         if(!professionalUser)
-            throw new UnauthorizedException("User doesn't exist!");
+            throw new UnauthorizedException("Professional User doesn't exist!");
 
-        const {professionalName,price,payment_method,completed_status,date} = orderDto;
+        const address = await this.AddressQueries.GetAddressById(addressID,user.id);
 
-        const address = await this.AddressRepository.findOneBy({id:addressID,user});
         if(!address)
             throw new UnauthorizedException("Invalid address!");
 
-        var error:string = "no error";
-        const order = await this.OrderRepository.create({
-            professionalName,
-            price,
-            payment_method,
-            completed_status,
-            date,
-            address,
-            user,
-            professionalUser
-        });
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        
-        await queryRunner.startTransaction();
-    
-        try {
-          const orderDb = await queryRunner.manager.save(Order, order);
-          var addonsArray: ProductAddon[] = [];
-        
-          for (const product of completeproducts) {
-            const productDb = await this.ProductRepository.findOneBy({ id: product.ID });
-            if (!productDb) {
-              error = "No product with that ID exists!";
-              throw new Error("No product with that ID exists!");
-            }
-        
-            for (const addonId of product.addonsID) {
-              const addonDb = await this.AddonRepository.findOneBy({ id: addonId });
-              if (!addonDb) {
-                error = "No addon with that ID exists!";
-                throw new Error("No product addon with that ID exists!");
-              }
-              addonsArray.push(addonDb);
-            }
-        
-            const orderItem = await this.OrderItemRepository.create({
-              product: productDb,
-              order: orderDb,
-              addons: addonsArray
-            });
-            await queryRunner.manager.save(OrderItem, orderItem);
-            addonsArray = [];
-          }
-          await queryRunner.commitTransaction();
-        } catch (error){
-          await queryRunner.rollbackTransaction();
-          throw new UnauthorizedException(error);
-        } finally {
-          await queryRunner.release();
-        }
-        
+        return await this.OrderQueries.CreateOrder(completeproducts,professionalID,user.id,orderDto,addressID);    
     }
 
-    async GetUserOrderById(id: string,user: User):Promise<void | OrderReturnDto>{
-        const order = await this.OrderRepository.findOneBy({id,user});
-        if(!order)
-            throw new UnauthorizedException("Order ID invalid!");
-        var products: Product[] = [];
-        const orderItems = await this.OrderItemRepository.findBy({order});
-        for(const orderItem of orderItems)
-        {
-            orderItem.product.addons = orderItem.addons;
-            products.push(orderItem.product);
-        }  
-        var returnOrder = new OrderReturnDto(
-            order,
-            products
-        );
-        returnOrder.address = order.address;
-        return returnOrder;
+    async GetUserOrderById(id: string,user: User):Promise<Order>{
+        
+        if(!user)
+            throw new UnauthorizedException("User is not registered!");
+
+        return await this.OrderQueries.GetOrderById(id,user.id);
     }
 
     async GetProfessionalOrderById(id: string,user: ProfessionalUser):Promise<void | OrderReturnDto>{

@@ -28,7 +28,7 @@ export class UserController {
   @UseGuards(UserGuard)
   async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <string>
   {
-    return this.userService.Edit(user.id,userDto);
+    return this.userService.Edit(user,userDto);
   }
 
   @Post('edit/password')

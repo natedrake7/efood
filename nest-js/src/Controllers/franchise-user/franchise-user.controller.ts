@@ -45,7 +45,7 @@ export class FranchiseUserController {
     @UseGuards(FranchiseGuard)
     async EditPicture(@GetUser() franchiseUser: FranchiseUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<void>
     {
-      return this.userService.EditPicture(franchiseUser.id,file.buffer);
+      return this.userService.EditPicture(franchiseUser,file.buffer);
     }
 
     @Post('edit/password')
@@ -82,7 +82,7 @@ export class FranchiseUserController {
     @UseGuards(ProfessionalGuard)
     async EditProfessionalPicture(@GetUser() professionalUser: ProfessionalUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File): Promise<void>
     {
-      return this.professionaluserService.EditImageById(professionalUser.id,file.buffer);
+      return this.professionaluserService.EditImageById(professionalUser,file.buffer);
     }
 
 }

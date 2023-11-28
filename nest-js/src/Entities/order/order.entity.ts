@@ -36,4 +36,8 @@ export class Order{
 
     @ManyToOne(() => Address,(address) => address.orders,{eager: true})
     address: Address;
+
+    products? : Product[];
+
+    addressId?: string;
 }

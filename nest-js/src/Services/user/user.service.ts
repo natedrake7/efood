@@ -8,6 +8,7 @@ import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
 import { UserQueries } from 'src/DbQueries/UserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
+import { User } from 'src/Entities/user/user.entity';
 
 @Injectable()
 export class UserService {
@@ -45,14 +46,13 @@ export class UserService {
     return await this.jwtService.signAsync(payload);
   }
 
-  async Edit(id:string,userDto: UserEdit):Promise<string>{
-    const user = await this.Queries.GetUserById(id);
+  async Edit(user: User,userDto: UserEdit):Promise<string>{
 
     if(!user)
       throw new UnauthorizedException("User is not registerd!");
 
-    const Edit_user = await this.Queries.UpdateUserById(id,userDto);
-    const {username,firstname,lastname,email,phonenumber} = Edit_user;
+    const Edit_user = await this.Queries.UpdateUserById(user.id,userDto);
+    const {id,username,firstname,lastname,email,phonenumber} = Edit_user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
 
     return await this.jwtService.signAsync(payload);

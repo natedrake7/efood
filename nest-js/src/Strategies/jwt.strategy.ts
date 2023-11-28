@@ -1,24 +1,21 @@
 import { Injectable } from "@nestjs/common/decorators/core/injectable.decorator";
 import { PassportStrategy } from "@nestjs/passport"
-import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { User } from "../Entities/user/user.entity";
-import { Repository } from "typeorm";
-import { ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
+import { JwtPayload, ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
+import { UserQueries } from "src/DbQueries/UserQueries";
 
 @Injectable()
 export class UserJwtStrategy extends PassportStrategy(Strategy){
-    constructor(    
-        @InjectRepository(User)
-        private userRepository: Repository<User>){
+    constructor(private readonly Queries: UserQueries){
             super({
                 secretOrKey: 'topSecret52',
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             });
         }
-    async validate(payload: ProfessionalJwtPayload):Promise<User | boolean>{
+    async validate(payload: JwtPayload):Promise<User | boolean>{
         const { id } = payload;
-        const user = await this.userRepository.findOne({where: [{id}]});
+        const user = await this.Queries.GetUserById(id);
         if(!user)
             return false;
         return user;

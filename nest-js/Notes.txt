@@ -1,2 +1,2 @@
 1)Finish edit\delete addons queries,add images to products.
-2)Implement order queries.
+2)Fnish order queries .

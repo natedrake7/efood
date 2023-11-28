@@ -5,12 +5,11 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { Repository } from "typeorm";
 import { ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
 import { FranchiseUser } from "../Entities/franchise_user/franchise_user.entity";
+import { FranchiseUserQueries } from "src/DbQueries/FranchiseUserQueries";
 
 @Injectable()
 export class FranchiseJwtStrategy extends PassportStrategy(Strategy){
-    constructor(    
-        @InjectRepository(FranchiseUser)
-        private userRepository: Repository<FranchiseUser>){
+    constructor(private readonly Queries: FranchiseUserQueries){
             super({
                 secretOrKey: 'topSecret52',
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -18,7 +17,7 @@ export class FranchiseJwtStrategy extends PassportStrategy(Strategy){
         }
     async validate(payload: ProfessionalJwtPayload):Promise<FranchiseUser | boolean>{
         const { id } = payload;
-        const user = await this.userRepository.findOne({where: [{id}]});
+        const user = await this.Queries.FindUserById(id);
         if(!user)
             return false;
         return user;

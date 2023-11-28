@@ -108,17 +108,15 @@ export class ProfessionalUserService {
       return await this.Queries.UpdateUserPasswordById(id,hashedPassword);
     }
 
-    async EditImageById(id: string,File : Buffer):Promise<void>{
+    async EditImageById(user: ProfessionalUser,File : Buffer):Promise<void>{
 
       if(!File)
         throw new UnauthorizedException("No file was imported!");
 
-      const user = await this.Queries.GetUserById(id);
-
       if(!user)
         throw new UnauthorizedException("User doesn't exist!");
 
-      return await this.Queries.EditImageById(id,File); 
+      return await this.Queries.EditImageById(user.id,File); 
     }
 
     async GetAll():Promise<ProfessionalUser[]>{
