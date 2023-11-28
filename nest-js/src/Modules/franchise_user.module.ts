@@ -13,6 +13,8 @@ import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
 import { Product } from 'src/Entities/products/product.entity';
 import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
 import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
+import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -24,7 +26,15 @@ import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
       },
     }),
     TypeOrmModule.forFeature([FranchiseUser,ProfessionalUser,Product])],
-  providers: [FranchiseUserService,ProfessionalUserService,FranchiseJwtStrategy,ProfesionalJwtStrategy,ProfessionalUserQueries,FranchiseUserQueries],
+  providers: [FranchiseUserService,
+    ProfessionalUserService,
+    FranchiseJwtStrategy,
+    ProfesionalJwtStrategy,
+    ProfessionalUserQueries,
+    FranchiseUserQueries,
+    {provide: APP_FILTER,
+    useClass: ValidationExceptionFilter}
+  ],
   controllers: [FranchiseUserController],
 })
 export class FranchiselUsersModule {}

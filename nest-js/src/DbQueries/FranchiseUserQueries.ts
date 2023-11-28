@@ -8,7 +8,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 export class FranchiseUserQueries{
     constructor(@InjectRepository(FranchiseUser)
                 private UserRepository: DataSource){}
-    async Create(userDto : FranchiseUserDto,file : Buffer):Promise<FranchiseUser>{
+    async Create(userDto : FranchiseUserDto,file : string):Promise<FranchiseUser>{
         const query = `INSERT INTO "FranchiseUser"(
                     username,password,description,email,phonenumber,rating,image
                     )
@@ -48,11 +48,17 @@ export class FranchiseUserQueries{
         return (await this.UserRepository.query(query,[password,id]))[0];
     }
 
-    async EditImageById(id: string, file:Buffer):Promise<void>{
-        const query = `UPDATE "FranchiseUser"
-                       SET image = $1
-                       WHERE id = $2;`;
-        return (await this.UserRepository.query(query,[file,id]))[0];
+    async EditImageById(id : string, File : string):Promise<{previous_image: string}>{
+        const query =  `With PreviousImage AS(
+                            SELECT image as previous_image FROM "FranchiseUser"
+                            WHERE id = $1
+                        ),
+                        UpdateImage AS(
+                            UPDATE "ProfessionalUser"
+                            SET image = $2
+                            WHERE id = $1
+                        )SELECT * FROM PreviousImage;`;
+        return (await this.UserRepository.query(query,[id,File]))[0];
     }
 
     async UpdateUserById(id: string,userDto: FranchiseUserEdit):Promise<FranchiseUser>{

@@ -46,8 +46,8 @@ export class ProfessionalUser{
     @Column({length:500})
     description: string;
 
-    @Column({type: 'bytea'})
-    image: Buffer;
+    @Column()
+    image: string;
 
     @OneToMany(() => Product, (product) => product.user)
     products: Product[];

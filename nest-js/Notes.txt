@@ -1,2 +1,1 @@
-1)Finish edit\delete addons queries,add images to products.
-2)Fnish order queries .
+1)Fnish order queries .

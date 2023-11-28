@@ -1,18 +1,17 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ProductAddon } from "src/Entities/products/product_addon.entity";
-import { ProfessionalUser } from "src/Entities/professional_user/professionaluser.entity";
 import { ProductAddonDto } from "src/Entities/products/addonDto.entity";
 import { ProductDto } from "src/Entities/products/productDto.entity";
-import { FranchiseUser } from "src/Entities/franchise_user/franchise_user.entity";
 import { Product } from "src/Entities/products/product.entity";
 import { ProductQueries } from "src/DbQueries/ProductQueries";
+import * as fs from 'fs';
 
 @Injectable()
 export class ProductService{
     constructor(private readonly Queries: ProductQueries){}
 
-    async Create( product : ProductDto,addons : ProductAddonDto[],user_id: string,IsUserProfessional:boolean = true):Promise<void>{
-        return await this.Queries.CreateProductWithAddons(user_id,product,addons,IsUserProfessional);
+    async Create( product : ProductDto,addons : ProductAddonDto[],user_id: string,file: string,IsUserProfessional:boolean = true):Promise<void>{
+        return await this.Queries.CreateProductWithAddons(user_id,product,addons,file,IsUserProfessional);
     }
 
     async GetAllProducts(id: string,IsUserProfessional:boolean = true):Promise<void | Product[]>{
@@ -33,6 +32,19 @@ export class ProductService{
 
     async EditProductById(product : ProductDto,user_id: string,id: string,IsUserProfessional:boolean = true):Promise<void>{
         return await this.Queries.UpdateProductById(product,user_id,id,IsUserProfessional);
+    }
+
+    async EditProductImageById(id: string, user_id: string,file: string,IsUserProfessional:boolean = true):Promise<void>{
+        const {previous_image} = await this.Queries.EditProductImageById(id,user_id,file,IsUserProfessional);
+
+        if(!fs.existsSync(previous_image))
+            return;
+        try{
+            fs.unlinkSync(previous_image);
+        }
+        catch(error){
+            throw new Error(error);
+        }
     }
 
     async DeleteProductById(id: string,user_id: string,IsUserProfessional:boolean = true):Promise<void>{

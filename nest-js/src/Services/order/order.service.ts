@@ -59,22 +59,6 @@ export class OrderService{
     }
 
     async GetProfessionalOrderById(id: string,user: ProfessionalUser):Promise<void | OrderReturnDto>{
-        const order = await this.OrderRepository.findOneBy({id,professionalUser:user});
-        if(!order)
-            throw new UnauthorizedException("Order ID invalid!");
-        var products: Product[] = [];
-        const orderItems = await this.OrderItemRepository.findBy({order});
-        for(const orderItem of orderItems)
-        {
-            orderItem.product.addons = orderItem.addons;
-            products.push(orderItem.product);
-        }  
-        var returnOrder = new OrderReturnDto(
-            order,
-            products
-        );
-        returnOrder.address = order.address;
-        return returnOrder;
     }
 
     async GetAllProfessionalOrders(user: ProfessionalUser):Promise<void | OrderReturnDto[]>{

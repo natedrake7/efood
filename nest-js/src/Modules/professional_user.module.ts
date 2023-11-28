@@ -9,6 +9,8 @@ import { Product } from 'src/Entities/products/product.entity';
 import { ProfessionalUser } from 'src/Entities/professional_user/professionaluser.entity';
 import { ProfessionalUserService } from 'src/Services/professional-user/professional-user.service';
 import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
+import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -21,7 +23,11 @@ import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
     }),
     TypeOrmModule.forFeature([ProfessionalUser,Product]),
   ],
-  providers: [ProfessionalUserService,ProfesionalJwtStrategy,ProfessionalUserQueries],
+  providers: [ProfessionalUserService,
+              ProfesionalJwtStrategy,
+              ProfessionalUserQueries,
+              {provide: APP_FILTER,
+                useClass: ValidationExceptionFilter}],
   controllers: [ProfessionalUserController],
 })
 export class ProfessionalUsersModule {}

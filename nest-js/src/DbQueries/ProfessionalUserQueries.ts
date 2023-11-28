@@ -9,7 +9,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 export class ProfessionalUserQueries{
     constructor(@InjectRepository(ProfessionalUser)
                 private UserRepository:DataSource){}
-    async CreateUser(userDto: ProfessionalUserDto, file:Buffer,franchiseUserId : string):Promise<ProfessionalUser>{
+    async CreateUser(userDto: ProfessionalUserDto, file: string,franchiseUserId : string):Promise<ProfessionalUser>{
         const query = `
             INSERT INTO "ProfessionalUser" (
                 username, address, delivery_time, password, city, zipcode,
@@ -49,11 +49,17 @@ export class ProfessionalUserQueries{
         return (await this.UserRepository.query(query,[username,franchiseuser_id]))[0];
     }
 
-    async EditImageById(id : string, File : Buffer):Promise<void>{
-        const query =  `UPDATE "ProfessionalUser"
-                        SET image = $1
-                        WHERE id = $2;`;
-        return (await this.UserRepository.query(query,[File,id]))[0];
+    async EditImageById(id : string, File : string):Promise<{previous_image: string}>{
+        const query =  `With PreviousImage AS(
+                            SELECT image as previous_image FROM "ProfessionalUser"
+                            WHERE id = $1
+                        ),
+                        UpdateImage AS(
+                            UPDATE "ProfessionalUser"
+                            SET image = $2
+                            WHERE id = $1
+                        )SELECT * FROM PreviousImage;`;
+        return (await this.UserRepository.query(query,[id,File]))[0];
     }
 
     async GetAll():Promise<ProfessionalUser[]>{

@@ -1,6 +1,5 @@
 import { IsString,MinLength,MaxLength,IsStrongPassword,IsEmail,IsPhoneNumber} from "class-validator";
-import { Column } from "typeorm";
-
+import { z } from 'zod';
 
 export class FranchiseUserDto{
     @IsString()
@@ -20,6 +19,6 @@ export class FranchiseUserDto{
     @IsPhoneNumber()
     phonenumber: string;
 
-    @Column({length:500})
+    @IsString()
     description: string;
 }

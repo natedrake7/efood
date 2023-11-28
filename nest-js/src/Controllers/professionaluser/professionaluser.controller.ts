@@ -1,4 +1,4 @@
-import { Controller,Post,Param,Get, Body,UseGuards,UseInterceptors,ParseFilePipe, FileTypeValidator  } from '@nestjs/common';
+import { Controller,Post,Param,Get, Body,UseGuards,UseInterceptors,ParseFilePipe, FileTypeValidator, UsePipes  } from '@nestjs/common';
 import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { ProfessionalUserDto } from 'src/Entities/professional_user/professional_userDto.entity';
 import { ProfessionalUserService } from 'src/Services/professional-user/professional-user.service';
@@ -6,20 +6,37 @@ import { GetUser } from 'src/get-user.decorator';
 import { ProfessionalUser } from 'src/Entities/professional_user/professionaluser.entity';
 import { ProfessionalUserEdit } from 'src/Entities/professional_user/professional_userEdit.entity';
 import { ProfessionalGuard } from 'src/Guards/professional.guard';
-import { ProfessionalUserReturnType } from 'src/Entities/professional_user/professional_user_return_type.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
+import { diskStorage } from 'multer';
 import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/professional_user_password_edit.entity';
+import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
+import { ValidationPipe } from '@nestjs/common/pipes';
+
+
+const storage = {
+  storage: diskStorage({
+    destination: './uploads/profileimages',
+    filename: (req,file,cb) => {
+      const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+      const extension: string = path.parse(file.originalname).ext;
+
+      cb(null,`${filename}${extension}`)
+    }
+  })
+}
 
 @Controller('professionaluser')
 export class ProfessionalUserController {
     constructor(private readonly userService: ProfessionalUserService){}
 
    @Post('register')
-   @UseInterceptors(FileInterceptor('image'))
-   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File):Promise<string[] | string>
+   @UsePipes(new ValidationPipe())
+   @UseInterceptors(FileInterceptor('image',storage))
+   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile() file):Promise<string[] | string>
    {
-        return this.userService.Create(userDto,file.buffer);
+        return this.userService.Create(userDto,file.path);
    }
 
    @Get('signin')
@@ -34,12 +51,13 @@ export class ProfessionalUserController {
    {
      return this.userService.Edit(professionalUser.id,userDto);
    }
+
    @Post('edit/image')
    @UseGuards(ProfessionalGuard)
-   @UseInterceptors(FileInterceptor('image'))
-   async EditImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile(new ParseFilePipe({validators: [new FileTypeValidator({ fileType: 'image/jpeg'})]}))file:  Express.Multer.File):Promise<void>
+   @UseInterceptors(FileInterceptor('image',storage))
+   async EditImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file):Promise<void>
    {
-    return this.userService.EditImageById(professionalUser,file.buffer);
+    return this.userService.EditImageById(professionalUser,file.path);
    }
 
    @Post('edit/password')
@@ -50,7 +68,7 @@ export class ProfessionalUserController {
    }
 
    @Get('get/:id')
-   async Get(@Param('id') id: string):Promise<void | ProfessionalUserReturnType>
+   async Get(@Param('id') id: string):Promise<ProfessionalUser>
    {
      return this.userService.GetById(id);
    }

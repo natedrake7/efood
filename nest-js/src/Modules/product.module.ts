@@ -17,6 +17,8 @@ import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
 import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
 import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
 import { UserQueries } from 'src/DbQueries/UserQueries';
+import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -36,7 +38,10 @@ import { UserQueries } from 'src/DbQueries/UserQueries';
   providers: [ProductService,ProfesionalJwtStrategy,
               FranchiseJwtStrategy,UserJwtStrategy,
               ProductQueries,ProfessionalUserQueries,
-              FranchiseUserQueries,UserQueries],
+              FranchiseUserQueries,UserQueries,
+              {provide: APP_FILTER,
+                useClass: ValidationExceptionFilter}
+              ],
   controllers: [ProductsController],
 })
 export class ProductsModule {}

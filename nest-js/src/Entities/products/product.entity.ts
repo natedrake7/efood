@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne,ManyToMany,OneToMany 
 import { ProductAddon } from './product_addon.entity';
 import { ProfessionalUser } from '../professional_user/professionaluser.entity';
 import { FranchiseUser } from '../franchise_user/franchise_user.entity';
+import { ProductRLAddon } from './product_rl_addon';
 
 @Entity('Product')
 export class Product{
@@ -26,8 +27,11 @@ export class Product{
     @Column()
     availability: boolean;
 
-    @ManyToMany(() => ProductAddon,productAddon => productAddon.products)
-    addons: ProductAddon[];
+    @Column()
+    image: string;
+
+    @OneToMany(() => ProductRLAddon,productRLaddon => productRLaddon.product)
+    productRLaddons: ProductRLAddon[];
 
     @ManyToOne(() => ProfessionalUser,(user) => user.products)
     user: ProfessionalUser;
@@ -36,4 +40,6 @@ export class Product{
     franchiseUser: FranchiseUser;
 
     productId?: string;
+
+    addons?: ProductAddon[];
 }

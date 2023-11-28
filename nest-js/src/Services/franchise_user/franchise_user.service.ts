@@ -9,6 +9,7 @@ import { FranchiseUserPasswordEdit } from 'src/Entities/franchise_user/franchise
 import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
+import * as fs from 'fs';
 
 @Injectable()
 export class FranchiseUserService {
@@ -16,11 +17,22 @@ export class FranchiseUserService {
         private jwtService: JwtService,
         private readonly Queries: FranchiseUserQueries){}
     
-    async Create(userDto: FranchiseUserDto,file: Buffer):Promise<string | string[]>{
+    async Create(userDto: FranchiseUserDto,file: string):Promise<string | string[]>{
       const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
       if(errors.length != 0)
+      {
+        if(fs.existsSync(file))
+        {
+          try{
+            fs.unlinkSync(file);
+          }
+          catch(error){
+            throw new Error(error);
+          }
+        }
         return errors
+      }
 
       const salt = await bcrypt.genSalt();
 
@@ -79,14 +91,23 @@ export class FranchiseUserService {
       return await this.Queries.UpdatePasswordById(id,hashedPassword);
     }
 
-    async EditPicture(user: FranchiseUser, File:Buffer):Promise<void>{
+    async EditImageById(user: FranchiseUser, File: string):Promise<void>{
       if(!user)
         throw new UnauthorizedException("User is not registered!");
 
       if(!File)
         throw new Error("No file was imported!");
 
-        return await this.Queries.EditImageById(user.id,File);
+      const {previous_image} = await this.Queries.EditImageById(user.id,File);
+
+      if(!fs.existsSync(previous_image))
+        return;
+      try{
+        fs.unlinkSync(previous_image);
+      }
+      catch(error){
+        throw new Error(error);
+      }
     }
 
     async UserExists(username: string,email: string, phonenumber: string): Promise<string[]>{

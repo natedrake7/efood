@@ -2,6 +2,8 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToMany,JoinTable,OneToMany,
 import { Product } from './product.entity';
 import { ProfessionalUser } from '../professional_user/professionaluser.entity';
 import { FranchiseUser } from '../franchise_user/franchise_user.entity';
+import { OrderItemRLProductAddon } from '../order/order_item_rl_product_addon';
+import { ProductRLAddon } from './product_rl_addon';
 
 @Entity('ProductAddon')
 export class ProductAddon{
@@ -14,13 +16,15 @@ export class ProductAddon{
     @Column()
     price: number;
 
-    @ManyToMany(() => Product)
-    @JoinTable()
-    products: Product[];
-
     @ManyToOne(() => ProfessionalUser,(professionalUser) => professionalUser.addons)
     professionalUser: ProfessionalUser;
 
     @ManyToOne(() => FranchiseUser,(franchiseUser) => franchiseUser.addons)
     franchiseUser: FranchiseUser;
+
+    @OneToMany(() => OrderItemRLProductAddon,(orderitemRLproductaddon) => orderitemRLproductaddon.addons)
+    orderitemRLproductaddon : OrderItemRLProductAddon[];
+
+    @OneToMany(() => ProductRLAddon, (productRLaddon) => productRLaddon.addon)
+    productRLaddons: ProductRLAddon[];
 }

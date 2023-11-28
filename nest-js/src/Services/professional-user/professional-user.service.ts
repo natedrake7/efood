@@ -1,5 +1,4 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt'
 import { AuthSignIn, FranchiseProfessionalSignIn } from 'src/Entities/authsignin.entity';
 import { JwtService } from '@nestjs/jwt/dist';
@@ -10,6 +9,7 @@ import { ProfessionalUserEdit } from 'src/Entities/professional_user/professiona
 import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/professional_user_password_edit.entity';
 import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
+import * as fs from 'fs';
 
 @Injectable()
 export class ProfessionalUserService {
@@ -17,12 +17,23 @@ export class ProfessionalUserService {
         private jwtService: JwtService,
         private readonly Queries: ProfessionalUserQueries){}
     
-    async Create(userDto: ProfessionalUserDto,file: Buffer):Promise<string | string[]>{
+    async Create(userDto: ProfessionalUserDto,file: string):Promise<string | string[]>{
 
         const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
         if(errors.length != 0)
-          return errors;
+        {
+          if(fs.existsSync(file))
+          {
+            try{
+              fs.unlinkSync(file);
+            }
+            catch(error){
+              throw new Error(error);
+            }
+          }
+          return errors
+        }
 
         const salt = await bcrypt.genSalt();
         userDto.password = await bcrypt.hash(userDto.password,salt);
@@ -34,12 +45,23 @@ export class ProfessionalUserService {
         return await this.jwtService.signAsync(payload);
     }
 
-    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuserId: string,file: Buffer):Promise<string | string[]>{
+    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuserId: string,file: string):Promise<string | string[]>{
 
       const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
       if(errors.length != 0)
-        return errors;
+      {
+        if(fs.existsSync(file))
+        {
+          try{
+            fs.unlinkSync(file);
+          }
+          catch(error){
+            throw new Error(error);
+          }
+        }
+        return errors
+      }
 
       const salt = await bcrypt.genSalt();
       userDto.password = await bcrypt.hash(userDto.password,salt);
@@ -108,15 +130,23 @@ export class ProfessionalUserService {
       return await this.Queries.UpdateUserPasswordById(id,hashedPassword);
     }
 
-    async EditImageById(user: ProfessionalUser,File : Buffer):Promise<void>{
-
+    async EditImageById(user: ProfessionalUser,File : string):Promise<void>{
       if(!File)
         throw new UnauthorizedException("No file was imported!");
 
       if(!user)
         throw new UnauthorizedException("User doesn't exist!");
 
-      return await this.Queries.EditImageById(user.id,File); 
+      const {previous_image} = await this.Queries.EditImageById(user.id,File);
+
+      if(!fs.existsSync(previous_image))
+        return;
+      try{
+        fs.unlinkSync(previous_image);
+      }
+      catch(error){
+        throw new Error(error);
+      }
     }
 
     async GetAll():Promise<ProfessionalUser[]>{

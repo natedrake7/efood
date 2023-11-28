@@ -12,8 +12,10 @@ import { Address } from 'src/Entities/addresses/address.entity';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 import { Order } from 'src/Entities/order/order.entity';
 import { OrderItem } from 'src/Entities/order/order_item.entity';
+import { OrderItemRLProductAddon } from 'src/Entities/order/order_item_rl_product_addon';
 import { Product } from 'src/Entities/products/product.entity';
 import { ProductAddon } from 'src/Entities/products/product_addon.entity';
+import { ProductRLAddon } from 'src/Entities/products/product_rl_addon';
 import { ProfessionalUser } from 'src/Entities/professional_user/professionaluser.entity';
 import { User } from 'src/Entities/user/user.entity';
 import { OrderService } from 'src/Services/order/order.service';
@@ -30,7 +32,7 @@ import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
       },
     }),
     TypeOrmModule.forFeature([User,FranchiseUser,ProfessionalUser,ProductAddon
-                            ,Order,Address,OrderItem,Product])],
+                            ,Order,Address,OrderItem,Product,OrderItemRLProductAddon,ProductRLAddon])],
   providers: [OrderService,UserJwtStrategy,ProfesionalJwtStrategy,UserQueries,ProfessionalUserQueries,OrderQueries,AddressQueries,ProductQueries],
   controllers: [OrdersController],
 })

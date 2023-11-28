@@ -10,6 +10,26 @@ import { FranchiseGuard } from "src/Guards/franchise.guard";
 import { Product } from "src/Entities/products/product.entity";
 import { ProductAddon } from "src/Entities/products/product_addon.entity";
 import { UserGuard } from "src/Guards/user.guard";
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
+import { UsePipes } from "@nestjs/common/decorators";
+import { ValidationPipe } from "@nestjs/common/pipes";
+import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
+import { diskStorage } from 'multer';
+import { UseInterceptors } from "@nestjs/common/decorators";
+
+const storage = {
+  storage: diskStorage({
+    destination: './uploads/productimages',
+    filename: (req,file,cb) => {
+      const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+      const extension: string = path.parse(file.originalname).ext;
+
+      cb(null,`${filename}${extension}`)
+    }
+  })
+}
 
 @Controller('products')
 export class ProductsController {
@@ -17,10 +37,14 @@ export class ProductsController {
 
    @Post('professional/create')
    @UseGuards(ProfessionalGuard)
-   async ProfessionalCreate(@Body() body: {productDto : ProductDto, addonsDto: ProductAddonDto[]},@GetUser() user : ProfessionalUser):Promise<void>
+   @UsePipes(new ValidationPipe())
+   @UseInterceptors(FileInterceptor('image',storage))
+   async ProfessionalCreate(@Body() body: {productDto : string, addonsDto: string},@GetUser() user : ProfessionalUser,@UploadedFile() file):Promise<void>
    {
         const { productDto, addonsDto } = body;
-        return this.productService.Create(productDto,addonsDto,user.id);
+        const addons = JSON.parse(addonsDto) as ProductAddonDto[];
+        const product = JSON.parse(productDto) as ProductDto;
+        return this.productService.Create(product,addons,user.id,file.path);
    }
 
    @Get('professional/get/:id')
@@ -42,6 +66,15 @@ export class ProductsController {
    async ProfessionalProductEdit(@Param('id') id: string,@Body() productDto: ProductDto,@GetUser() user : ProfessionalUser):Promise<void>
    {
         return this.productService.EditProductById(productDto,user.id,id);
+   }
+
+   @Post('professional/edit/image/:id')
+   @UseGuards(ProfessionalGuard)
+   @UsePipes(new ValidationPipe())
+   @UseInterceptors(FileInterceptor('image',storage))
+   async ProfessionalEditProductImageById(@Param('id') id: string,@GetUser() user: ProfessionalUser,@UploadedFile() file):Promise<void>
+   {
+     return await this.productService.EditProductImageById(id,user.id,file.path);
    }
 
    @Post('professional/delete/:id')
@@ -75,10 +108,12 @@ export class ProductsController {
 
    @Post('franchise/create')
    @UseGuards(FranchiseGuard)
-   async FranchiseCreate(@Body() body: {productDto : ProductDto, addonsDto: ProductAddonDto[]},@GetUser() user : FranchiseUser):Promise<void>
+   @UsePipes(new ValidationPipe())
+   @UseInterceptors(FileInterceptor('image',storage))
+   async FranchiseCreate(@Body() body: {productDto : ProductDto, addonsDto: ProductAddonDto[]},@GetUser() user : FranchiseUser,@UploadedFile() file):Promise<void>
    {
         const { productDto, addonsDto } = body;
-        return this.productService.Create(productDto, addonsDto,user.id,false);
+        return this.productService.Create(productDto, addonsDto,user.id,file.path,false);
    }
 
    @Get('franchise/get/:id')
@@ -100,6 +135,15 @@ export class ProductsController {
    async FranchiseProductEdit(@Param('id') id: string,@Body() productDto: ProductDto,@GetUser() user : FranchiseUser):Promise<void>
    {
         return this.productService.EditProductById(productDto,user.id,id,false);
+   }
+
+   @Post('franchise/edit/image/:id')
+   @UseGuards(FranchiseGuard)
+   @UsePipes(new ValidationPipe())
+   @UseInterceptors(FileInterceptor('image',storage))
+   async FranchiseEditProductImageById(@Param('id') id: string,@GetUser() user: FranchiseUser,@UploadedFile() file):Promise<void>
+   {
+     return await this.productService.EditProductImageById(id,user.id,file.path,false);
    }
 
    @Post('franchise/delete/:id')

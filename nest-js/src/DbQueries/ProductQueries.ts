@@ -1,17 +1,15 @@
 import { UnauthorizedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { query } from "express";
 import { ProductAddonDto } from "src/Entities/products/addonDto.entity";
 import { Product } from "src/Entities/products/product.entity";
 import { ProductDto } from "src/Entities/products/productDto.entity";
 import { ProductAddon } from "src/Entities/products/product_addon.entity";
-import { User } from "src/Entities/user/user.entity";
 import { DataSource } from "typeorm";
 
 export class ProductQueries{
     constructor(@InjectRepository(Product)
                 private ProductRepository: DataSource){}
-    async CreateProductWithAddons(id : string,productDto: ProductDto,addonsDto: ProductAddonDto[],IsUserProfessional: boolean):Promise<void>{
+    async CreateProductWithAddons(id : string,productDto: ProductDto,addonsDto: ProductAddonDto[],file: string,IsUserProfessional: boolean):Promise<void>{
         const clauses = [];
         const values = [productDto.name,
             productDto.size,
@@ -19,7 +17,8 @@ export class ProductQueries{
             productDto.type,
             productDto.description,
             productDto.availability,
-            id
+            id,
+            file
             ];
 
         var UserClause: string = `"userId"`;
@@ -32,10 +31,10 @@ export class ProductQueries{
         var QueryConnector: string = `,`;
         var CreateProductQuery:string = `WITH Product AS (
             INSERT INTO "Product"(
-                name, size, price, type, description, availability, ${UserClause}
+                name, size, price, type, description, availability, ${UserClause} ,image
             )
             VALUES (
-                $1, $2, $3, $4, $5, $6, $7
+                $1, $2, $3, $4, $5, $6, $7, $8
             )
             RETURNING id as ProductId
         )`;
@@ -48,7 +47,6 @@ export class ProductQueries{
         }
 
         CreateProductQuery += QueryConnector;
-
         addonsDto.forEach(addon =>{
             clauses.push(`($${values.length + 1},$${values.length + 2},$7)`);
             values.push(addon.name);
@@ -65,7 +63,7 @@ export class ProductQueries{
                 RETURNING id as AddonId
             ),
             ProductRLAddon AS (
-                INSERT INTO "product_addon_products_product"("productAddonId", "productId")
+                INSERT INTO "ProductRLAddon"("addonId", "productId")
                 SELECT AddonId, ProductId FROM Addon, Product
                 RETURNING "productId"
             )SELECT * FROM ProductRLAddon;`;
@@ -73,63 +71,63 @@ export class ProductQueries{
         return;
     }
 
-    async GetProductsByUserId(id : string,IsUserProfessional: boolean = true):Promise<Product[]>{
+    async GetProductsByUserId(id : string,IsUserProfessional: boolean):Promise<Product[]>{
         var UserClause:string = "";
         if(IsUserProfessional)
             UserClause = `"userId"`;
         else
             UserClause = `"franchiseUserId"`;
 
-        const query = `SELECT id,name,size,price,type,description,availability 
+        const query = `SELECT id,name,size,price,type,description,availability,image
                        FROM "Product" 
                        WHERE ${UserClause} = $1`;
         return (await this.ProductRepository.query(query,[id]));
     }
 
     async GetCommercialProductsByUserId(id : string):Promise<Product[]>{
-        const query = `SELECT id,name,size,price,type,description,availability FROM "Product"
+        const query = `SELECT id,name,size,price,type,description,availability,image FROM "Product"
                        WHERE "userId" = $1 OR "franchiseUserId" = $1;`;
         return await this.ProductRepository.query(query,[id]);
     }
 
     async GetCommercialProductById(id : string):Promise<Product>{
-        const Productquery = `SELECT id,name,size,price,type,description,availability
+        const Productquery = `SELECT id,name,size,price,type,description,availability,image
                               FROM "Product"
                               WHERE id = $1 LIMIT 1;`;
         const product = (await this.ProductRepository.query(Productquery,[id]))[0];
         const AddonsQuery = `
             WITH ProductRLAddon AS (
-            SELECT "productAddonId" 
-            FROM "product_addon_products_product"
+            SELECT "addonId" 
+            FROM "ProductRLAddon"
             WHERE "productId" = $1
             )
             SELECT pa.id, pa.name, pa.price
             FROM ProductRLAddon prla
-            INNER JOIN "ProductAddon" pa ON pa.id = prla."productAddonId";`;
+            INNER JOIN "ProductAddon" pa ON pa.id = prla."addonId";`;
         product.Addons = (await this.ProductRepository.query(AddonsQuery,[product.id]));
         return product;
     }
 
-    async GetProductById(user_id : string,id : string,IsUserProfessional: boolean = true):Promise<Product>{
+    async GetProductById(user_id : string,id : string,IsUserProfessional: boolean):Promise<Product>{
         var UserClause = this.GetUserClause(IsUserProfessional);
-        const Productquery = `SELECT id,name,size,price,type,description,availability
+        const Productquery = `SELECT id,name,size,price,type,description,availability,image
                        FROM "Product"
                        WHERE ${UserClause} = $1 AND id = $2 LIMIT 1;`;
         const product = (await this.ProductRepository.query(Productquery,[user_id,id]))[0];
         const AddonsQuery = `
             WITH ProductRLAddon AS (
-                SELECT "productAddonId" 
-                FROM "product_addon_products_product"
+                SELECT "addonId" 
+                FROM "ProductRLAddon"
                 WHERE "productId" = $1
             )
             SELECT pa.id, pa.name, pa.price
             FROM ProductRLAddon prla
-            INNER JOIN "ProductAddon" pa ON pa.id = prla."productAddonId";`;
+            INNER JOIN "ProductAddon" pa ON pa.id = prla."addonId";`;
         product.Addons = (await this.ProductRepository.query(AddonsQuery,[product.id]));
         return product;         
     }
 
-    async UpdateProductById(product: ProductDto,user_id: string,id: string,IsUserProfessional: boolean = true):Promise<void>{
+    async UpdateProductById(product: ProductDto,user_id: string,id: string,IsUserProfessional: boolean):Promise<void>{
         const userClause = this.GetUserClause(IsUserProfessional);
         const clauses = [];
         const values:any[] = [id,user_id];
@@ -214,15 +212,15 @@ export class ProductQueries{
             RETURNING id
             ),
             ProductRLAddon as(
-                DELETE FROM "product_addon_products_product"
-                WHERE "productAddonId" = $1 
-                RETURNING "productAddonId"
+                DELETE FROM "ProductRLAddon"
+                WHERE "addonId" = $1 
+                RETURNING "addonId"
             )SELECT * FROM ProductRLAddon;
             `
         return await this.ProductRepository.query(query,[id,user_id]);
     }
 
-    async DeleteProductById(id: string,user_id: string,IsUserProfessional = true):Promise<void>{
+    async DeleteProductById(id: string,user_id: string,IsUserProfessional:boolean):Promise<void>{
         const userClause = this.GetUserClause(IsUserProfessional);
 
         const query = `WITH Product as(
@@ -231,22 +229,41 @@ export class ProductQueries{
             RETURNING id
         ),
         ProductRLAddon as(
-            DELETE FROM "product_addon_products_product"
+            DELETE FROM "ProductRLAddon"
             WHERE "productId" = $1
-            RETURNING "productAddonId"
+            RETURNING "addonId"
         )SELECT * FROM ProductRLAddon;`
 
         return await this.ProductRepository.query(query,[id,user_id]);
     }
 
-    GetUserClause(IsUserProfessional: boolean = true):string{
+    async EditProductImageById(id: string, user_id: string,file: string,IsUserProfessional: boolean):Promise<{previous_image: string}>{
+        const userClause = this.GetUserClause(IsUserProfessional);
+
+        const query = `With PreviousImage AS(
+                        SELECT image as previous_image FROM "Product"
+                        WHERE id = $1
+                    ),
+                    UpdateImage AS(
+                        UPDATE "Product"
+                        SET image = $2
+                        WHERE id = $1 AND ${userClause} = $3
+                    )SELECT * FROM PreviousImage;`;
+        const values = [id,
+                        file,
+                        user_id
+                        ];
+        return (await this.ProductRepository.query(query,values))[0];
+    }
+
+    GetUserClause(IsUserProfessional: boolean):string{
         if(IsUserProfessional)
             return `"userId"`;
         else
             return `"franchiseUserId"`;
     }
 
-    GetUserClauseForAddon(IsUserProfessional: boolean = true):string{
+    GetUserClauseForAddon(IsUserProfessional: boolean):string{
         if(IsUserProfessional)
             return `"professionalUserId"`;
         else
