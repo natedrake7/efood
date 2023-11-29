@@ -11,13 +11,12 @@ import { OrderModule } from './Modules/order.module';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config/dist';
 import { configValidationSchema } from './config.schema';
-import { SharedModule } from './Modules/shared.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
-    envFilePath: [`.env.stage.dev`],
     validationSchema: configValidationSchema,
     isGlobal: true,
+    envFilePath: [`.env.stage.${process.env.STAGE}`],
   }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
