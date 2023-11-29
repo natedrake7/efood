@@ -1,4 +1,4 @@
-import { IsString,MinLength,MaxLength,IsStrongPassword,IsEmail,IsPhoneNumber, isString} from "class-validator";
+import { IsString,MinLength,MaxLength,IsStrongPassword,IsEmail,IsPhoneNumber} from "class-validator";
 import { Column } from "typeorm";
 
 
