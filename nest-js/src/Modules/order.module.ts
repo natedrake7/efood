@@ -21,6 +21,8 @@ import { User } from 'src/Entities/user/user.entity';
 import { OrderService } from 'src/Services/order/order.service';
 import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
 import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
+import { APP_FILTER } from '@nestjs/core';
+import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
 
 @Module({
   imports: [
@@ -33,7 +35,16 @@ import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
     }),
     TypeOrmModule.forFeature([User,FranchiseUser,ProfessionalUser,ProductAddon
                             ,Order,Address,OrderItem,Product,OrderItemRLProductAddon,ProductRLAddon])],
-  providers: [OrderService,UserJwtStrategy,ProfesionalJwtStrategy,UserQueries,ProfessionalUserQueries,OrderQueries,AddressQueries,ProductQueries],
+  providers: [OrderService,
+              UserJwtStrategy,
+              ProfesionalJwtStrategy,
+              UserQueries,
+              ProfessionalUserQueries,
+              OrderQueries,
+              AddressQueries,
+              ProductQueries,              
+              {provide: APP_FILTER,
+              useClass: ValidationExceptionFilter}],
   controllers: [OrdersController],
 })
 export class OrderModule {}

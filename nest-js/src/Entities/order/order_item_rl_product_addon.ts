@@ -9,8 +9,8 @@ export class OrderItemRLProductAddon{
     id: string;
 
     @ManyToOne(() => OrderItem,(orderitem) => orderitem.orderitemRLproductaddon)
-    items: OrderItem;
+    item: OrderItem;
 
     @ManyToOne(() => ProductAddon, (productaddon)=> productaddon.orderitemRLproductaddon)
-    addons:  ProductAddon;
+    addon:  ProductAddon;
 }

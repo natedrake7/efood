@@ -2,18 +2,15 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Order } from "src/Entities/order/order.entity";
 import { OrderDto } from "src/Entities/order/orderDto.entity";
 import { Repository } from "typeorm";
-import { ProductQueries } from "./ProductQueries";
 import { Product } from "src/Entities/products/product.entity";
 import { AddressQueries } from "./AddressQueries";
-import { Address } from "src/Entities/addresses/address.entity";
 
 export class OrderQueries{
     constructor(@InjectRepository(Order)
                 private OrderRepository: Repository<Order>,
-                private readonly ProductQueries: ProductQueries,
                 private readonly AddressQueries: AddressQueries){}
 
-    async CreateOrder(completeproducts: {ID :string ,addonsID :string[] }[],professionalId : string,user_id: string,orderDto: OrderDto,addressId : string):Promise<void>{
+    async CreateOrder(completeproducts: {ID :string,count: number ,addonsID :string[] }[],professionalId : string,user_id: string,orderDto: OrderDto,addressId : string):Promise<void>{
        
         const insertClauses: string[] = [];
         const values:any[] = [orderDto.professionalName,
@@ -23,14 +20,16 @@ export class OrderQueries{
                               professionalId,
                               addressId
                             ];
+
         completeproducts.forEach(product =>{
-            insertClauses.push(`((SELECT OrderId FROM UserOrder), $${values.length + 1})`);
+            insertClauses.push(`((SELECT OrderId FROM UserOrder), $${values.length + 1},$${values.length + 2})`);
             values.push(product.ID);
+            values.push(product.count);
         });
        
         const query = `WITH UserOrder AS (
             INSERT INTO "Order"(
-                "professionalName", price, payment_method, "date", "userId",
+                "professionalName", price, payment_method, "insertedDate", "userId",
                 "professionalUserId", completed_status, "addressId"
             )
             VALUES (
@@ -40,7 +39,7 @@ export class OrderQueries{
         ),
         OrderItem AS (
             INSERT INTO "OrderItem"(
-                "orderId", "productId"
+                "orderId", "productId",number
             )
             VALUES ${insertClauses.join(`,`)}
             RETURNING id  AS OrderItemId ,"productId"
@@ -63,41 +62,82 @@ export class OrderQueries{
         }
         if(AddonClauses.length == 0)
             return;
-       const AddonsQuery = `INSERT INTO "order_item_addons_product_addon"(
-        "orderItemId","productAddonId"
+       const AddonsQuery = `INSERT INTO "OrderItemRLProductAddon"(
+        "itemId","addonId"
         )
         VALUES ${AddonClauses.join(`,`)};`;
 
         return await this.OrderRepository.query(AddonsQuery,AddonValues);
     }
 
-    async GetOrderById(id: string,user_id : string):Promise<Order>{
-        const Orderquery = `SELECT id,"professionalName",price,payment_method,"date",completed_status,"addressId" 
+    async UpdateOrderAsCompletedById(id : string, user_id: string):Promise<void>{
+        const query = `UPDATE "Order"
+                       SET "completedDate" = CURRENT_TIMESTAMP, completed_status = TRUE
+                       WHERE id = $1 AND "professionalUserId" = $2;`;
+
+        return await this.OrderRepository.query(query,[id,user_id]);
+    }
+
+    async GetAllOrdersByUserId(user_id: string,IsUserProfessional: boolean):Promise<Order[]>
+    {
+        const userClause = this.UserClause(IsUserProfessional);
+        const query = `SELECT id,"professionalName",price,payment_method,"insertedDate","completedDate",completed_status 
+                       FROM "Order" 
+                       WHERE ${userClause} = $1;`;
+        return await this.OrderRepository.query(query,[user_id]);
+    }
+
+    async GetOrderById(id: string,user_id : string,IsUserProfessional:boolean):Promise<Order>{
+        const userClause = this.UserClause(IsUserProfessional);
+
+        const Orderquery = `SELECT id,"professionalName","userId",price,payment_method,"insertedDate","completedDate",completed_status,"addressId" 
                             FROM "Order" 
-                            WHERE id = $1 AND "userId" = $2 
+                            WHERE id = $1 AND ${userClause} = $2 
                             LIMIT 1;`;
 
         const order = (await this.OrderRepository.query(Orderquery,[id,user_id]))[0] as Order;
 
-        const ProductsQuery = `SELECT "productId" as id,name,size,price,type,description FROM "OrderItem" AS oa
+        const ProductsQuery = `SELECT "productId" as id,name,size,price,type,description,number FROM "OrderItem" AS oa
                                 INNER JOIN "Product" AS pr ON pr.id = oa."productId"
                                 WHERE oa."orderId" = $1;`;
         const AddonsQuery = `WITH ProductRLAddon AS (
-                                SELECT "productAddonId" 
-                                FROM "product_addon_products_product"
+                                SELECT "addonId" 
+                                FROM "ProductRLAddon"
                                 WHERE "productId" = $1
                             )
                             SELECT pa.id, pa.name, pa.price
                             FROM ProductRLAddon prla
-                            INNER JOIN "ProductAddon" pa ON pa.id = prla."productAddonId";`;
+                            INNER JOIN "ProductAddon" pa ON pa.id = prla."addonId";`;
 
         order.products = await this.OrderRepository.query(ProductsQuery,[order.id]) as Product[];
         
         for (const product of order.products)
             product.addons = await this.OrderRepository.query(AddonsQuery, [product.id]);
         
-        order.address = await this.AddressQueries.GetAddressById(order.addressId,user_id);
-
+        order.address = await this.AddressQueries.GetAddressById(order.addressId,order.userId);
+        order.addressId = null;
+        order.userId = null;
         return order;
+    }
+
+    async CancelOrderById(id : string, user_id : string):Promise<void>{
+        const query = `UPDATE "Order"
+                       SET "cancelledStatus" = TRUE AND "completed_status" = TRUE AND "completedDate" = CURRENT_TIMESTAMP
+                       WHERE id = $1 AND "userId" = $2;`;
+        return await this.OrderRepository.query(query,[id,user_id]);
+    }
+
+    async CheckOrderStatusById(id : string, user_id : string):Promise<boolean>{
+        const query = `SELECT "completed_status" FROM "Order"
+                       WHERE id = $1 AND "userId" = $2 LIMIT 1;`;
+
+        return (await this.OrderRepository.query(query,[id,user_id]))[0];
+    }
+
+    UserClause(IsUserProfessional: boolean):string{
+        if(IsUserProfessional)
+            return `"professionalUserId"`;
+        else
+            return `"userId"`;
     }
 }

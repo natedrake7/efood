@@ -22,7 +22,7 @@ export class ProductAddon{
     @ManyToOne(() => FranchiseUser,(franchiseUser) => franchiseUser.addons)
     franchiseUser: FranchiseUser;
 
-    @OneToMany(() => OrderItemRLProductAddon,(orderitemRLproductaddon) => orderitemRLproductaddon.addons)
+    @OneToMany(() => OrderItemRLProductAddon,(orderitemRLproductaddon) => orderitemRLproductaddon.addon)
     orderitemRLproductaddon : OrderItemRLProductAddon[];
 
     @OneToMany(() => ProductRLAddon, (productRLaddon) => productRLaddon.addon)

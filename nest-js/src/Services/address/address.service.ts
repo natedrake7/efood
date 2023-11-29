@@ -1,18 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository} from 'typeorm';
 import { Address } from 'src/Entities/addresses/address.entity';
 import { AddressDto } from 'src/Entities/addresses/addressDto.entity';
 import { User } from 'src/Entities/user/user.entity';
 import { AddressEdit } from 'src/Entities/addresses/address_edit.entity';
 import { AddressQueries } from 'src/DbQueries/AddressQueries';
 import { isPhoneNumber } from 'class-validator';
+import { BadRequestException } from '@nestjs/common/exceptions';
 
 @Injectable()
 export class AddressService{
-    constructor(@InjectRepository(Address)
-                private address_repository: Repository<Address>,
-                private Queries:  AddressQueries){}
+    constructor(private Queries:  AddressQueries){}
 
     async AddAddress(user : User,addressDto : AddressDto):Promise<void>{
         if(!user)
@@ -28,10 +25,10 @@ export class AddressService{
         const address = this.Queries.GetAddressById(id,user.id);
 
         if(!address)
-            throw new UnauthorizedException("No address with that ID exists!");
+            throw new BadRequestException("No address with that ID exists!");
 
         if(addressDto.phonenumber != null && !isPhoneNumber(addressDto.phonenumber))
-            throw new UnauthorizedException("Invalid Phonenumber (specify region e.g +30 6944444444)");
+            throw new BadRequestException("Invalid Phonenumber (specify region e.g +30 6944444444)");
 
         return await this.Queries.UpdateAddressById(id,user.id,addressDto);
     }
@@ -49,10 +46,10 @@ export class AddressService{
         if(!user)
             throw new UnauthorizedException("User is not registered!");
 
-        const address = this.Queries.GetAddressById(id,user.id);
-
+        const address = await this.Queries.GetAddressById(id,user.id);
+        
         if(!address)
-            throw new UnauthorizedException("Address doesn't exist!");
+            throw new BadRequestException("Address doesn't exist!");
 
         return address;
     }
@@ -62,7 +59,7 @@ export class AddressService{
         const address = await this.Queries.GetAddressById(id,user.id);
 
         if(!address)
-            throw new UnauthorizedException("Address doesn't exist!");
+            throw new BadRequestException("Address doesn't exist!");
 
         return await this.Queries.DeleteAddressById(id,user.id);
     }

@@ -10,6 +10,7 @@ import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
 import * as fs from 'fs';
+import { BadRequestException } from '@nestjs/common/exceptions';
 
 @Injectable()
 export class FranchiseUserService {
@@ -28,7 +29,7 @@ export class FranchiseUserService {
             fs.unlinkSync(file);
           }
           catch(error){
-            throw new Error(error);
+            throw new BadRequestException(error);
           }
         }
         return errors
@@ -96,7 +97,7 @@ export class FranchiseUserService {
         throw new UnauthorizedException("User is not registered!");
 
       if(!File)
-        throw new Error("No file was imported!");
+        throw new BadRequestException("No file was imported!");
 
       const {previous_image} = await this.Queries.EditImageById(user.id,File);
 
@@ -106,7 +107,7 @@ export class FranchiseUserService {
         fs.unlinkSync(previous_image);
       }
       catch(error){
-        throw new Error(error);
+        throw new BadRequestException(error);
       }
     }
 

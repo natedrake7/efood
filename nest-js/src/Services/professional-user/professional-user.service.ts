@@ -9,6 +9,7 @@ import { ProfessionalUserEdit } from 'src/Entities/professional_user/professiona
 import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/professional_user_password_edit.entity';
 import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
+import { BadRequestException } from '@nestjs/common/exceptions';
 import * as fs from 'fs';
 
 @Injectable()
@@ -57,7 +58,7 @@ export class ProfessionalUserService {
             fs.unlinkSync(file);
           }
           catch(error){
-            throw new Error(error);
+            throw new BadRequestException(error);
           }
         }
         return errors
@@ -132,7 +133,7 @@ export class ProfessionalUserService {
 
     async EditImageById(user: ProfessionalUser,File : string):Promise<void>{
       if(!File)
-        throw new UnauthorizedException("No file was imported!");
+        throw new BadRequestException("No file was imported!");
 
       if(!user)
         throw new UnauthorizedException("User doesn't exist!");

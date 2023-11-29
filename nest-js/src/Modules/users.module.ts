@@ -9,6 +9,8 @@ import { ProfessionalUser } from 'src/Entities/professional_user/professionaluse
 import { User } from 'src/Entities/user/user.entity';
 import { UserService } from 'src/Services/user/user.service';
 import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
+import { APP_FILTER } from '@nestjs/core';
+import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
     TypeOrmModule.forFeature([ProfessionalUser]),
     TypeOrmModule.forFeature([FranchiseUser]),
   ],
-  providers: [UserService,UserJwtStrategy,UserQueries],
+  providers: [UserService,UserJwtStrategy,UserQueries,              
+              {provide: APP_FILTER,
+              useClass: ValidationExceptionFilter}],
   controllers: [UserController],
 })
 export class UsersModule {}

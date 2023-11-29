@@ -23,7 +23,13 @@ export class Order{
     completed_status: boolean;
 
     @Column()
-    date: Date;
+    insertedDate: Date;
+
+    @Column({nullable: true})
+    completedDate: Date;
+
+    @Column({nullable: true})
+    cancelledStatus: boolean;
 
     @ManyToOne(() => User,(user) => user.orders)
     user: User;
@@ -34,10 +40,12 @@ export class Order{
     @OneToMany(() => OrderItem, (orderItem) => orderItem.order)
     items: OrderItem[];
 
-    @ManyToOne(() => Address,(address) => address.orders,{eager: true})
+    @ManyToOne(() => Address,(address) => address.orders)
     address: Address;
 
     products? : Product[];
 
     addressId?: string;
+
+    userId: string;
 }

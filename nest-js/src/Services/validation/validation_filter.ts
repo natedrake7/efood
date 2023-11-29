@@ -13,7 +13,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
     if (status === HttpStatus.BAD_REQUEST) {
-      const errors = exception.getResponse()['message'];
+      const errors = exception.getResponse()['message'] as any[];
       const file = request.file ? request.file.path : undefined;
       if (file !== undefined && fs.existsSync(file)) {
         try {
@@ -22,8 +22,6 @@ export class ValidationExceptionFilter implements ExceptionFilter {
           console.error('Error deleting file:', error);
         }
       }
-      else
-        errors.push("No image was selected!");
 
       // Send a response to the client
       response.status(status).json({
@@ -32,7 +30,16 @@ export class ValidationExceptionFilter implements ExceptionFilter {
         message: exception.message,
         errors: errors
       });
-    } else {
+    }
+    else if(status === HttpStatus.UNAUTHORIZED){
+      const errors = exception.getResponse()['message'] as any[];
+      response.status(status).json({
+        statusCode: status,
+        path: request.url,
+        message: exception.message,
+        errors: errors
+      });
+    }else {
       // For other types of exceptions, forward them as they are
       response.status(status).json({
         statusCode: status,

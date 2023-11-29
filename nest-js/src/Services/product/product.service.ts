@@ -4,6 +4,7 @@ import { ProductAddonDto } from "src/Entities/products/addonDto.entity";
 import { ProductDto } from "src/Entities/products/productDto.entity";
 import { Product } from "src/Entities/products/product.entity";
 import { ProductQueries } from "src/DbQueries/ProductQueries";
+import { BadRequestException } from "@nestjs/common/exceptions";
 import * as fs from 'fs';
 
 @Injectable()
@@ -17,7 +18,7 @@ export class ProductService{
     async GetAllProducts(id: string,IsUserProfessional:boolean = true):Promise<void | Product[]>{
         const products = await this.Queries.GetProductsByUserId(id,IsUserProfessional);
         if(!products)
-            throw new UnauthorizedException("User doesn't have any products!");
+            throw new BadRequestException("User doesn't have any products!");
         return products;
     }
 
@@ -25,7 +26,7 @@ export class ProductService{
         const product = await this.Queries.GetProductById(user_id,id,IsUserProfessional);
 
         if(!product)
-            throw new UnauthorizedException("Invalid product!");
+            throw new BadRequestException("Invalid product!");
 
         return product;
     }
@@ -43,7 +44,7 @@ export class ProductService{
             fs.unlinkSync(previous_image);
         }
         catch(error){
-            throw new Error(error);
+            throw new BadRequestException(error);
         }
     }
 
@@ -58,7 +59,7 @@ export class ProductService{
     async GetAddonById(id: string,user_id: string,IsUserProfessional:boolean = true):Promise<void | ProductAddon>{
         const addon = await this.Queries.GetAddonById(id,user_id,IsUserProfessional);
         if(!addon)
-            throw new UnauthorizedException("Addon doesn't exist!");
+            throw new BadRequestException("Addon doesn't exist!");
         return addon;
     }
 

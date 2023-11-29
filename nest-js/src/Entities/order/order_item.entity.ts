@@ -15,6 +15,9 @@ export class OrderItem{
     @ManyToOne(() => Product)
     product: Product;
 
-    @OneToMany(() => OrderItemRLProductAddon,(orderitemRLproductaddon) => orderitemRLproductaddon.items)
+    @Column()
+    number: number;
+
+    @OneToMany(() => OrderItemRLProductAddon,(orderitemRLproductaddon) => orderitemRLproductaddon.item)
     orderitemRLproductaddon: OrderItemRLProductAddon[];
 }
