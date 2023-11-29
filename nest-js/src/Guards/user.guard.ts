@@ -3,11 +3,13 @@ import {CanActivate,ExecutionContext,Injectable,UnauthorizedException} from '@ne
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
-  
+import { ConfigService } from '@nestjs/config';
+
 @Injectable()
 export class UserGuard implements CanActivate {
     constructor(private jwtService: JwtService,
-                private jwtStrategy: UserJwtStrategy) {}
+                private jwtStrategy: UserJwtStrategy,
+                private configService: ConfigService) {}
   
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const request = context.switchToHttp().getRequest();
@@ -18,7 +20,7 @@ export class UserGuard implements CanActivate {
       const payload = await this.jwtService.verifyAsync(
         token,
         {
-           secret: 'topSecret52'
+           secret: this.configService.get('JWT_SECRET'),
         }
       );
       const user = await this.jwtStrategy.validate(payload);

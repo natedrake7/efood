@@ -1,17 +1,17 @@
 import { Injectable } from "@nestjs/common/decorators/core/injectable.decorator";
 import { PassportStrategy } from "@nestjs/passport"
-import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { Repository } from "typeorm";
 import { ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
 import { FranchiseUser } from "../Entities/franchise_user/franchise_user.entity";
 import { FranchiseUserQueries } from "src/DbQueries/FranchiseUserQueries";
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FranchiseJwtStrategy extends PassportStrategy(Strategy){
-    constructor(private readonly Queries: FranchiseUserQueries){
+    constructor(private readonly Queries: FranchiseUserQueries,
+                private configService: ConfigService){
             super({
-                secretOrKey: 'topSecret52',
+                secretOrKey: configService.get('JWT_SECRET'),
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             });
         }

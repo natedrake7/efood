@@ -1,17 +1,17 @@
 import { Injectable } from "@nestjs/common/decorators/core/injectable.decorator";
 import { PassportStrategy } from "@nestjs/passport"
-import { InjectRepository } from "@nestjs/typeorm";
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { Repository } from "typeorm";
 import { ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
 import { ProfessionalUser } from "../Entities/professional_user/professionaluser.entity";
 import { ProfessionalUserQueries } from "src/DbQueries/ProfessionalUserQueries";
+import { ConfigService } from '@nestjs/config/dist';
 
 @Injectable()
 export class ProfesionalJwtStrategy extends PassportStrategy(Strategy){
-    constructor(private readonly Queries: ProfessionalUserQueries){
+    constructor(private readonly Queries: ProfessionalUserQueries,
+                private configService: ConfigService){
             super({
-                secretOrKey: 'topSecret52',
+                secretOrKey: configService.get('JWT_SECRET'),
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             });
         }
