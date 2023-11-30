@@ -143,7 +143,7 @@ export class ProductsController {
    @UseInterceptors(FileInterceptor('image',storage))
    async FranchiseEditProductImageById(@Param('id') id: string,@GetUser() user: FranchiseUser,@UploadedFile() file):Promise<void>
    {
-     return await this.productService.EditProductImageById(id,user.id,file.path,false);
+     return this.productService.EditProductImageById(id,user.id,file.path,false);
    }
 
    @Post('franchise/delete/:id')

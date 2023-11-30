@@ -7,12 +7,18 @@ import { ProfesionalJwtStrategy } from 'src/Strategies/professional.strategy';
 import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
 import { APP_FILTER } from '@nestjs/core';
 import { SharedModule } from './shared.module';
+import { RefreshProfessionalJwtStrategy } from 'src/Strategies/professional_refresh.strategy';
+import { UserJwtStrategy } from 'src/Strategies/jwt.strategy';
+import { UserQueries } from 'src/DbQueries/UserQueries';
 
 
 @Module({
   imports: [SharedModule],
   providers: [ProfessionalUserService,
               ProfesionalJwtStrategy,
+              RefreshProfessionalJwtStrategy,
+              UserJwtStrategy,
+              UserQueries,
               ProfessionalUserQueries,
               {provide: APP_FILTER,
                 useClass: ValidationExceptionFilter}],

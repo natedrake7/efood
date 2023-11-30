@@ -9,6 +9,8 @@ import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
 import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
 import { APP_FILTER } from '@nestjs/core';
 import { SharedModule } from './shared.module';
+import { RefreshProfessionalJwtStrategy } from 'src/Strategies/professional_refresh.strategy';
+import { RefreshFranchiseJwtStrategy } from 'src/Strategies/franchise_refresh.strategy';
 
 @Module({
   imports: [SharedModule],
@@ -16,6 +18,8 @@ import { SharedModule } from './shared.module';
     ProfessionalUserService,
     FranchiseJwtStrategy,
     ProfesionalJwtStrategy,
+    RefreshProfessionalJwtStrategy,
+    RefreshFranchiseJwtStrategy,
     ProfessionalUserQueries,
     FranchiseUserQueries,
     {provide: APP_FILTER,

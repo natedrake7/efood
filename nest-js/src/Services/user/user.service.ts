@@ -3,7 +3,7 @@ import { UserDto } from 'src/Entities/user/UserDto';
 import * as bcrypt from 'bcrypt'
 import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { JwtService } from '@nestjs/jwt/dist';
-import { JwtPayload } from 'src/Entities/jwt-payload.interface';
+import { JwtPayload, RefreshJwtPayload } from 'src/Entities/jwt-payload.interface';
 import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
 import { UserQueries } from 'src/DbQueries/UserQueries';
@@ -16,7 +16,7 @@ export class UserService {
     private jwtService: JwtService,
     private readonly Queries: UserQueries){}
 
-  async Create(userDto: UserDto):Promise<string | string[]>{
+  async Create(userDto: UserDto):Promise<{accesstoken: string,refreshtoken:string} | string[]>{
     const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
     if(errors.length != 0)
@@ -26,12 +26,17 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(userDto.password,salt);
     userDto.password = hashedPassword;
     const {id,username,firstname,lastname,email,phonenumber} = await this.Queries.CreateUser(userDto);
-    const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
 
-    return await this.jwtService.signAsync(payload);
+    const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
+    const refresh_payload: RefreshJwtPayload = {id,email,username};
+
+    const accesstoken = await this.jwtService.signAsync(payload);
+    const refreshtoken = await this.jwtService.signAsync(refresh_payload,{expiresIn: '7d'});
+
+    return {accesstoken,refreshtoken};
   }
 
-  async SignIn(userDto: AuthSignIn):Promise<string>{
+  async SignIn(userDto: AuthSignIn):Promise<{accesstoken: string,refreshtoken:string}>{
     const {username,password} = userDto;
 
     const user = await this.Queries.GetUserByUsername(username);
@@ -43,10 +48,15 @@ export class UserService {
 
     const {id,firstname,lastname,email,phonenumber} = user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
-    return await this.jwtService.signAsync(payload);
+    const refresh_payload: RefreshJwtPayload = {id,email,username};
+
+    const accesstoken = await this.jwtService.signAsync(payload);
+    const refreshtoken = await this.jwtService.signAsync(refresh_payload,{expiresIn: '7d'});
+    
+    return {accesstoken,refreshtoken};
   }
 
-  async Edit(user: User,userDto: UserEdit):Promise<string>{
+  async Edit(user: User,userDto: UserEdit):Promise<{accesstoken: string}>{
 
     if(!user)
       throw new UnauthorizedException("User is not registerd!");
@@ -55,7 +65,9 @@ export class UserService {
     const {id,username,firstname,lastname,email,phonenumber} = Edit_user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
 
-    return await this.jwtService.signAsync(payload);
+    const accesstoken = await this.jwtService.signAsync(payload);
+
+    return {accesstoken};
   }
 
   async EditPassword(id: string, userDto: UserPasswordEdit):Promise<void>{
@@ -71,6 +83,17 @@ export class UserService {
     const hashedPassword = await bcrypt.hash(userDto.new_password,salt);
 
     return await this.Queries.UpdateUserPasswordById(id,hashedPassword);
+  }
+
+  async RefreshToken(user: User):Promise<{accesstoken : string}>{
+
+    const {id,username,firstname,lastname,email,phonenumber} = user;
+
+    const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};
+
+    const accesstoken = await this.jwtService.signAsync(payload);
+
+    return {accesstoken};
   }
 
   async UserExists(username: string,email: string, phonenumber: string): Promise<string[]>{

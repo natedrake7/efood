@@ -1,13 +1,13 @@
 import { Injectable } from "@nestjs/common/decorators/core/injectable.decorator";
 import { PassportStrategy } from "@nestjs/passport"
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
-import { ProfessionalUser } from "../Entities/professional_user/professionaluser.entity";
-import { ProfessionalUserQueries } from "src/DbQueries/ProfessionalUserQueries";
+import { RefreshJwtPayload } from "../Entities/jwt-payload.interface";
 import { ConfigService } from '@nestjs/config/dist';
+import { ProfessionalUserQueries } from "src/DbQueries/ProfessionalUserQueries";
+import { ProfessionalUser } from "src/Entities/professional_user/professionaluser.entity";
 
 @Injectable()
-export class ProfesionalJwtStrategy extends PassportStrategy(Strategy){
+export class RefreshProfessionalJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh'){
     constructor(private readonly Queries: ProfessionalUserQueries,
                 private configService: ConfigService){
             super({
@@ -15,7 +15,7 @@ export class ProfesionalJwtStrategy extends PassportStrategy(Strategy){
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             });
         }
-    async validate(payload: ProfessionalJwtPayload):Promise<ProfessionalUser | boolean>{
+    async validate(payload: RefreshJwtPayload):Promise<boolean | ProfessionalUser>{
         const user = await this.Queries.GetUserById(payload.id);
         if(!user)
             return false;

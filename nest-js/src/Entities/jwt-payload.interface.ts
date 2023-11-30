@@ -43,3 +43,11 @@ export interface FranchiseJwtPayload{
 
     phonenumber: string;
 }
+
+export interface RefreshJwtPayload{
+    id: string;
+
+    username: string;
+    
+    email: string;
+}

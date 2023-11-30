@@ -14,7 +14,7 @@ export class OrdersController{
 
     @Post('user/create')
     @UseGuards(UserGuard)
-    async Create(@Body() body: {orderDto : OrderDto,professionalID : string,completeproducts: {ID :string,count: number,addonsID :string[]}[],addressID : string},
+    async Create(@Body() body: {orderDto : OrderDto,professionalID : string,completeproducts: {ID :string,count: number,size:string,addonsID :string[]}[],addressID : string},
                 @GetUser() user: User):Promise<void>
     {
         return this.orderService.Create(user,body.orderDto,body.professionalID,body.completeproducts,body.addressID);
@@ -38,7 +38,7 @@ export class OrdersController{
     @UseGuards(UserGuard)
     async CancelOrder(@Param('id') id: string,@GetUser() user: User):Promise<void>
     {
-        return await this.orderService.CancelOrder(id,user);
+        return this.orderService.CancelOrder(id,user);
     }
 
     @Get('professional/get/:id')
@@ -52,7 +52,7 @@ export class OrdersController{
     @UseGuards(ProfessionalGuard)
     async UpdateProfessionalOrderById(@Param('id') id: string,@GetUser() user: ProfessionalUser):Promise<void>
     {
-        return await this.orderService.UpdateProfessionalOrderById(id,user);
+        return this.orderService.UpdateProfessionalOrderById(id,user);
     }
 
     @Get('professional/get')

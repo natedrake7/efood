@@ -1,4 +1,4 @@
-import { Controller,Post,Body,Delete,Param, Get, UseGuards} from '@nestjs/common';
+import { Controller,Post,Body, Get, UseGuards} from '@nestjs/common';
 import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { User } from 'src/Entities/user/user.entity';
 import { UserDto } from 'src/Entities/user/UserDto';
@@ -7,26 +7,27 @@ import { GetUser } from 'src/get-user.decorator';
 import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserGuard } from 'src/Guards/user.guard';
 import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
+import { RefreshUserGuard } from 'src/Guards/user_refresh.guard';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
-  async Create(@Body() userDto: UserDto): Promise<string | string[]>
+  async Create(@Body() userDto: UserDto): Promise<{accesstoken: string,refreshtoken: string} | string[]>
   {
     return this.userService.Create(userDto);
   }
 
   @Get('signin')
-  async SignIn(@Body() userDto: AuthSignIn): Promise<string>
+  async SignIn(@Body() userDto: AuthSignIn): Promise<{accesstoken: string,refreshtoken: string}>
   {
     return this.userService.SignIn(userDto);
   }
 
   @Post('edit')
   @UseGuards(UserGuard)
-  async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <string>
+  async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <{accesstoken: string}>
   {
     return this.userService.Edit(user,userDto);
   }
@@ -36,5 +37,12 @@ export class UserController {
   async EditPassword(@GetUser() user: User,@Body() userDto: UserPasswordEdit): Promise <void>
   {
     return this.userService.EditPassword(user.id,userDto);
+  }
+
+  @Post('refresh')
+  @UseGuards(RefreshUserGuard)
+  async RefreshToken(@GetUser() user: User):Promise<{accesstoken: string}>
+  {
+    return this.userService.RefreshToken(user);
   }
 }

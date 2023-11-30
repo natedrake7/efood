@@ -1,21 +1,21 @@
 import { Injectable } from "@nestjs/common/decorators/core/injectable.decorator";
 import { PassportStrategy } from "@nestjs/passport"
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { ProfessionalJwtPayload } from "../Entities/jwt-payload.interface";
-import { ProfessionalUser } from "../Entities/professional_user/professionaluser.entity";
-import { ProfessionalUserQueries } from "src/DbQueries/ProfessionalUserQueries";
+import { RefreshJwtPayload } from "../Entities/jwt-payload.interface";
 import { ConfigService } from '@nestjs/config/dist';
+import { User } from "src/Entities/user/user.entity";
+import { UserQueries } from "src/DbQueries/UserQueries";
 
 @Injectable()
-export class ProfesionalJwtStrategy extends PassportStrategy(Strategy){
-    constructor(private readonly Queries: ProfessionalUserQueries,
+export class RefreshUserJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh'){
+    constructor(private readonly Queries: UserQueries,
                 private configService: ConfigService){
             super({
                 secretOrKey: configService.get('JWT_SECRET'),
                 jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
             });
         }
-    async validate(payload: ProfessionalJwtPayload):Promise<ProfessionalUser | boolean>{
+    async validate(payload: RefreshJwtPayload):Promise<boolean | User>{
         const user = await this.Queries.GetUserById(payload.id);
         if(!user)
             return false;

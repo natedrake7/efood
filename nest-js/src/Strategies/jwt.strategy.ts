@@ -16,8 +16,7 @@ export class UserJwtStrategy extends PassportStrategy(Strategy){
             });
         }
     async validate(payload: JwtPayload):Promise<User | boolean>{
-        const { id } = payload;
-        const user = await this.Queries.GetUserById(id);
+        const user = await this.Queries.GetUserById(payload.id);
         if(!user)
             return false;
         return user;

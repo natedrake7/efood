@@ -18,6 +18,8 @@ import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { diskStorage } from 'multer';
 import { ValidationPipe } from '@nestjs/common';
+import { RefreshFranchiseGuard } from 'src/Guards/franchise_refresh.guard';
+import { RefreshProfessionalGuard } from 'src/Guards/professional_refresh.guard';
 
 const storage = {
   storage: diskStorage({
@@ -39,20 +41,20 @@ export class FranchiseUserController {
     @Post('create')
     @UsePipes(new ValidationPipe())
     @UseInterceptors(FileInterceptor('image',storage))
-    async Create(@Body() userDto: FranchiseUserDto,@UploadedFile() file): Promise<string[] | string>
+    async Create(@Body() userDto: FranchiseUserDto,@UploadedFile() file): Promise<{accesstoken: string,refreshtoken: string} | string[]>
     {
       return this.userService.Create(userDto,file.path);
     }
   
     @Get('signin')
-    async SignIn(@Body() userDto: AuthSignIn): Promise<string>
+    async SignIn(@Body() userDto: AuthSignIn): Promise<{accesstoken: string,refreshtoken: string}>
     {
       return this.userService.SignIn(userDto);
     }
 
     @Post('edit')
     @UseGuards(FranchiseGuard)
-    async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<string | string[]>
+    async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<{accesstoken: string} | string[]>
     {
       return this.userService.Edit(franchiseUser.id,userDto);
     }
@@ -76,21 +78,21 @@ export class FranchiseUserController {
     @UseGuards(FranchiseGuard)
     @UsePipes(new ValidationPipe())
     @UseInterceptors(FileInterceptor('image',storage))
-    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto,@UploadedFile() file) : Promise<string | string[]>
+    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto,@UploadedFile() file) : Promise<{accesstoken: string, refreshtoken:string} | string[]>
     {
       return this.professionaluserService.FranchiseCreate(userDto,franchiseuser.id,file.path);
     }
 
     @Get('professionaluser/signin')
     @UseGuards(FranchiseGuard)
-    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() authSignIn: FranchiseProfessionalSignIn): Promise<string>
+    async SignInProfessionalUser(@GetUser() userDto: FranchiseUser,@Body() authSignIn: FranchiseProfessionalSignIn): Promise<{accesstoken: string, refreshtoken:string}>
     {
       return this.professionaluserService.FranchsiseSignIn(userDto.id,authSignIn);
     }
 
     @Post('professionaluser/edit')
     @UseGuards(ProfessionalGuard)
-    async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<string | string[]>
+    async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<{accesstoken: string} | string[]>
     {
       return this.professionaluserService.Edit(professionalUser.id,userDto);
     }
@@ -101,6 +103,20 @@ export class FranchiseUserController {
     async EditProfessionalPicture(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file): Promise<void>
     {
       return this.professionaluserService.EditImageById(professionalUser,file.path);
+    }
+
+    @Post('refresh')
+    @UseGuards(RefreshFranchiseGuard)
+    async RefreshToken(@GetUser() user: FranchiseUser):Promise<{accesstoken: string}>
+    {
+      return this.userService.RefreshToken(user);
+    }
+
+    @Post('professionaluser/refresh')
+    @UseGuards(RefreshProfessionalGuard)
+    async RefreshProfessionalToken(@GetUser() user: ProfessionalUser):Promise<{accesstoken: string}>
+    {
+      return this.professionaluserService.RefreshToken(user);
     }
 
 }

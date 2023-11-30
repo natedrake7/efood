@@ -9,8 +9,9 @@ import { FranchiseUserPasswordEdit } from 'src/Entities/franchise_user/franchise
 import { FranchiseUserQueries } from 'src/DbQueries/FranchiseUserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { FranchiseUser } from 'src/Entities/franchise_user/franchise_user.entity';
-import * as fs from 'fs';
+import { RefreshJwtPayload } from 'src/Entities/jwt-payload.interface';
 import { BadRequestException } from '@nestjs/common/exceptions';
+import * as fs from 'fs';
 
 @Injectable()
 export class FranchiseUserService {
@@ -18,7 +19,7 @@ export class FranchiseUserService {
         private jwtService: JwtService,
         private readonly Queries: FranchiseUserQueries){}
     
-    async Create(userDto: FranchiseUserDto,file: string):Promise<string | string[]>{
+    async Create(userDto: FranchiseUserDto,file: string):Promise<{accesstoken: string,refreshtoken: string} | string[]>{
       const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
       if(errors.length != 0)
@@ -42,11 +43,15 @@ export class FranchiseUserService {
 
       const {id,username,description,email,phonenumber} = user;
       const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
+      const refresh_payload: RefreshJwtPayload = {id,email,username};
 
-      return await this.jwtService.signAsync(payload);
+      const accesstoken = await this.jwtService.signAsync(payload);
+      const refreshtoken = await this.jwtService.signAsync(refresh_payload,{expiresIn: '7d'});
+    
+      return {accesstoken,refreshtoken};
     }
 
-    async SignIn(userDto: AuthSignIn):Promise<string>{
+    async SignIn(userDto: AuthSignIn):Promise<{accesstoken: string,refreshtoken: string}>{
         const user = await this.Queries.FindUserByUsername(userDto.username);
 
         if(!user)
@@ -58,12 +63,16 @@ export class FranchiseUserService {
         const {id,username,description,email,phonenumber} = user;
 
         const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
+        const refresh_payload: RefreshJwtPayload = {id,email,username};
 
-        return await this.jwtService.signAsync(payload);
+        const accesstoken = await this.jwtService.signAsync(payload);
+        const refreshtoken = await this.jwtService.signAsync(refresh_payload,{expiresIn: '7d'});
+      
+        return {accesstoken,refreshtoken};
     
     }
 
-    async Edit(id:string,userDto: FranchiseUserEdit):Promise<string | string[]>{
+    async Edit(id:string,userDto: FranchiseUserEdit):Promise<{accesstoken: string} | string[]>{
       const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
       if(errors.length != 0)
@@ -73,8 +82,9 @@ export class FranchiseUserService {
       
       const {username,description,email,phonenumber} = user;
       const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
+      const accesstoken = await this.jwtService.signAsync(payload);
 
-      return await this.jwtService.signAsync(payload);
+      return {accesstoken};
     }
 
     async EditPassword(id: string, userDto: FranchiseUserPasswordEdit):Promise<void>{
@@ -90,6 +100,14 @@ export class FranchiseUserService {
       const hashedPassword = await bcrypt.hash(userDto.new_password,salt);
       
       return await this.Queries.UpdatePasswordById(id,hashedPassword);
+    }
+
+    async RefreshToken(user : FranchiseUser):Promise<{accesstoken: string}>{
+      const {id,username,description,email,phonenumber} = user;
+      const payload: FranchiseJwtPayload = {id,username,description,email,phonenumber};
+      const accesstoken = await this.jwtService.signAsync(payload);
+
+      return {accesstoken};
     }
 
     async EditImageById(user: FranchiseUser, File: string):Promise<void>{

@@ -10,7 +10,7 @@ export class OrderQueries{
                 private OrderRepository: Repository<Order>,
                 private readonly AddressQueries: AddressQueries){}
 
-    async CreateOrder(completeproducts: {ID :string,count: number ,addonsID :string[] }[],professionalId : string,user_id: string,orderDto: OrderDto,addressId : string):Promise<void>{
+    async CreateOrder(completeproducts: {ID :string,count: number,size:string,addonsID :string[] }[],professionalId : string,user_id: string,orderDto: OrderDto,addressId : string):Promise<void>{
        
         const insertClauses: string[] = [];
         const values:any[] = [orderDto.professionalName,
@@ -22,9 +22,10 @@ export class OrderQueries{
                             ];
 
         completeproducts.forEach(product =>{
-            insertClauses.push(`((SELECT OrderId FROM UserOrder), $${values.length + 1},$${values.length + 2})`);
+            insertClauses.push(`((SELECT OrderId FROM UserOrder), $${values.length + 1},$${values.length + 2},$${values.length + 3})`);
             values.push(product.ID);
             values.push(product.count);
+            values.push(product.size);
         });
        
         const query = `WITH UserOrder AS (
@@ -39,7 +40,7 @@ export class OrderQueries{
         ),
         OrderItem AS (
             INSERT INTO "OrderItem"(
-                "orderId", "productId",number
+                "orderId", "productId",number,size
             )
             VALUES ${insertClauses.join(`,`)}
             RETURNING id  AS OrderItemId ,"productId"
@@ -97,7 +98,7 @@ export class OrderQueries{
 
         const order = (await this.OrderRepository.query(Orderquery,[id,user_id]))[0] as Order;
 
-        const ProductsQuery = `SELECT "productId" as id,name,size,price,type,description,number FROM "OrderItem" AS oa
+        const ProductsQuery = `SELECT "productId" as id, pr.name, oa.size, pr.price, pr.type, pr.description, oa.number FROM "OrderItem" AS oa
                                 INNER JOIN "Product" AS pr ON pr.id = oa."productId"
                                 WHERE oa."orderId" = $1;`;
         const AddonsQuery = `WITH ProductRLAddon AS (

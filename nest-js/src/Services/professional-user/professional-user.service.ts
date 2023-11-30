@@ -10,6 +10,7 @@ import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/
 import { ProfessionalUserQueries } from 'src/DbQueries/ProfessionalUserQueries';
 import { isEmail, isPhoneNumber } from 'class-validator';
 import { BadRequestException } from '@nestjs/common/exceptions';
+import { RefreshJwtPayload } from 'src/Entities/jwt-payload.interface';
 import * as fs from 'fs';
 
 @Injectable()
@@ -18,7 +19,7 @@ export class ProfessionalUserService {
         private jwtService: JwtService,
         private readonly Queries: ProfessionalUserQueries){}
     
-    async Create(userDto: ProfessionalUserDto,file: string):Promise<string | string[]>{
+    async Create(userDto: ProfessionalUserDto,file: string):Promise<{accesstoken: string, refreshtoken:string} | string[]>{
 
         const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
@@ -43,10 +44,15 @@ export class ProfessionalUserService {
         const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
         const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
 
-        return await this.jwtService.signAsync(payload);
+        const refresh_payload: RefreshJwtPayload = {id,email,username};
+
+        const accesstoken = await this.jwtService.signAsync(payload);
+        const refreshtoken = await this.jwtService.signAsync(refresh_payload);
+    
+        return {accesstoken,refreshtoken};
     }
 
-    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuserId: string,file: string):Promise<string | string[]>{
+    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuserId: string,file: string):Promise<{accesstoken: string, refreshtoken:string} | string[]>{
 
       const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
@@ -70,11 +76,15 @@ export class ProfessionalUserService {
 
       const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
       const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+      const refresh_payload: RefreshJwtPayload = {id,email,username};
 
-      return await this.jwtService.signAsync(payload);
+      const accesstoken = await this.jwtService.signAsync(payload);
+      const refreshtoken = await this.jwtService.signAsync(refresh_payload);
+  
+      return {accesstoken,refreshtoken};
   }
 
-    async SignIn(userDto: AuthSignIn):Promise<string>{
+    async SignIn(userDto: AuthSignIn):Promise<{accesstoken: string, refreshtoken:string}>{
         const {username,password} = userDto;
     
         const user = await this.Queries.GetUserByUsername(username);
@@ -87,11 +97,15 @@ export class ProfessionalUserService {
     
         const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
         const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+        const refresh_payload: RefreshJwtPayload = {id,email,username};
 
-        return await this.jwtService.signAsync(payload);
+        const accesstoken = await this.jwtService.signAsync(payload);
+        const refreshtoken = await this.jwtService.signAsync(refresh_payload,{expiresIn: '7d'});
+    
+        return {accesstoken,refreshtoken};
     }
 
-    async FranchsiseSignIn(franchiseuser_id: string,authSignIn: FranchiseProfessionalSignIn):Promise<string>{
+    async FranchsiseSignIn(franchiseuser_id: string,authSignIn: FranchiseProfessionalSignIn):Promise<{accesstoken: string, refreshtoken:string}>{
 
       const user = await this.Queries.FranchiseGetUserByUsername(authSignIn.username,franchiseuser_id);
       if(!user)
@@ -99,11 +113,15 @@ export class ProfessionalUserService {
 
       const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
       const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+      const refresh_payload: RefreshJwtPayload = {id,email,username};
 
-      return await this.jwtService.signAsync(payload);
+      const accesstoken = await this.jwtService.signAsync(payload);
+      const refreshtoken = await this.jwtService.signAsync(refresh_payload,{expiresIn: '7d'});
+    
+      return {accesstoken,refreshtoken};
     }
 
-    async Edit(id: string,userDto: ProfessionalUserEdit):Promise<string | string[]>{
+    async Edit(id: string,userDto: ProfessionalUserEdit):Promise<{accesstoken: string} | string[]>{
       const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
       if(errors.length != 0)
@@ -114,7 +132,9 @@ export class ProfessionalUserService {
       const {username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
       const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
       
-      return await this.jwtService.signAsync(payload);
+      const accesstoken = await this.jwtService.signAsync(payload);
+
+      return {accesstoken};
     }
 
     async EditPassword(id: string,userDto: ProfessionalUserPasswordEditDto):Promise<void>{
@@ -148,6 +168,15 @@ export class ProfessionalUserService {
       catch(error){
         throw new Error(error);
       }
+    }
+
+    async RefreshToken(user: ProfessionalUser):Promise<{accesstoken: string}>{
+      const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
+      const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+      
+      const accesstoken = await this.jwtService.signAsync(payload);
+
+      return {accesstoken};
     }
 
     async GetAll():Promise<ProfessionalUser[]>{

@@ -13,6 +13,8 @@ import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { ValidationPipe } from '@nestjs/common/pipes';
+import { UserGuard } from 'src/Guards/user.guard';
+import { RefreshProfessionalGuard } from 'src/Guards/professional_refresh.guard';
 
 
 const storage = {
@@ -34,20 +36,20 @@ export class ProfessionalUserController {
    @Post('register')
    @UsePipes(new ValidationPipe())
    @UseInterceptors(FileInterceptor('image',storage))
-   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile() file):Promise<string[] | string>
+   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile() file):Promise<{accesstoken: string, refreshtoken:string} | string[]>
    {
         return this.userService.Create(userDto,file.path);
    }
 
    @Get('signin')
-   async SignIn(@Body() userDto: AuthSignIn):Promise<string>
+   async SignIn(@Body() userDto: AuthSignIn):Promise<{accesstoken: string , refreshtoken: string}>
    {
         return this.userService.SignIn(userDto);
    }
 
    @Post('edit')
    @UseGuards(ProfessionalGuard)
-   async Edit(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise <string | string[]>
+   async Edit(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise <{accesstoken: string} | string[]>
    {
      return this.userService.Edit(professionalUser.id,userDto);
    }
@@ -68,15 +70,24 @@ export class ProfessionalUserController {
    }
 
    @Get('get/:id')
+   @UseGuards(UserGuard)
    async Get(@Param('id') id: string):Promise<ProfessionalUser>
    {
      return this.userService.GetById(id);
    }
 
    @Get('get')
+   @UseGuards(UserGuard)
    async GetAll():Promise<void | ProfessionalUser[]>
    {
      return this.userService.GetAll();
+   }
+
+   @Post('refresh')
+   @UseGuards(RefreshProfessionalGuard)
+   async RefreshToken(@GetUser() user: ProfessionalUser):Promise<{accesstoken: string}>
+   {
+      return this.userService.RefreshToken(user);
    }
 
 }

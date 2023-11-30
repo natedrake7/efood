@@ -14,7 +14,7 @@ export class OrderService{
                 private ProfessionalUserQueries: ProfessionalUserQueries,
                 private AddressQueries: AddressQueries){}
     
-    async Create(user: User,orderDto: OrderDto,professionalID: string,completeproducts: {ID :string,count: number,addonsID :string[]}[],addressID: string):Promise<void>{
+    async Create(user: User,orderDto: OrderDto,professionalID: string,completeproducts: {ID :string,count: number,size:string,addonsID :string[]}[],addressID: string):Promise<void>{
         const professionalUser = await this.ProfessionalUserQueries.GetUserById(professionalID);
         
         if(!professionalUser)
