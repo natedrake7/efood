@@ -19,7 +19,7 @@ export class UserController {
     return this.userService.Create(userDto);
   }
 
-  @Get('signin')
+  @Post('signin')
   async SignIn(@Body() userDto: AuthSignIn): Promise<{accesstoken: string,refreshtoken: string}>
   {
     return this.userService.SignIn(userDto);

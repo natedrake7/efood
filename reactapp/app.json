@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "UdemyApp",
-    "slug": "UdemyApp",
+    "name": "reactapp",
+    "slug": "reactapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

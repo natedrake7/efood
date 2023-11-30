@@ -1,13 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as fs from 'fs';
+import helmet from 'helmet';
 
-console.log(process.env.STAGE)
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  app.enableCors();
-  app.useGlobalPipes(new ValidationPipe());
+  const app = await NestFactory.create(AppModule,
+    );
+  app.enableCors({
+    origin: '*',
+  });
+  app.useGlobalPipes(new ValidationPipe());  
+  
   await app.listen(3000);
 }
 bootstrap();
