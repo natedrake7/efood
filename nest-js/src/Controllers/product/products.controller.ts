@@ -14,22 +14,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
 import { UsePipes } from "@nestjs/common/decorators";
 import { ValidationPipe } from "@nestjs/common/pipes";
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import { diskStorage } from 'multer';
 import { UseInterceptors } from "@nestjs/common/decorators";
-
-const storage = {
-  storage: diskStorage({
-    destination: './uploads/productimages',
-    filename: (req,file,cb) => {
-      const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
-      const extension: string = path.parse(file.originalname).ext;
-
-      cb(null,`${filename}${extension}`)
-    }
-  })
-}
 
 @Controller('products')
 export class ProductsController {
@@ -38,7 +23,7 @@ export class ProductsController {
    @Post('professional/create')
    @UseGuards(ProfessionalGuard)
    @UsePipes(new ValidationPipe())
-   @UseInterceptors(FileInterceptor('image',storage))
+   @UseInterceptors(FileInterceptor('image'))
    async ProfessionalCreate(@Body() body: {productDto : string, addonsDto: string},@GetUser() user : ProfessionalUser,@UploadedFile() file):Promise<void>
    {
         const { productDto, addonsDto } = body;
@@ -71,7 +56,7 @@ export class ProductsController {
    @Post('professional/edit/image/:id')
    @UseGuards(ProfessionalGuard)
    @UsePipes(new ValidationPipe())
-   @UseInterceptors(FileInterceptor('image',storage))
+   @UseInterceptors(FileInterceptor('image'))
    async ProfessionalEditProductImageById(@Param('id') id: string,@GetUser() user: ProfessionalUser,@UploadedFile() file):Promise<void>
    {
      return await this.productService.EditProductImageById(id,user.id,file.path);
@@ -109,7 +94,7 @@ export class ProductsController {
    @Post('franchise/create')
    @UseGuards(FranchiseGuard)
    @UsePipes(new ValidationPipe())
-   @UseInterceptors(FileInterceptor('image',storage))
+   @UseInterceptors(FileInterceptor('image'))
    async FranchiseCreate(@Body() body: {productDto : ProductDto, addonsDto: ProductAddonDto[]},@GetUser() user : FranchiseUser,@UploadedFile() file):Promise<void>
    {
         const { productDto, addonsDto } = body;
@@ -140,7 +125,7 @@ export class ProductsController {
    @Post('franchise/edit/image/:id')
    @UseGuards(FranchiseGuard)
    @UsePipes(new ValidationPipe())
-   @UseInterceptors(FileInterceptor('image',storage))
+   @UseInterceptors(FileInterceptor('image'))
    async FranchiseEditProductImageById(@Param('id') id: string,@GetUser() user: FranchiseUser,@UploadedFile() file):Promise<void>
    {
      return this.productService.EditProductImageById(id,user.id,file.path,false);

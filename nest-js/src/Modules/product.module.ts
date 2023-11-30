@@ -12,9 +12,29 @@ import { UserQueries } from 'src/DbQueries/UserQueries';
 import { ValidationExceptionFilter } from 'src/Services/validation/validation_filter';
 import { APP_FILTER } from '@nestjs/core';
 import { SharedModule } from './shared.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { ConfigModule,ConfigService } from '@nestjs/config';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
 
 @Module({
-  imports: [SharedModule],
+  imports: [SharedModule,
+            MulterModule.registerAsync({
+            imports: [ConfigModule],
+            useFactory: async (configService: ConfigService) => ({
+              storage: diskStorage({
+                  destination: configService.get('PRODUCT_IMAGES_PATH'),
+                  filename: (req,file,cb) => {
+                    const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
+                    const extension: string = path.parse(file.originalname).ext;
+              
+                    return cb(null,`${filename}${extension}`)
+                  }
+                })
+              }),
+              inject: [ConfigService]
+            })],
   providers: [ProductService,ProfesionalJwtStrategy,
               FranchiseJwtStrategy,UserJwtStrategy,
               ProductQueries,ProfessionalUserQueries,

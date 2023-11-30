@@ -8,26 +8,11 @@ import { ProfessionalUserEdit } from 'src/Entities/professional_user/professiona
 import { ProfessionalGuard } from 'src/Guards/professional.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
-import { diskStorage } from 'multer';
 import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/professional_user_password_edit.entity';
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
 import { ValidationPipe } from '@nestjs/common/pipes';
 import { UserGuard } from 'src/Guards/user.guard';
 import { RefreshProfessionalGuard } from 'src/Guards/professional_refresh.guard';
 
-
-const storage = {
-  storage: diskStorage({
-    destination: './uploads/profileimages',
-    filename: (req,file,cb) => {
-      const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
-      const extension: string = path.parse(file.originalname).ext;
-
-      cb(null,`${filename}${extension}`)
-    }
-  })
-}
 
 @Controller('professionaluser')
 export class ProfessionalUserController {
@@ -35,7 +20,7 @@ export class ProfessionalUserController {
 
    @Post('register')
    @UsePipes(new ValidationPipe())
-   @UseInterceptors(FileInterceptor('image',storage))
+   @UseInterceptors(FileInterceptor('image'))
    async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile() file):Promise<{accesstoken: string, refreshtoken:string} | string[]>
    {
         return this.userService.Create(userDto,file.path);
@@ -56,7 +41,7 @@ export class ProfessionalUserController {
 
    @Post('edit/image')
    @UseGuards(ProfessionalGuard)
-   @UseInterceptors(FileInterceptor('image',storage))
+   @UseInterceptors(FileInterceptor('image'))
    async EditImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file):Promise<void>
    {
     return this.userService.EditImageById(professionalUser,file.path);

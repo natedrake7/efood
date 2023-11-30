@@ -82,7 +82,7 @@ export class OrderQueries{
     async GetAllOrdersByUserId(user_id: string,IsUserProfessional: boolean):Promise<Order[]>
     {
         const userClause = this.UserClause(IsUserProfessional);
-        const query = `SELECT id,"professionalName",price,payment_method,"insertedDate","completedDate",completed_status 
+        const query = `SELECT id,"professionalName",image,price,payment_method,"insertedDate","completedDate",completed_status 
                        FROM "Order" 
                        WHERE ${userClause} = $1;`;
         return await this.OrderRepository.query(query,[user_id]);
@@ -98,7 +98,7 @@ export class OrderQueries{
 
         const order = (await this.OrderRepository.query(Orderquery,[id,user_id]))[0] as Order;
 
-        const ProductsQuery = `SELECT "productId" as id, pr.name, oa.size, pr.price, pr.type, pr.description, oa.number FROM "OrderItem" AS oa
+        const ProductsQuery = `SELECT "productId" as id, pr.name,pr.image, oa.size, pr.price, pr.type, pr.description, oa.number FROM "OrderItem" AS oa
                                 INNER JOIN "Product" AS pr ON pr.id = oa."productId"
                                 WHERE oa."orderId" = $1;`;
         const AddonsQuery = `WITH ProductRLAddon AS (
