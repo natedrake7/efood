@@ -1,14 +1,20 @@
-import {IsString} from "class-validator";
+import {IsString, MaxLength, MinLength} from "class-validator";
 
 export class AuthSignIn{
-    @IsString()
+    @IsString({message: 'Invalid username!'})
+    @MinLength(4,{message: 'Invalid username!'})
+    @MaxLength(20,{message: 'Invalid username!'})
     username: string;
     
-    @IsString()
+    @IsString({message: 'Invalid password!'})
+    @MinLength(8,{message: 'Invalid password!'})
+    @MaxLength(20,{message: 'Invalid password!'})
     password:string;
 }
 
 export class FranchiseProfessionalSignIn{
-    @IsString()
+    @IsString({message: 'Invalid username!'})
+    @MinLength(4,{message: 'Invalid username!'})
+    @MaxLength(20,{message: 'Invalid username!'})
     username: string;
 }

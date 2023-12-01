@@ -1,29 +1,48 @@
-// App.js
-import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
-import { StyleSheet } from 'react-native';
+import HomeScreen from './HomeScreen';
+import AuthContextProvider, { AuthContext } from './store/auth-context';
+import { useContext } from 'react';
 
-const AppNavigator = createStackNavigator(
-  {
-    Login: LoginScreen,
-    Register: RegisterScreen,
-    // Add more screens if needed (e.g., Home, Dashboard)
-  },
-  {
-    initialRouteName: 'Login', // Set the initial screen (can be 'Register' if needed)
-  }
-);
+const Stack = createNativeStackNavigator();
 
-export default createAppContainer(AppNavigator);
+export default function App(){
+  return(
+      <>
+        <StatusBar style='dark'/>
+        <AuthContextProvider>
+          <Navigation/>
+        </AuthContextProvider>
+      </>
+  );
+}
 
+function Navigation(){
+  const authCtx = useContext(AuthContext);
+  return(
+    <NavigationContainer>
+     {!authCtx.isAuthenticated && <AuthStack/>}
+     {authCtx.isAuthenticated && <AuthenticatedStack/>}
+  </NavigationContainer>
+  );
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function AuthStack(){
+  return(
+      <Stack.Navigator>
+        <Stack.Screen name="Login" component={LoginScreen}/>
+        <Stack.Screen name="Register" component={RegisterScreen}/>
+      </Stack.Navigator>
+  );
+}
+
+function AuthenticatedStack(){
+  return (
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen}/>
+      </Stack.Navigator>
+  )
+}

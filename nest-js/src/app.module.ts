@@ -11,6 +11,7 @@ import { OrderModule } from './Modules/order.module';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config/dist';
 import { configValidationSchema } from './config.schema';
+import { NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -35,6 +36,7 @@ import { configValidationSchema } from './config.schema';
           database: configService.get('DB_DATABASE'),
       }),
   }),
+  NestjsFormDataModule,
   UsersModule,
   ProfessionalUsersModule,
   FranchiselUsersModule,

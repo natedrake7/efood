@@ -8,24 +8,28 @@ import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserGuard } from 'src/Guards/user.guard';
 import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
 import { RefreshUserGuard } from 'src/Guards/user_refresh.guard';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('create')
+  @FormDataRequest()
   async Create(@Body() userDto: UserDto): Promise<{accesstoken: string,refreshtoken: string} | string[]>
   {
     return this.userService.Create(userDto);
   }
 
   @Post('signin')
+  @FormDataRequest()
   async SignIn(@Body() userDto: AuthSignIn): Promise<{accesstoken: string,refreshtoken: string}>
   {
     return this.userService.SignIn(userDto);
   }
 
   @Post('edit')
+  @FormDataRequest()
   @UseGuards(UserGuard)
   async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <{accesstoken: string}>
   {
@@ -33,6 +37,7 @@ export class UserController {
   }
 
   @Post('edit/password')
+  @FormDataRequest()
   @UseGuards(UserGuard)
   async EditPassword(@GetUser() user: User,@Body() userDto: UserPasswordEdit): Promise <void>
   {

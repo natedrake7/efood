@@ -1,10 +1,11 @@
-import { IsString,MinLength,MaxLength,IsStrongPassword,IsEmail,IsPhoneNumber} from "class-validator";
+import { IsString,MinLength,MaxLength,IsStrongPassword,IsEmail,IsPhoneNumber, IsAlpha} from "class-validator";
 
 
 export class UserDto{
-    @IsString()
+
     @MinLength(4)
     @MaxLength(20)
+    @IsString()
     username: string;
 
     @IsString()

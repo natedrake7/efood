@@ -1,10 +1,9 @@
-// RegisterScreen.js
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 
 const RegisterScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(null);
+  const [password, setPassword] = useState(null);
 
   const handleRegister = () => {
     // Add registration logic here (e.g., API call)

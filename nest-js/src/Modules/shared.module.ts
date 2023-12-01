@@ -13,9 +13,11 @@ import { Address } from "src/Entities/addresses/address.entity";
 import { OrderItem } from "src/Entities/order/order_item.entity";
 import { OrderItemRLProductAddon } from "src/Entities/order/order_item_rl_product_addon";
 import { ProductRLAddon } from "src/Entities/products/product_rl_addon";
+import { NestjsFormDataModule } from "nestjs-form-data/dist/nestjs-form-data.module";
 
 @Module({
 imports:[
+    NestjsFormDataModule,
     PassportModule.register({defaultStrategy: 'jwt'}),
     JwtModule.registerAsync({
         imports:[ConfigModule],
@@ -33,5 +35,5 @@ imports:[
                               OrderItem,Product,
                               OrderItemRLProductAddon,
                               ProductRLAddon])],
-    exports:[TypeOrmModule,PassportModule,JwtModule],
+    exports:[TypeOrmModule,PassportModule,JwtModule,NestjsFormDataModule],
 })export class SharedModule{}
