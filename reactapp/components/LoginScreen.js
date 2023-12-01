@@ -1,8 +1,8 @@
 import React, { useState,useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet,Image,Dimensions,KeyboardAvoidingView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { LogIn } from './store/auth';
-import { AuthContext } from './store/auth-context';
+import { LogIn } from '../store/auth';
+import { AuthContext } from '../store/auth-context';
 
 function LoginScreen(){
   const navigation = useNavigation();
@@ -24,6 +24,7 @@ function LoginScreen(){
     {
       authCtx.postAccessToken(response.accesstoken);
       authCtx.postRefreshToken(response.refreshtoken);
+      await authCtx.storeRefreshToken(response.refreshtoken);
     }
     else
     {
@@ -50,7 +51,7 @@ function LoginScreen(){
   }, []);
   return (
     <KeyboardAvoidingView style={styles.container} behavior='padding'>
-      <Image style={styles.imageContainer} source={require('./images/login-image.png')}/>
+      <Image style={styles.imageContainer} source={require('../images/login-image.png')}/>
       <View style={styles.credentialsContainer}>
         <Text style={styles.header}>Login</Text>
         <Text style={styles.inputHeaders}>Username:</Text>

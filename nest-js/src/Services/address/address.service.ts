@@ -10,7 +10,7 @@ import { BadRequestException } from '@nestjs/common/exceptions';
 @Injectable()
 export class AddressService{
     constructor(private Queries:  AddressQueries){}
-
+    
     async AddAddress(user : User,addressDto : AddressDto):Promise<void>{
         if(!user)
             throw new UnauthorizedException("User is not registered!");

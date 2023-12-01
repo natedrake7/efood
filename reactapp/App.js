@@ -1,20 +1,51 @@
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from './LoginScreen';
-import RegisterScreen from './RegisterScreen';
-import HomeScreen from './HomeScreen';
+import LoginScreen from './components/LoginScreen';
+import RegisterScreen from './components/RegisterScreen';
+import HomeScreen from './components/HomeScreen';
+import RememberMeScreen from './components/RememberMeScreen';
 import AuthContextProvider, { AuthContext } from './store/auth-context';
-import { useContext } from 'react';
+import { useContext,useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SplashScreen from 'expo-splash-screen';
 
 const Stack = createNativeStackNavigator();
+SplashScreen.preventAutoHideAsync();
+
+function Root(){
+  const [isTryingLogin,setIsTryingLogin] = useState(true);
+  const authCtx = useContext(AuthContext);
+
+  useEffect(() => {
+    async function GetRefreshTokenFromStorage(){
+      try {
+        const refreshTokenStorage = await AsyncStorage.getItem('refreshToken');
+        refreshTokenStorage ? authCtx.postRefreshToken(refreshTokenStorage) : authCtx.postRefreshToken(''); 
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+      setIsTryingLogin(false);
+    };
+
+    GetRefreshTokenFromStorage();
+  }, []);
+
+  if(!isTryingLogin)
+  {
+    SplashScreen.hideAsync();
+    return <Navigation/>
+  }
+
+}
 
 export default function App(){
+
   return(
       <>
         <StatusBar style='dark'/>
         <AuthContextProvider>
-          <Navigation/>
+          <Root/>
         </AuthContextProvider>
       </>
   );
@@ -22,10 +53,13 @@ export default function App(){
 
 function Navigation(){
   const authCtx = useContext(AuthContext);
+
   return(
     <NavigationContainer>
-     {!authCtx.isAuthenticated && <AuthStack/>}
-     {authCtx.isAuthenticated && <AuthenticatedStack/>}
+      {authCtx.rememberMe && !authCtx.isAuthenticated  ? (<RememberMeStack />) : 
+        !authCtx.isAuthenticated ? 
+        (<AuthStack />) : 
+        (<AuthenticatedStack />)}
   </NavigationContainer>
   );
 }
@@ -38,6 +72,15 @@ function AuthStack(){
       </Stack.Navigator>
   );
 }
+
+function RememberMeStack(){
+  return(
+    <Stack.Navigator>
+      <Stack.Screen name="RememberMe" component={RememberMeScreen}/>
+    </Stack.Navigator>
+);
+}
+
 
 function AuthenticatedStack(){
   return (
