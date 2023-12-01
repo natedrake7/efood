@@ -15,7 +15,6 @@ const RememberMeScreen = ()  =>{
         try {
           const token = await GetToken(authCtx.refreshToken);
           token ? authCtx.postAccessToken(token) : authCtx.postAccessToken('');
-        console.log(authCtx.isAuthenticated);
         } 
         catch (error) {
           console.error('Error fetching data:', error);
@@ -25,8 +24,5 @@ const RememberMeScreen = ()  =>{
   
       GetAccessToken();
     }, []);
-  
-    if(!isFetchingToken)
-      SplashScreen.hideAsync();
 }
 export default RememberMeScreen;

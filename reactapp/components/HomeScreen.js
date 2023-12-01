@@ -5,7 +5,7 @@ import { GetProfessionalUsers } from '../store/professional';
 import { AuthContext } from '../store/auth-context';
 import * as SplashScreen from 'expo-splash-screen';
 
-SplashScreen.hideAsync();
+SplashScreen.preventAutoHideAsync();
 
 function HomeScreen() {
   [isPageReady,setIsPageReady] = useState(false);
@@ -30,7 +30,7 @@ function HomeScreen() {
 
   if(isPageReady)
   {
-    SplashScreen.preventAutoHideAsync();
+    SplashScreen.hideAsync();
     return (
       <FlatList
         data={professionalUsers}
