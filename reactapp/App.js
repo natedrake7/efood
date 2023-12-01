@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/RegisterScreen';
 import HomeScreen from './components/HomeScreen';
-import RememberMeScreen from './components/RememberMeScreen';
 import AuthContextProvider, { AuthContext } from './store/auth-context';
 import { useContext,useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -56,10 +55,7 @@ function Navigation(){
 
   return(
     <NavigationContainer>
-      {authCtx.rememberMe && !authCtx.isAuthenticated  ? (<RememberMeStack />) : 
-        !authCtx.isAuthenticated ? 
-        (<AuthStack />) : 
-        (<AuthenticatedStack />)}
+      {authCtx.isAuthenticated ? <AuthenticatedStack /> : <AuthStack />}
   </NavigationContainer>
   );
 }
@@ -71,14 +67,6 @@ function AuthStack(){
         <Stack.Screen name="Register" component={RegisterScreen}/>
       </Stack.Navigator>
   );
-}
-
-function RememberMeStack(){
-  return(
-    <Stack.Navigator>
-      <Stack.Screen name="RememberMe" component={RememberMeScreen}/>
-    </Stack.Navigator>
-);
 }
 
 

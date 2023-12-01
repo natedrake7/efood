@@ -3,6 +3,11 @@ import { View, Text, TextInput, Button, StyleSheet,Image,Dimensions,KeyboardAvoi
 import { useNavigation } from '@react-navigation/native';
 import { LogIn } from '../store/auth';
 import { AuthContext } from '../store/auth-context';
+import { GetToken } from "../store/auth";
+import * as SplashScreen from 'expo-splash-screen';
+
+
+SplashScreen.preventAutoHideAsync();
 
 function LoginScreen(){
   const navigation = useNavigation();
@@ -11,8 +16,11 @@ function LoginScreen(){
   const [password, setPassword] = useState('');
   const [usernameError, setUsernameError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
+  const [isFetchingToken,setIsFetchingToken] = useState(true);
 
+  
   const handleLogin = async() => {
+
     const data = new FormData();
     data.append('username', username);
     data.append('password', password);
@@ -38,60 +46,81 @@ function LoginScreen(){
     navigation.navigate('Register');
   };
 
+
   useEffect(() => {
 
-    // After 3000 milliseconds (3 seconds), reset the value to null
+    async function GetAccessToken(){
+      try {
+          if(authCtx.refreshToken)
+          {
+            const token = await GetToken(authCtx.refreshToken);
+            token ? authCtx.postAccessToken(token) : authCtx.postAccessToken('');
+          }   
+      } 
+      catch (error) {
+        console.error('Error fetching data:', error);
+      }
+      setIsFetchingToken(false);
+    };
+
+    GetAccessToken();
+
     const timeoutId = setTimeout(() => {
       setPasswordError(null);
       setUsernameError(null);
     }, 10000);
 
-    // Cleanup the timeout to avoid memory leaks
     return () => clearTimeout(timeoutId);
   }, []);
-  return (
-    <KeyboardAvoidingView style={styles.container} behavior='padding'>
-      <Image style={styles.imageContainer} source={require('../images/login-image.png')}/>
-      <View style={styles.credentialsContainer}>
-        <Text style={styles.header}>Login</Text>
-        <Text style={styles.inputHeaders}>Username:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your username..."
-          value={username}
-          onChangeText={(text) => setUsername(text)}
-        />
-        {usernameError &&
-          <Text style={styles.error}>{usernameError.message}</Text>
-        }
-        <Text style={styles.inputHeaders}>Password:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your password..."
-          secureTextEntry
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
-        {passwordError &&
-          <Text style={styles.error}>{passwordError.message}</Text>
-        }
-          <View style={styles.buttonsContainer}>
-              <View style = {styles.buttons}>
-                  <Button title="Login" onPress={handleLogin} />
-              </View>
-              <View style = {styles.buttons}>
-                  <Button title="Register" onPress={handleNavigateToRegister} />
-              </View>
+
+  if(!isFetchingToken)
+  {
+    SplashScreen.hideAsync();
+
+    return (
+      <KeyboardAvoidingView style={styles.container} behavior='padding'>
+        <Image style={styles.imageContainer} source={require('../images/login-image.png')}/>
+        <View style={styles.credentialsContainer}>
+          <Text style={styles.header}>Login</Text>
+          <Text style={styles.inputHeaders}>Username:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your username..."
+            value={username}
+            onChangeText={(text) => setUsername(text)}
+          />
+          {usernameError &&
+            <Text style={styles.error}>{usernameError.message}</Text>
+          }
+          <Text style={styles.inputHeaders}>Password:</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password..."
+            secureTextEntry
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+          />
+          {passwordError &&
+            <Text style={styles.error}>{passwordError.message}</Text>
+          }
+            <View style={styles.buttonsContainer}>
+                <View style = {styles.buttons}>
+                    <Button title="Login" onPress={handleLogin} />
+                </View>
+                <View style = {styles.buttons}>
+                    <Button title="Register" onPress={handleNavigateToRegister} />
+                </View>
+            </View>
+            <View style={styles.buttons}>
+                <View style = {styles.buttons}>
+                    <Button title="Want to be a professional?
+                                    Register Now" onPress={handleNavigateToRegister} />
+                </View>
+            </View>
           </View>
-          <View style={styles.buttons}>
-              <View style = {styles.buttons}>
-                  <Button title="Want to be a professional?
-                                  Register Now" onPress={handleNavigateToRegister} />
-              </View>
-          </View>
-        </View>
-    </KeyboardAvoidingView>
-  );
+      </KeyboardAvoidingView>
+    );
+  }
 };
 export default LoginScreen;
 
