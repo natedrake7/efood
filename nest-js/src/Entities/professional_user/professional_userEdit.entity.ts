@@ -1,6 +1,8 @@
 export class ProfessionalUserEdit{
     username: string;
 
+    name: string;
+    
     address: string;
 
     delivery_time: number;
@@ -9,6 +11,8 @@ export class ProfessionalUserEdit{
 
     email: string;
     
+    type: string;
+
     phonenumber: string;
 
     city: string;

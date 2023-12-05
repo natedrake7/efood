@@ -132,7 +132,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#fff',
   },
   imageContainer:{
     flex: 2,
@@ -162,7 +161,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingHorizontal: 10,
     borderRadius: 10,
-    backgroundColor:'white'
   },  
   buttonsContainer: {
     flexDirection: 'row',

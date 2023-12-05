@@ -36,13 +36,14 @@ export class ProfessionalUserService {
           }
           return errors
         }
+        const editedFile = file.replace(/\\/g, '/');
 
         const salt = await bcrypt.genSalt();
         userDto.password = await bcrypt.hash(userDto.password,salt);
-        const user = await this.Queries.CreateUser(userDto,file,null);
+        const user = await this.Queries.CreateUser(userDto,editedFile,null);
 
-        const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-        const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+        const {id,name,type,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
+        const payload: ProfessionalJwtPayload = {id,name,type,username,address,delivery_time,city,zipcode,description,email,phonenumber};
 
         const refresh_payload: RefreshJwtPayload = {id,email,username};
 
@@ -69,13 +70,14 @@ export class ProfessionalUserService {
         }
         return errors
       }
+      const editedFile = file.replace(/\\/g, '/');
 
       const salt = await bcrypt.genSalt();
       userDto.password = await bcrypt.hash(userDto.password,salt);
-      const user = await this.Queries.CreateUser(userDto,file,franchiseuserId);
+      const user = await this.Queries.CreateUser(userDto,editedFile,franchiseuserId);
 
-      const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-      const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+      const {id,name,username,type,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
+      const payload: ProfessionalJwtPayload = {id,name,type,username,address,delivery_time,city,zipcode,description,email,phonenumber};
       const refresh_payload: RefreshJwtPayload = {id,email,username};
 
       const accesstoken = await this.jwtService.signAsync(payload);
@@ -95,8 +97,8 @@ export class ProfessionalUserService {
         if(!await bcrypt.compare(password,user.password))
           throw new UnauthorizedException("Incorrect Password!");
     
-        const {id,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-        const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+        const {id,address,type,name,delivery_time,description,email,phonenumber,city,zipcode} = user;
+        const payload: ProfessionalJwtPayload = {id,username,type,name,address,delivery_time,city,zipcode,description,email,phonenumber};
         const refresh_payload: RefreshJwtPayload = {id,email,username};
 
         const accesstoken = await this.jwtService.signAsync(payload);
@@ -111,8 +113,8 @@ export class ProfessionalUserService {
       if(!user)
         throw new UnauthorizedException("User is not registerd!");
 
-      const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-      const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+      const {id,type,username,name,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
+      const payload: ProfessionalJwtPayload = {id,username,type,name,address,delivery_time,city,zipcode,description,email,phonenumber};
       const refresh_payload: RefreshJwtPayload = {id,email,username};
 
       const accesstoken = await this.jwtService.signAsync(payload);
@@ -129,8 +131,8 @@ export class ProfessionalUserService {
 
       const user = await this.Queries.UpdateUserById(id,userDto);
 
-      const {username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-      const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+      const {username,type,name,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
+      const payload: ProfessionalJwtPayload = {id,name,type,username,address,delivery_time,city,zipcode,description,email,phonenumber};
       
       const accesstoken = await this.jwtService.signAsync(payload);
 
@@ -152,13 +154,14 @@ export class ProfessionalUserService {
     }
 
     async EditImageById(user: ProfessionalUser,File : string):Promise<void>{
+      const editedFile = File.replace(/\\/g, '/');
       if(!File)
         throw new BadRequestException("No file was imported!");
 
       if(!user)
         throw new UnauthorizedException("User doesn't exist!");
 
-      const {previous_image} = await this.Queries.EditImageById(user.id,File);
+      const {previous_image} = await this.Queries.EditImageById(user.id,editedFile);
 
       if(!fs.existsSync(previous_image))
         return;
@@ -171,8 +174,8 @@ export class ProfessionalUserService {
     }
 
     async RefreshToken(user: ProfessionalUser):Promise<{accesstoken: string}>{
-      const {id,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
-      const payload: ProfessionalJwtPayload = {id,username,address,delivery_time,city,zipcode,description,email,phonenumber};
+      const {id,type,name,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
+      const payload: ProfessionalJwtPayload = {id,name,type,username,address,delivery_time,city,zipcode,description,email,phonenumber};
       
       const accesstoken = await this.jwtService.signAsync(payload);
 

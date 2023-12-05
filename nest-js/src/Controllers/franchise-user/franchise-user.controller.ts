@@ -20,6 +20,7 @@ import { diskStorage } from 'multer';
 import { ValidationPipe } from '@nestjs/common';
 import { RefreshFranchiseGuard } from 'src/Guards/franchise_refresh.guard';
 import { RefreshProfessionalGuard } from 'src/Guards/professional_refresh.guard';
+import { FormDataRequest } from 'nestjs-form-data';
 
 const storage = {
   storage: diskStorage({
@@ -39,6 +40,7 @@ export class FranchiseUserController {
                 private readonly professionaluserService: ProfessionalUserService) {}
 
     @Post('create')
+    @FormDataRequest()
     @UsePipes(new ValidationPipe())
     @UseInterceptors(FileInterceptor('image',storage))
     async Create(@Body() userDto: FranchiseUserDto,@UploadedFile() file): Promise<{accesstoken: string,refreshtoken: string} | string[]>
@@ -46,13 +48,14 @@ export class FranchiseUserController {
       return this.userService.Create(userDto,file.path);
     }
   
-    @Get('signin')
+    @Post('signin')
     async SignIn(@Body() userDto: AuthSignIn): Promise<{accesstoken: string,refreshtoken: string}>
     {
       return this.userService.SignIn(userDto);
     }
 
     @Post('edit')
+    @FormDataRequest()
     @UseGuards(FranchiseGuard)
     async Edit(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserEdit): Promise<{accesstoken: string} | string[]>
     {
@@ -60,6 +63,7 @@ export class FranchiseUserController {
     }
 
     @Post('edit/image')
+    @FormDataRequest()
     @UseInterceptors(FileInterceptor('image',storage))
     @UseGuards(FranchiseGuard)
     async EditPicture(@GetUser() franchiseUser: FranchiseUser,@UploadedFile() file): Promise<void>
@@ -68,6 +72,7 @@ export class FranchiseUserController {
     }
 
     @Post('edit/password')
+    @FormDataRequest()
     @UseGuards(FranchiseGuard)
     async EditPassword(@GetUser() franchiseUser: FranchiseUser,@Body() userDto: FranchiseUserPasswordEdit):Promise<void>
     {
@@ -75,6 +80,7 @@ export class FranchiseUserController {
     }
 
     @Post('professionaluser/create')
+    @FormDataRequest()
     @UseGuards(FranchiseGuard)
     @UsePipes(new ValidationPipe())
     @UseInterceptors(FileInterceptor('image',storage))
@@ -91,6 +97,7 @@ export class FranchiseUserController {
     }
 
     @Post('professionaluser/edit')
+    @FormDataRequest()
     @UseGuards(ProfessionalGuard)
     async EditProfessionalUser(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise<{accesstoken: string} | string[]>
     {
@@ -98,6 +105,7 @@ export class FranchiseUserController {
     }
 
     @Post('professionaluser/edit/profile-picture')
+    @FormDataRequest()
     @UseGuards(ProfessionalGuard)
     @UseInterceptors(FileInterceptor('image',storage))
     async EditProfessionalPicture(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file): Promise<void>

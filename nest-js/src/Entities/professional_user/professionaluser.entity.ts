@@ -13,6 +13,12 @@ export class ProfessionalUser{
     @Column({length:100})
     username: string;
 
+    @Column({length:100})
+    name: string;
+
+    @Column({length: 100})
+    type: string;
+
     @Column({length: 100})
     address: string;
 

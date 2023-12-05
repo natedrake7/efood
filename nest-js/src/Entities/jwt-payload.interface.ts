@@ -15,6 +15,10 @@ export interface JwtPayload{
 export interface ProfessionalJwtPayload{
     id: string;
 
+    name: string;
+
+    type: string;
+
     username: string;
 
     address: string;

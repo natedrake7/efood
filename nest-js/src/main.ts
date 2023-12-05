@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
-import * as fs from 'fs';
-import helmet from 'helmet';
+import * as express from 'express';
 
 
 async function bootstrap() {
@@ -23,6 +22,8 @@ async function bootstrap() {
       }
     }),
   );
+
+  app.use('/uploads', express.static('uploads'));
   
   await app.listen(3000);
 }

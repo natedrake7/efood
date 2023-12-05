@@ -1,1 +1,2 @@
-1)Set Form Data as input in all of post methods
+1)Decrease image sizes on input.
+2)Add background images too.

@@ -7,12 +7,14 @@ import { User } from "src/Entities/user/user.entity";
 import { ProfessionalUser } from "src/Entities/professional_user/professionaluser.entity";
 import { ProfessionalGuard } from "src/Guards/professional.guard"
 import { Order } from "src/Entities/order/order.entity";
+import { FormDataRequest } from "nestjs-form-data";
 
 @Controller('order')
 export class OrdersController{
     constructor(private readonly orderService :OrderService){}
 
     @Post('user/create')
+    @FormDataRequest()
     @UseGuards(UserGuard)
     async Create(@Body() body: {orderDto : OrderDto,professionalID : string,completeproducts: {ID :string,count: number,size:string,addonsID :string[]}[],addressID : string},
                 @GetUser() user: User):Promise<void>
@@ -35,6 +37,7 @@ export class OrdersController{
     }
 
     @Post('user/cancel/:id')
+    @FormDataRequest()
     @UseGuards(UserGuard)
     async CancelOrder(@Param('id') id: string,@GetUser() user: User):Promise<void>
     {
@@ -49,6 +52,7 @@ export class OrdersController{
     }
 
     @Post('professional/update/:id')
+    @FormDataRequest()
     @UseGuards(ProfessionalGuard)
     async UpdateProfessionalOrderById(@Param('id') id: string,@GetUser() user: ProfessionalUser):Promise<void>
     {

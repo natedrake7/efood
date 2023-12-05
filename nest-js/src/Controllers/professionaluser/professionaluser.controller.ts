@@ -12,6 +12,7 @@ import { ProfessionalUserPasswordEditDto } from 'src/Entities/professional_user/
 import { ValidationPipe } from '@nestjs/common/pipes';
 import { UserGuard } from 'src/Guards/user.guard';
 import { RefreshProfessionalGuard } from 'src/Guards/professional_refresh.guard';
+import { FormDataRequest } from 'nestjs-form-data';
 
 
 @Controller('professionaluser')
@@ -26,13 +27,15 @@ export class ProfessionalUserController {
         return this.userService.Create(userDto,file.path);
    }
 
-   @Get('signin')
+   @Post('signin')
+   @FormDataRequest()
    async SignIn(@Body() userDto: AuthSignIn):Promise<{accesstoken: string , refreshtoken: string}>
    {
         return this.userService.SignIn(userDto);
    }
 
    @Post('edit')
+   @FormDataRequest()
    @UseGuards(ProfessionalGuard)
    async Edit(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserEdit): Promise <{accesstoken: string} | string[]>
    {
@@ -48,6 +51,7 @@ export class ProfessionalUserController {
    }
 
    @Post('edit/password')
+   @FormDataRequest()
    @UseGuards(ProfessionalGuard)
    async EditPassword(@GetUser() professionalUser: ProfessionalUser,@Body() userDto: ProfessionalUserPasswordEditDto): Promise <void>
    {

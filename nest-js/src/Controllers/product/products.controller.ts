@@ -15,6 +15,7 @@ import { UploadedFile } from '@nestjs/common';
 import { UsePipes } from "@nestjs/common/decorators";
 import { ValidationPipe } from "@nestjs/common/pipes";
 import { UseInterceptors } from "@nestjs/common/decorators";
+import { FormDataRequest } from "nestjs-form-data";
 
 @Controller('products')
 export class ProductsController {
@@ -47,6 +48,7 @@ export class ProductsController {
    }
 
    @Post('professional/edit/:id')
+   @FormDataRequest()
    @UseGuards(ProfessionalGuard)
    async ProfessionalProductEdit(@Param('id') id: string,@Body() productDto: ProductDto,@GetUser() user : ProfessionalUser):Promise<void>
    {
@@ -84,6 +86,7 @@ export class ProductsController {
    }
 
    @Post('professional/addon/edit/:id')
+   @FormDataRequest()
    @UseGuards(ProfessionalGuard)
    async ProfessionalAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto,@GetUser() user: ProfessionalUser):Promise<void>
    {
@@ -116,6 +119,7 @@ export class ProductsController {
    }
 
    @Post('franchise/edit/:id')
+   @FormDataRequest()
    @UseGuards(FranchiseGuard)
    async FranchiseProductEdit(@Param('id') id: string,@Body() productDto: ProductDto,@GetUser() user : FranchiseUser):Promise<void>
    {
@@ -153,6 +157,7 @@ export class ProductsController {
    }
 
    @Post('franchise/addon/edit/:id')
+   @FormDataRequest()
    @UseGuards(FranchiseGuard)
    async FranchiseAddonEdit(@Param('id') id: string,@Body() addonDto: ProductAddonDto,@GetUser() user:FranchiseUser):Promise<void>
    {

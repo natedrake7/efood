@@ -12,19 +12,21 @@ export class ProfessionalUserQueries{
     async CreateUser(userDto: ProfessionalUserDto, file: string,franchiseUserId : string):Promise<ProfessionalUser>{
         const query = `
             INSERT INTO "ProfessionalUser" (
-                username, address, delivery_time, password, city, zipcode,
+                username, address,name, delivery_time, password, city, zipcode,type
                 timetable, email, phonenumber, description, image,open_status,rating,"franchiseUserId"
             )
             VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
-            ) RETURNING id,username,address,delivery_time,city,zipcode,timetable,email,phonenumber,description;`;
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
+            ) RETURNING id,username,address,delivery_time,type,city,zipcode,timetable,email,phonenumber,description;`;
         const values = [
             userDto.username,
             userDto.address,
+            userDto.name,
             userDto.delivery_time,
             userDto.password,
             userDto.city,
             userDto.zipcode,
+            userDto.type,
             userDto.timetable,
             userDto.email,
             userDto.phonenumber,
@@ -37,15 +39,15 @@ export class ProfessionalUserQueries{
         return (await this.UserRepository.query(query,values))[0];
     }
     async GetUserById(id : string):Promise<ProfessionalUser> { 
-        const query = `SELECT id,username,address,delivery_time,city,zipcode,timetable,email,phonenumber,description,"franchiseUserId" FROM "ProfessionalUser" WHERE id = $1 LIMIT 1;`
+        const query = `SELECT id,username,address,type,name,delivery_time,city,zipcode,timetable,email,phonenumber,description,"franchiseUserId",image FROM "ProfessionalUser" WHERE id = $1 LIMIT 1;`
         return (await this.UserRepository.query(query,[id]))[0];
     }
     async GetUserByUsername(username: string):Promise<ProfessionalUser>{ 
-        const query = `SELECT id,username,address,delivery_time,city,zipcode,password,timetable,email,phonenumber,description FROM "ProfessionalUser" WHERE username = $1 LIMIT 1;`;
+        const query = `SELECT id,username,address,name,type,delivery_time,city,zipcode,password,timetable,email,phonenumber,description FROM "ProfessionalUser" WHERE username = $1 LIMIT 1;`;
         return (await this.UserRepository.query(query,[username]))[0];
     }
     async FranchiseGetUserByUsername(username: string,franchiseuser_id: string):Promise<ProfessionalUser>{
-        const query = `SELECT id,username,address,delivery_time,city,zipcode,timetable,email,phonenumber,description FROM "ProfessionalUser" WHERE username = $1 AND "franchiseUserId" = $2 LIMIT 1;`
+        const query = `SELECT id,username,name,address,type,delivery_time,city,zipcode,timetable,email,phonenumber,description FROM "ProfessionalUser" WHERE username = $1 AND "franchiseUserId" = $2 LIMIT 1;`
         return (await this.UserRepository.query(query,[username,franchiseuser_id]))[0];
     }
 
@@ -63,7 +65,7 @@ export class ProfessionalUserQueries{
     }
 
     async GetAll():Promise<ProfessionalUser[]>{
-        const query  = `SELECT id,address,delivery_time,city,zipcode,timetable,email,phonenumber,description FROM "ProfessionalUser";`;
+        const query  = `SELECT id,name,address,type,delivery_time,city,zipcode,timetable,email,phonenumber,description,image FROM "ProfessionalUser";`;
         return (await this.UserRepository.query(query));
     }
     async GetUserWithProductsById(id : string):Promise<ProfessionalUser>{
@@ -79,10 +81,12 @@ export class ProfessionalUserQueries{
             clauses = `"userId" = $1`;
             values = user.id;
         }
-        
-        const query = `SELECT name,size,price,type,description,availability,id FROM "Product"
+        user.username = null;
+        const query = `SELECT name,size,price,image,type,description,availability,id FROM "Product"
                         WHERE ${clauses};`;
         const Products = (await this.UserRepository.query(query,[values]));
+        user.franchiseUserId = null;
+        
         user.products = Products;
         return user;
     }
@@ -94,6 +98,16 @@ export class ProfessionalUserQueries{
         {
             updateClauses.push(`username = $${values.length + 1}`);
             values.push(userDto.username);
+        }
+        if(userDto.name != null)
+        {
+            updateClauses.push(`name = $${values.length + 1}`);
+            values.push(userDto.name);
+        }
+        if(userDto.type != null)
+        {
+            updateClauses.push(`"type" = $${values.length + 1}`);
+            values.push(userDto.type);
         }
         if (userDto.address != null)
         {
@@ -144,7 +158,7 @@ export class ProfessionalUserQueries{
             SET 
                 ${updateClauses.join(', ')}
             WHERE id = '${id}' 
-            RETURNING id,username,address,delivery_time,city,zipcode,email,phonenumber,description,timetable,rating;`;
+            RETURNING id,username,type,name,address,delivery_time,city,zipcode,email,phonenumber,description,timetable,rating;`;
 
         return (await this.UserRepository.query(query,values))[0][0];
     }

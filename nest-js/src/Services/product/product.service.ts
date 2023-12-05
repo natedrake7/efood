@@ -12,7 +12,8 @@ export class ProductService{
     constructor(private readonly Queries: ProductQueries){}
 
     async Create( product : ProductDto,addons : ProductAddonDto[],user_id: string,file: string,IsUserProfessional:boolean = true):Promise<void>{
-        return await this.Queries.CreateProductWithAddons(user_id,product,addons,file,IsUserProfessional);
+        const editedFile = file.replace(/\\/g, '/');
+        return await this.Queries.CreateProductWithAddons(user_id,product,addons,editedFile,IsUserProfessional);
     }
 
     async GetAllProducts(id: string,IsUserProfessional:boolean = true):Promise<void | Product[]>{
@@ -36,7 +37,9 @@ export class ProductService{
     }
 
     async EditProductImageById(id: string, user_id: string,file: string,IsUserProfessional:boolean = true):Promise<void>{
-        const {previous_image} = await this.Queries.EditProductImageById(id,user_id,file,IsUserProfessional);
+        const editedFile = file.replace(/\\/g, '/');
+        
+        const {previous_image} = await this.Queries.EditProductImageById(id,user_id,editedFile,IsUserProfessional);
 
         if(!fs.existsSync(previous_image))
             return;
