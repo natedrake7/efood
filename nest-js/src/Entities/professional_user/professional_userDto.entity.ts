@@ -16,7 +16,6 @@ export class ProfessionalUserDto{
     @IsString()
     address: string;
 
-    @IsNumber()
     delivery_time: number;
 
     @IsString()

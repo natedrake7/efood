@@ -23,7 +23,7 @@ export class AddressService{
             throw new UnauthorizedException("User is not registered!");
         
         const address = this.Queries.GetAddressById(id,user.id);
-
+        
         if(!address)
             throw new BadRequestException("No address with that ID exists!");
 

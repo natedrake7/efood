@@ -25,7 +25,8 @@ function DetailsScreen() {
     async function GetProfessionalUser(){
       try{
         const response = await GetProfessionalUserById(authCtx.accessToken,id);
-        response.image = `http://192.168.1.16:3000/${response.image}`
+        response.profileImage = `http://192.168.1.16:3000/${response.profileImage}`
+        response.backgroundImage = `http://192.168.1.16:3000/${response.backgroundImage}`
         response.products.forEach(item => {
             item.image = `http://192.168.1.16:3000/${item.image}`;
             });
@@ -52,7 +53,7 @@ function DetailsScreen() {
         <>
         <View style={styles.headerContainer}>
             <Text style={styles.textHeader}>{professionalUser.name}</Text>
-            <Image source={{ uri: professionalUser.image }} style={styles.profileimageContainer} />
+            <Image source={{ uri: professionalUser.profileImage }} style={styles.profileimageContainer} />
         </View>
         <View style={styles.deliveryRatingContainer}>
             <Text style={styles.textdeliveryRating}>Delivery: {professionalUser.delivery_time}'</Text>
@@ -108,6 +109,11 @@ function DetailsScreen() {
   {
     SplashScreen.hideAsync();
     return(
+      <>
+        <Image
+          source={{ uri: professionalUser.backgroundImage }}
+          style={{ width: '100%', height: 150, resizeMode: 'cover' }}
+        />
         <SafeAreaView style={styles.container}>
         {professionalUser &&
         <>
@@ -117,11 +123,13 @@ function DetailsScreen() {
                 renderItem={RenderProduct}
                 keyExtractor={(item) => item.id}
                 showsVerticalScrollIndicator={false}
+                stickyHeaderIndices={[0]}
             >
             </FlatList>
           </>
         }
       </SafeAreaView >
+      </>
     );
   }
 

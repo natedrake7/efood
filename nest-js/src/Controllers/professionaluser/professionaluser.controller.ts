@@ -1,4 +1,4 @@
-import { Controller,Post,Param,Get, Body,UseGuards,UseInterceptors,ParseFilePipe, FileTypeValidator, UsePipes  } from '@nestjs/common';
+import { Controller,Post,Param,Get, Body,UseGuards,UseInterceptors, UsePipes  } from '@nestjs/common';
 import { AuthSignIn } from 'src/Entities/authsignin.entity';
 import { ProfessionalUserDto } from 'src/Entities/professional_user/professional_userDto.entity';
 import { ProfessionalUserService } from 'src/Services/professional-user/professional-user.service';
@@ -13,6 +13,8 @@ import { ValidationPipe } from '@nestjs/common/pipes';
 import { UserGuard } from 'src/Guards/user.guard';
 import { RefreshProfessionalGuard } from 'src/Guards/professional_refresh.guard';
 import { FormDataRequest } from 'nestjs-form-data';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { UploadedFiles } from '@nestjs/common/decorators';
 
 
 @Controller('professionaluser')
@@ -21,10 +23,11 @@ export class ProfessionalUserController {
 
    @Post('register')
    @UsePipes(new ValidationPipe())
-   @UseInterceptors(FileInterceptor('image'))
-   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFile() file):Promise<{accesstoken: string, refreshtoken:string} | string[]>
+   @UseInterceptors(FilesInterceptor('images', 2))
+   async Create(@Body() userDto: ProfessionalUserDto,@UploadedFiles() files):Promise<{accesstoken: string, refreshtoken:string} | string[]>
    {
-        return this.userService.Create(userDto,file.path);
+
+        return this.userService.Create(userDto,files[1].path,files[0].path);
    }
 
    @Post('signin')
@@ -42,12 +45,20 @@ export class ProfessionalUserController {
      return this.userService.Edit(professionalUser.id,userDto);
    }
 
-   @Post('edit/image')
+   @Post('edit/profile-image')
    @UseGuards(ProfessionalGuard)
    @UseInterceptors(FileInterceptor('image'))
-   async EditImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file):Promise<void>
+   async EditProfileImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file):Promise<void>
    {
     return this.userService.EditImageById(professionalUser,file.path);
+   }
+
+   @Post('edit/background-image')
+   @UseGuards(ProfessionalGuard)
+   @UseInterceptors(FileInterceptor('image'))
+   async EditBackgroundImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file):Promise<void>
+   {
+    return this.userService.EditImageById(professionalUser,file.path,true);
    }
 
    @Post('edit/password')

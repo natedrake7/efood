@@ -3,6 +3,7 @@ import { Product } from '../products/product.entity';
 import { FranchiseUser } from '../franchise_user/franchise_user.entity';
 import { Order } from '../order/order.entity';
 import { ProductAddon } from '../products/product_addon.entity';
+import { nullable } from 'zod';
 
 @Entity('ProfessionalUser')
 export class ProfessionalUser{
@@ -53,7 +54,10 @@ export class ProfessionalUser{
     description: string;
 
     @Column()
-    image: string;
+    profileImage: string;
+
+    @Column()
+    backgroundImage: string;
 
     @OneToMany(() => Product, (product) => product.user)
     products: Product[];

@@ -1,2 +1,2 @@
 1)Decrease image sizes on input.
-2)Add background images too.
+2)Add ratings count in db

@@ -22,7 +22,7 @@ import * as path from 'path';
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({
               storage: diskStorage({
-                  destination: configService.get('PROFILE_IMAGES_PATH'),
+                  destination: configService.get('PROFESSIONAL_IMAGES_PATH'),
                   filename: (req,file,cb) => {
                     const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
                     const extension: string = path.parse(file.originalname).ext;

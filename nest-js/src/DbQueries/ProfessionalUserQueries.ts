@@ -9,15 +9,15 @@ import { InjectRepository } from "@nestjs/typeorm";
 export class ProfessionalUserQueries{
     constructor(@InjectRepository(ProfessionalUser)
                 private UserRepository:DataSource){}
-    async CreateUser(userDto: ProfessionalUserDto, file: string,franchiseUserId : string):Promise<ProfessionalUser>{
+    async CreateUser(userDto: ProfessionalUserDto,backgroundImage: string,profileImage: string,franchiseUserId : string):Promise<ProfessionalUser>{
         const query = `
             INSERT INTO "ProfessionalUser" (
-                username, address,name, delivery_time, password, city, zipcode,type
-                timetable, email, phonenumber, description, image,open_status,rating,"franchiseUserId"
+                username, address,name, delivery_time, password, city, zipcode,type,
+                timetable, email, phonenumber, description, "profileImage","backgroundImage",open_status,rating,"franchiseUserId"
             )
             VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
-            ) RETURNING id,username,address,delivery_time,type,city,zipcode,timetable,email,phonenumber,description;`;
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+            ) RETURNING id,username,address,delivery_time,type,city,zipcode,timetable,email,"profileImage","backgroundImage",phonenumber,description;`;
         const values = [
             userDto.username,
             userDto.address,
@@ -31,7 +31,8 @@ export class ProfessionalUserQueries{
             userDto.email,
             userDto.phonenumber,
             userDto.description,
-            file,
+            profileImage,
+            backgroundImage,
             false,
             0,
             franchiseUserId
@@ -39,7 +40,7 @@ export class ProfessionalUserQueries{
         return (await this.UserRepository.query(query,values))[0];
     }
     async GetUserById(id : string):Promise<ProfessionalUser> { 
-        const query = `SELECT id,username,address,type,name,delivery_time,city,zipcode,timetable,email,phonenumber,description,"franchiseUserId",image FROM "ProfessionalUser" WHERE id = $1 LIMIT 1;`
+        const query = `SELECT id,username,address,type,name,delivery_time,city,zipcode,timetable,email,phonenumber,description,"franchiseUserId","profileImage","backgroundImage" FROM "ProfessionalUser" WHERE id = $1 LIMIT 1;`
         return (await this.UserRepository.query(query,[id]))[0];
     }
     async GetUserByUsername(username: string):Promise<ProfessionalUser>{ 
@@ -51,21 +52,25 @@ export class ProfessionalUserQueries{
         return (await this.UserRepository.query(query,[username,franchiseuser_id]))[0];
     }
 
-    async EditImageById(id : string, File : string):Promise<{previous_image: string}>{
+    async EditImageById(id : string, File : string,IsImageBackground:boolean):Promise<{previous_image: string}>{
+         var imageClause: string = ` `;
+         IsImageBackground ? imageClause = `"backgroundImage"` : imageClause = `"profileImage"`;
+
+
         const query =  `With PreviousImage AS(
-                            SELECT image as previous_image FROM "ProfessionalUser"
+                            SELECT ${imageClause} as previous_image FROM "ProfessionalUser"
                             WHERE id = $1
                         ),
                         UpdateImage AS(
                             UPDATE "ProfessionalUser"
-                            SET image = $2
+                            SET ${imageClause} = $2
                             WHERE id = $1
                         )SELECT * FROM PreviousImage;`;
         return (await this.UserRepository.query(query,[id,File]))[0];
     }
 
     async GetAll():Promise<ProfessionalUser[]>{
-        const query  = `SELECT id,name,address,type,delivery_time,city,zipcode,timetable,email,phonenumber,description,image FROM "ProfessionalUser";`;
+        const query  = `SELECT id,name,address,type,delivery_time,city,zipcode,timetable,email,phonenumber,description,"profileImage","backgroundImage" FROM "ProfessionalUser";`;
         return (await this.UserRepository.query(query));
     }
     async GetUserWithProductsById(id : string):Promise<ProfessionalUser>{
@@ -158,7 +163,7 @@ export class ProfessionalUserQueries{
             SET 
                 ${updateClauses.join(', ')}
             WHERE id = '${id}' 
-            RETURNING id,username,type,name,address,delivery_time,city,zipcode,email,phonenumber,description,timetable,rating;`;
+            RETURNING id,username,type,name,address,delivery_time,city,zipcode,email,phonenumber,description,timetable,rating,"profileImage","backgroundImage";`;
 
         return (await this.UserRepository.query(query,values))[0][0];
     }

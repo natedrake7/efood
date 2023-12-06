@@ -14,25 +14,12 @@ import { ProfessionalGuard } from 'src/Guards/professional.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadedFile } from '@nestjs/common';
 import { FranchiseUserPasswordEdit } from 'src/Entities/franchise_user/franchise_user_password_edit.entity';
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import { diskStorage } from 'multer';
 import { ValidationPipe } from '@nestjs/common';
 import { RefreshFranchiseGuard } from 'src/Guards/franchise_refresh.guard';
 import { RefreshProfessionalGuard } from 'src/Guards/professional_refresh.guard';
 import { FormDataRequest } from 'nestjs-form-data';
-
-const storage = {
-  storage: diskStorage({
-    destination: './uploads/profileimages',
-    filename: (req,file,cb) => {
-      const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + uuidv4();
-      const extension: string = path.parse(file.originalname).ext;
-
-      cb(null,`${filename}${extension}`)
-    }
-  })
-}
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { UploadedFiles } from '@nestjs/common/decorators';
 
 @Controller('franchiseuser')
 export class FranchiseUserController {
@@ -40,9 +27,8 @@ export class FranchiseUserController {
                 private readonly professionaluserService: ProfessionalUserService) {}
 
     @Post('create')
-    @FormDataRequest()
     @UsePipes(new ValidationPipe())
-    @UseInterceptors(FileInterceptor('image',storage))
+    @UseInterceptors(FileInterceptor('image'))
     async Create(@Body() userDto: FranchiseUserDto,@UploadedFile() file): Promise<{accesstoken: string,refreshtoken: string} | string[]>
     {
       return this.userService.Create(userDto,file.path);
@@ -64,7 +50,7 @@ export class FranchiseUserController {
 
     @Post('edit/image')
     @FormDataRequest()
-    @UseInterceptors(FileInterceptor('image',storage))
+    @UseInterceptors(FileInterceptor('image'))
     @UseGuards(FranchiseGuard)
     async EditPicture(@GetUser() franchiseUser: FranchiseUser,@UploadedFile() file): Promise<void>
     {
@@ -83,10 +69,10 @@ export class FranchiseUserController {
     @FormDataRequest()
     @UseGuards(FranchiseGuard)
     @UsePipes(new ValidationPipe())
-    @UseInterceptors(FileInterceptor('image',storage))
-    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto,@UploadedFile() file) : Promise<{accesstoken: string, refreshtoken:string} | string[]>
+    @UseInterceptors(FilesInterceptor('images',2))
+    async CreateProfessionalUser(@GetUser() franchiseuser: FranchiseUser,@Body() userDto: ProfessionalUserDto,@UploadedFiles() files) : Promise<{accesstoken: string, refreshtoken:string} | string[]>
     {
-      return this.professionaluserService.FranchiseCreate(userDto,franchiseuser.id,file.path);
+      return this.professionaluserService.FranchiseCreate(userDto,franchiseuser.id,files[0].path,files[1].path);
     }
 
     @Get('professionaluser/signin')
@@ -104,13 +90,21 @@ export class FranchiseUserController {
       return this.professionaluserService.Edit(professionalUser.id,userDto);
     }
 
-    @Post('professionaluser/edit/profile-picture')
-    @FormDataRequest()
+    @Post('professionaluser/edit/profile-image')
     @UseGuards(ProfessionalGuard)
-    @UseInterceptors(FileInterceptor('image',storage))
-    async EditProfessionalPicture(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file): Promise<void>
+    @UseInterceptors(FileInterceptor('image'))
+    async EditProfessionalProfileImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file): Promise<void>
     {
       return this.professionaluserService.EditImageById(professionalUser,file.path);
+    }
+
+    
+    @Post('professionaluser/edit/background-image')
+    @UseGuards(ProfessionalGuard)
+    @UseInterceptors(FileInterceptor('image'))
+    async EditProfessionalBackgroundImage(@GetUser() professionalUser: ProfessionalUser,@UploadedFile() file): Promise<void>
+    {
+      return this.professionaluserService.EditImageById(professionalUser,file.path,true);
     }
 
     @Post('refresh')
@@ -118,6 +112,7 @@ export class FranchiseUserController {
     async RefreshToken(@GetUser() user: FranchiseUser):Promise<{accesstoken: string}>
     {
       return this.userService.RefreshToken(user);
+
     }
 
     @Post('professionaluser/refresh')

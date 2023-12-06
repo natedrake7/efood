@@ -19,16 +19,25 @@ export class ProfessionalUserService {
         private jwtService: JwtService,
         private readonly Queries: ProfessionalUserQueries){}
     
-    async Create(userDto: ProfessionalUserDto,file: string):Promise<{accesstoken: string, refreshtoken:string} | string[]>{
+    async Create(userDto: ProfessionalUserDto,backgroundImage: string,profileImage: string):Promise<{accesstoken: string, refreshtoken:string} | string[]>{
 
         const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
         if(errors.length != 0)
         {
-          if(fs.existsSync(file))
+          if(fs.existsSync(backgroundImage))
           {
             try{
-              fs.unlinkSync(file);
+              fs.unlinkSync(backgroundImage);
+            }
+            catch(error){
+              throw new Error(error);
+            }
+          }
+          if(fs.existsSync(profileImage))
+          {
+            try{
+              fs.unlinkSync(profileImage);
             }
             catch(error){
               throw new Error(error);
@@ -36,11 +45,13 @@ export class ProfessionalUserService {
           }
           return errors
         }
-        const editedFile = file.replace(/\\/g, '/');
+
+        const editedprofileImage = profileImage.replace(/\\/g, '/');
+        const editedbackgroundImage = backgroundImage.replace(/\\/g, '/');
 
         const salt = await bcrypt.genSalt();
         userDto.password = await bcrypt.hash(userDto.password,salt);
-        const user = await this.Queries.CreateUser(userDto,editedFile,null);
+        const user = await this.Queries.CreateUser(userDto,editedbackgroundImage,editedprofileImage,null);
 
         const {id,name,type,username,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
         const payload: ProfessionalJwtPayload = {id,name,type,username,address,delivery_time,city,zipcode,description,email,phonenumber};
@@ -53,28 +64,39 @@ export class ProfessionalUserService {
         return {accesstoken,refreshtoken};
     }
 
-    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuserId: string,file: string):Promise<{accesstoken: string, refreshtoken:string} | string[]>{
+    async FranchiseCreate(userDto: ProfessionalUserDto,franchiseuserId: string,backgroundImage: string,profileImage: string):Promise<{accesstoken: string, refreshtoken:string} | string[]>{
 
       const errors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
       if(errors.length != 0)
       {
-        if(fs.existsSync(file))
+        if(fs.existsSync(backgroundImage))
         {
           try{
-            fs.unlinkSync(file);
+            fs.unlinkSync(backgroundImage);
           }
           catch(error){
-            throw new BadRequestException(error);
+            throw new Error(error);
+          }
+        }
+        if(fs.existsSync(profileImage))
+        {
+          try{
+            fs.unlinkSync(profileImage);
+          }
+          catch(error){
+            throw new Error(error);
           }
         }
         return errors
       }
-      const editedFile = file.replace(/\\/g, '/');
+
+      const editedprofileImage = profileImage.replace(/\\/g, '/');
+      const editedbackgroundImage = backgroundImage.replace(/\\/g, '/');
 
       const salt = await bcrypt.genSalt();
       userDto.password = await bcrypt.hash(userDto.password,salt);
-      const user = await this.Queries.CreateUser(userDto,editedFile,franchiseuserId);
+      const user = await this.Queries.CreateUser(userDto,editedbackgroundImage,editedprofileImage,franchiseuserId);
 
       const {id,name,username,type,address,delivery_time,description,email,phonenumber,city,zipcode} = user;
       const payload: ProfessionalJwtPayload = {id,name,type,username,address,delivery_time,city,zipcode,description,email,phonenumber};
@@ -153,7 +175,7 @@ export class ProfessionalUserService {
       return await this.Queries.UpdateUserPasswordById(id,hashedPassword);
     }
 
-    async EditImageById(user: ProfessionalUser,File : string):Promise<void>{
+    async EditImageById(user: ProfessionalUser,File : string,IsImageBackground:boolean = false):Promise<void>{
       const editedFile = File.replace(/\\/g, '/');
       if(!File)
         throw new BadRequestException("No file was imported!");
@@ -161,7 +183,7 @@ export class ProfessionalUserService {
       if(!user)
         throw new UnauthorizedException("User doesn't exist!");
 
-      const {previous_image} = await this.Queries.EditImageById(user.id,editedFile);
+      const {previous_image} = await this.Queries.EditImageById(user.id,editedFile,IsImageBackground);
 
       if(!fs.existsSync(previous_image))
         return;
