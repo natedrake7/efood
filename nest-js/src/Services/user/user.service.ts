@@ -43,6 +43,7 @@ export class UserService {
     
     if(!user)
       throw new UnauthorizedException("User is not registerd!");
+    
     if(!await bcrypt.compare(password,user.password))
       throw new UnauthorizedException("Incorrect Password!");
 

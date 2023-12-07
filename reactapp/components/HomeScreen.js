@@ -1,12 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState,useEffect, useContext } from 'react';
-import { View, Text, TextInput, StyleSheet,Image, FlatList } from 'react-native';
+import { View, Text, TextInput, StyleSheet,Image, FlatList,ActivityIndicator,TouchableOpacity } from 'react-native';
 import { GetProfessionalUsers } from '../store/professional';
 import { AuthContext } from '../store/auth-context';
-import { ActivityIndicator } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaView } from 'react-navigation';
-import { TouchableOpacity } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 
 SplashScreen.preventAutoHideAsync();
@@ -15,20 +13,29 @@ function HomeScreen() {
   const [isPageReady,setIsPageReady] = useState(false);
   const [professionalUsers,setProfessionalUsers] = useState([]);
   const [searchValue,setSearchValue] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
   const navigation = useNavigation();
   const authCtx = useContext(AuthContext);
 
   useEffect(() => {
     async function GetProfessionals(){
 
-      setCurrentTime(new Date().toLocaleDateString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true }));
+      const currentTimeString = new Date().toLocaleDateString('en-US', { hour: 'numeric', minute: 'numeric', hour12: false });
+
+      // Adjust the regular expression to match the new format
+      const matchResult = currentTimeString.match(/(\d+):(\d+)(\w+)/);
+      const [, h1 ,] = matchResult;
+      const CurrentHour = parseInt(h1, 10) % 12;
 
       try{
         const response = await GetProfessionalUsers(authCtx.accessToken);
+
         response.forEach(item => {
           const timetable = item.timetable.split('-');
-          (timetable[0] < currentTime && timetable[1] > currentTime) ? item.open_status = true : item.open_status = false;
+
+          const openingHour = getHours(timetable[0]);
+          const ClosingHour = getHours(timetable[1]);
+
+          (openingHour <= ClosingHour && ClosingHour > CurrentHour) ? item.open_status = true : item.open_status = false;
             item.profileImage = `http://192.168.1.16:3000/${item.profileImage}`;
             item.backgroundImage = `http://192.168.1.16:3000/${item.backgroundImage}`;
         });
@@ -130,6 +137,19 @@ function HomeScreen() {
 };
 export default HomeScreen;
 
+function getHours(timeString) {
+  const matchResult = timeString.match(/(\d+):(\d+)(\w+)/);
+
+  if (matchResult) {
+    const [, h, , period] = matchResult;
+    return period === 'AM' ? parseInt(h, 10) % 12 : (parseInt(h, 10) % 12) + 12;
+
+  } else {
+    console.error(`Invalid time string: ${timeString}`);
+    return 0; // Return a default value or handle the error as needed
+  }
+}
+
 
 const styles = StyleSheet.create({
   container: {
@@ -139,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   input: {
-    height: 65,
+    height: 50,
     backgroundColor: '#353535c5',
 
     borderWidth: 1,

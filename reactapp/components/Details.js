@@ -1,7 +1,7 @@
 import { useNavigation,useRoute } from '@react-navigation/native';
-import React, { useState,useEffect, useContext } from 'react';
-import { View, Text, TextInput, StyleSheet,Image, FlatList } from 'react-native';
-import { GetProfessionalUserById, GetProfessionalUsers } from '../store/professional';
+import React, { useState,useEffect, useContext,useRef } from 'react';
+import { View, Text, TextInput, StyleSheet,Image, FlatList, ScrollView,Animated,PanResponder } from 'react-native';
+import { GetProfessionalUserById } from '../store/professional';
 import { AuthContext } from '../store/auth-context';
 import { ActivityIndicator } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
@@ -105,6 +105,25 @@ function DetailsScreen() {
     );
   }
 
+  const translateY = useRef(new Animated.Value(0)).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        Animated.event([{ dy: translateY }], { useNativeDriver: false })({
+          dy: gestureState.dy,
+        });
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy < 0) {
+          // If the drag gesture is upwards, you can trigger additional actions here
+          // For example, you can animate the list back to its original position.
+          Animated.spring(translateY, { toValue: 0, useNativeDriver: false }).start();
+        }
+      },
+    })
+  ).current;
+
   if(isPageReady)
   {
     SplashScreen.hideAsync();
@@ -116,17 +135,20 @@ function DetailsScreen() {
         />
         <SafeAreaView style={styles.container}>
         {professionalUser &&
-        <>
-            <FlatList
-                ListHeaderComponent={RenderHeader()}
-                data={professionalUser.products}
-                renderItem={RenderProduct}
-                keyExtractor={(item) => item.id}
-                showsVerticalScrollIndicator={false}
-                stickyHeaderIndices={[0]}
-            >
-            </FlatList>
-          </>
+            <Animated.FlatList
+              {...panResponder.panHandlers}
+              ListHeaderComponent={RenderHeader}
+              data={professionalUser.products}
+              renderItem={RenderProduct}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              stickyHeaderIndices={[0]}
+              onScroll={Animated.event(
+                [{ nativeEvent: { contentOffset: { y: translateY } } }],
+                { useNativeDriver: false }
+              )}
+              scrollEventThrottle={16}
+          />
         }
       </SafeAreaView >
       </>
@@ -266,5 +288,10 @@ const styles = StyleSheet.create({
         color: '#353535', // Use a non-transparent color
         fontSize: 20,
       },
-
+      handle: {
+        height: 20,
+        backgroundColor: 'lightgray',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
   });

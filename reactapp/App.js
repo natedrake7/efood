@@ -1,6 +1,4 @@
-import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer,DefaultTheme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/RegisterScreen';
 import HomeScreen from './components/HomeScreen';
@@ -9,10 +7,16 @@ import { useContext,useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SplashScreen from 'expo-splash-screen';
 import DetailsScreen from './components/Details';
-import { StyleSheet} from 'react-native';
 import ProductDetailsScreen from './components/ProductDetails';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar';
+import ProfileScreen from './components/ProfileScreen';
+import DrawerScreen from './components/DrawerScreen';
 
+const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
+
 SplashScreen.preventAutoHideAsync();
 
 function Root(){
@@ -38,7 +42,6 @@ function Root(){
     SplashScreen.hideAsync();
     return <Navigation/>;
   }
-
 };
 
 export default function App(){
@@ -46,6 +49,7 @@ export default function App(){
   return(
       <>
         <AuthContextProvider>
+        <StatusBar barStyle="dark-content"/>
             <Root/>
         </AuthContextProvider>
       </>
@@ -74,11 +78,23 @@ function AuthStack(){
 
 function AuthenticatedStack(){
   return (
-      <Stack.Navigator screenOptions={headerOptions}>
-        <Stack.Screen name="Home" component={HomeScreen}/>
-        <Stack.Screen name="Details" component={DetailsScreen}/>
-        <Stack.Screen name="ProductDetails" component={ProductDetailsScreen}/>
-      </Stack.Navigator>
+    <Stack.Navigator screenOptions={headerOptions}>
+      <Stack.Screen name="DrawerHome" options={{headerShown: false}}>
+      {() => (
+          <Drawer.Navigator 
+          drawerContent={props => <DrawerScreen {...props}/>}
+          screenOptions={headerOptions}
+          drawerPosition="left"
+          drawerType="slide"
+        >
+          <Drawer.Screen name="Home" component={HomeScreen} />
+          <Drawer.Screen name="Profile" component={ProfileScreen}/>
+        </Drawer.Navigator>
+      )}
+      </Stack.Screen>
+      <Stack.Screen name="Details" component={DetailsScreen} />
+      <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
+    </Stack.Navigator>
   )
 };
 
@@ -91,8 +107,19 @@ const Theme = {
 };
 
 const headerOptions = {
-  name: '',
   headerMode: 'float',
+
   headerStyle: {backgroundColor: '#000000ea'},
+
+  drawerStyle: {
+    backgroundColor: '#000000ea',
+    width: '50%'
+  },
+
+  drawerActiveTintColor: 'white',
+  drawerInactiveTintColor: 'white',
+
   headerTintColor: '#fff',
+  headerTitleAlign: 'center',
+
 };
