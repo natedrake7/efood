@@ -18,6 +18,7 @@ export class UserController {
   @FormDataRequest()
   async Create(@Body() userDto: UserDto): Promise<{accesstoken: string,refreshtoken: string} | string[]>
   {
+    console.log(userDto);
     return this.userService.Create(userDto);
   }
 

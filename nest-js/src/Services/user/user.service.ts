@@ -45,7 +45,7 @@ export class UserService {
       throw new UnauthorizedException("User is not registerd!");
     
     if(!await bcrypt.compare(password,user.password))
-      throw new UnauthorizedException("Incorrect Password!");
+      throw new UnauthorizedException("Incorrect User or Password!");
 
     const {id,firstname,lastname,email,phonenumber} = user;
     const payload: JwtPayload = {id,username,firstname,lastname,email,phonenumber};

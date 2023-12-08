@@ -1,4 +1,6 @@
-import { createContext, useState,useEffect } from "react";
+import { createContext, useEffect, useState} from "react";
+import "core-js/stable/atob";
+import { jwtDecode } from "jwt-decode";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const AuthContext = createContext({
@@ -8,6 +10,7 @@ export const AuthContext = createContext({
     postAccessToken: () => {},
     postRefreshToken: () => {},
     storeRefreshToken: async() => {},
+    getUserInfo: () => {},
     logout: () => {},
 });
 
@@ -15,6 +18,19 @@ function AuthContextProvider({children}){
 
     const [accessToken,setAccessToken] = useState();
     const [refreshToken,setRefreshToken] = useState();
+
+    useEffect(() => {
+        async function GetRefreshTokenFromStorage(){
+            try {
+                const refreshTokenStorage = await AsyncStorage.getItem('refreshToken');
+                refreshTokenStorage ? postRefreshToken(refreshTokenStorage) : postRefreshToken(''); 
+                }catch (error) {
+            console.error('Error fetching data:', error);
+            }
+    }
+    GetRefreshTokenFromStorage();
+    },[]);
+
 
     function postAccessToken(token){
         setAccessToken(token);
@@ -34,16 +50,23 @@ function AuthContextProvider({children}){
         setRefreshToken(token);
     }
 
+    function getUserInfo()
+    {
+        if (accessToken)
+            return jwtDecode(accessToken);
+         return '';
+    }
+
     async function logout(){
         try{
+            setAccessToken(null);
+            setRefreshToken(null);
             await AsyncStorage.removeItem('refreshToken');
         }
         catch(error)
         {
             throw new Error(error);
         }
-        setAccessToken(null);
-        setRefreshToken(null);
     }
 
     const value = {
@@ -53,6 +76,7 @@ function AuthContextProvider({children}){
         postAccessToken: postAccessToken,
         postRefreshToken: postRefreshToken,
         storeRefreshToken: storeRefreshToken,
+        getUserInfo: getUserInfo,
         logout: logout,
     }
 

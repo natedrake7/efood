@@ -14,8 +14,9 @@ function LoginScreen(){
   const authCtx = useContext(AuthContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [usernameError, setUsernameError] = useState(null);
-  const [passwordError, setPasswordError] = useState(null);
+  const [usernameError, setUsernameError] =  useState('');
+  const [passwordError, setPasswordError] =  useState('');
+  const [error,setError] = useState('');
   const [isFetchingToken,setIsFetchingToken] = useState(true);
 
   
@@ -25,20 +26,28 @@ function LoginScreen(){
     data.append('username', username);
     data.append('password', password);
 
-
-    const response =  await LogIn(data);
-    //if response contains our access and refresh tokens
-    if(response.accesstoken || response.refreshtoken)
-    {
-      authCtx.postAccessToken(response.accesstoken);
-      authCtx.postRefreshToken(response.refreshtoken);
-      await authCtx.storeRefreshToken(response.refreshtoken);
+    try{
+      const response =  await LogIn(data);
+      if(response.accesstoken || response.refreshtoken)
+      {
+        authCtx.postAccessToken(response.accesstoken);
+        authCtx.postRefreshToken(response.refreshtoken);
+        await authCtx.storeRefreshToken(response.refreshtoken);
+      }
+      else if(Array.isArray(response))
+      {
+        //else response is an array of errors
+        setUsernameError(response.find((error) => error.property === 'username'));
+        setPasswordError(response.find((error) => error.property === 'password'));
+      }
+      else
+      {
+        setError(response);
+        console.log(error);
+      }
     }
-    else
-    {
-      //else response is an array of errors
-      setUsernameError(response.find((error) => error.property === 'username'));
-      setPasswordError(response.find((error) => error.property === 'password'));
+    catch(error){
+      throw new Error(error);
     }
   };
 
@@ -66,8 +75,9 @@ function LoginScreen(){
     GetAccessToken();
 
     const timeoutId = setTimeout(() => {
-      setPasswordError(null);
-      setUsernameError(null);
+      setPasswordError('');
+      setUsernameError('');
+      setError('');
     }, 10000);
 
     return () => clearTimeout(timeoutId);
@@ -78,47 +88,47 @@ function LoginScreen(){
     SplashScreen.hideAsync();
 
     return (
-      <KeyboardAvoidingView style={styles.container} behavior='padding'>
-        <Image style={styles.imageContainer} source={require('../images/login-image.png')}/>
-        <View style={styles.credentialsContainer}>
-          <Text style={styles.header}>Login</Text>
-          <Text style={styles.inputHeaders}>Username:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your username..."
-            value={username}
-            onChangeText={(text) => setUsername(text)}
-          />
-          {usernameError &&
-            <Text style={styles.error}>{usernameError.message}</Text>
-          }
-          <Text style={styles.inputHeaders}>Password:</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your password..."
-            secureTextEntry
-            value={password}
-            onChangeText={(text) => setPassword(text)}
-          />
-          {passwordError &&
-            <Text style={styles.error}>{passwordError.message}</Text>
-          }
-            <View style={styles.buttonsContainer}>
-                <View style = {styles.buttons}>
-                    <Button title="Login" onPress={handleLogin} />
-                </View>
-                <View style = {styles.buttons}>
-                    <Button title="Register" onPress={handleNavigateToRegister} />
-                </View>
+        <KeyboardAvoidingView style={styles.container} behavior='padding'>
+          <Image style={styles.imageContainer} source={require('../images/login-image.png')}/>
+          <View style={styles.credentialsContainer}>
+            <Text style={styles.header}>Login</Text>
+            <Text style={styles.inputHeaders}>Username:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your username..."
+              placeholderTextColor={'#ffff'}
+              value={username}
+              onChangeText={(text) => setUsername(text)}
+            />
+            {usernameError &&
+              <Text style={styles.error}>{usernameError.message}</Text>
+            }
+            <Text style={styles.inputHeaders}>Password:</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your password..."
+              placeholderTextColor={'#ffff'}
+              secureTextEntry
+              value={password}
+              onChangeText={(text) => setPassword(text)}
+            />
+            {passwordError &&
+              <Text style={styles.error}>{passwordError.message}</Text>
+            }
+            {
+              error &&
+              <Text style={styles.error}>{error}</Text>
+            }
+              <View style={styles.buttonsContainer}>
+                  <View style = {styles.buttons}>
+                      <Button title="Login" onPress={handleLogin} />
+                  </View>
+                  <View style = {styles.buttons}>
+                      <Button title="Register" onPress={handleNavigateToRegister} />
+                  </View>
+              </View>
             </View>
-            <View style={styles.buttons}>
-                <View style = {styles.buttons}>
-                    <Button title="Want to be a professional?
-                                    Register Now" onPress={handleNavigateToRegister} />
-                </View>
-            </View>
-          </View>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
     );
   }
 };
@@ -147,20 +157,22 @@ const styles = StyleSheet.create({
   inputHeaders:{
     marginBottom: 10,
     fontSize: 15,
+    color:'#ffff',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: 'red'
+    color: '#ffff',
   },
   input: {
     height: 40,
-    borderColor: 'red',
+    borderColor: '#ffff',
     borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 10,
     borderRadius: 10,
+    color: '#ffff',
   },  
   buttonsContainer: {
     flexDirection: 'row',

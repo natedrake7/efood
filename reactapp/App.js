@@ -3,45 +3,26 @@ import LoginScreen from './components/LoginScreen';
 import RegisterScreen from './components/RegisterScreen';
 import HomeScreen from './components/HomeScreen';
 import AuthContextProvider, { AuthContext } from './store/auth-context';
-import { useContext,useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useContext} from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import DetailsScreen from './components/Details';
 import ProductDetailsScreen from './components/ProductDetails';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StatusBar } from 'expo-status-bar';
 import ProfileScreen from './components/ProfileScreen';
 import DrawerScreen from './components/DrawerScreen';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { registerOptions,loginOptions,TabScreenOptions } from './UI/Options';
+
 
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
 SplashScreen.preventAutoHideAsync();
 
 function Root(){
-  const [isTryingLogin,setIsTryingLogin] = useState(true);
-  const authCtx = useContext(AuthContext);
-
-  useEffect(() => {
-    async function GetRefreshTokenFromStorage(){
-      try {
-        const refreshTokenStorage = await AsyncStorage.getItem('refreshToken');
-        refreshTokenStorage ? authCtx.postRefreshToken(refreshTokenStorage) : authCtx.postRefreshToken(''); 
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-      setIsTryingLogin(false);
-    };
-
-    GetRefreshTokenFromStorage();
-  }, []);
-
-  if(!isTryingLogin)
-  {
-    SplashScreen.hideAsync();
-    return <Navigation/>;
-  }
+  return <Navigation/>;
 };
 
 export default function App(){
@@ -49,7 +30,6 @@ export default function App(){
   return(
       <>
         <AuthContextProvider>
-        <StatusBar barStyle="dark-content"/>
             <Root/>
         </AuthContextProvider>
       </>
@@ -66,14 +46,43 @@ function Navigation(){
   );
 };
 
+
 function AuthStack(){
   return(
-      <Stack.Navigator screenOptions={headerOptions}>
-        <Stack.Screen name="Login" component={LoginScreen}/>
-        <Stack.Screen name="Register" component={RegisterScreen}/>
-      </Stack.Navigator>
+      <Tab.Navigator renderTabBar={renderTabBar} screenOptions={TabScreenOptions}   animation={{
+        type: 'timing',
+        duration: 300,
+      }}>
+        <Tab.Screen name="User" component={AuthStackScreens} options={{ headerShown:false}}/>
+        <Tab.Screen name="Professional" component={AuthStackScreens} options={{ headerShown:false }}/>
+      </Tab.Navigator>
   );
 };
+
+function AuthStackScreens(){
+  return(
+    <Stack.Navigator>
+      <Stack.Group
+        screenOptions={{
+          presentation: 'modal',
+          headerStyle:{
+            backgroundColor: 'black',
+            title:'',
+          },
+        }}
+      >
+        <Stack.Screen name="Login" component={LoginScreen}  options={loginOptions}/>
+        <Stack.Screen name="Register" component={RegisterScreen} options={registerOptions}/>
+      </Stack.Group>
+    </Stack.Navigator>
+  );
+};
+
+const renderTabBar = props => (
+  <TabBar
+    {...props}
+  />
+);
 
 
 function AuthenticatedStack(){
