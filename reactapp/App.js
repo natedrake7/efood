@@ -11,8 +11,13 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import ProfileScreen from './components/ProfileScreen';
 import DrawerScreen from './components/DrawerScreen';
+import SettingsScreen from './components/SettingsScreen';
+import LoginProfessionalScreen from './components/LoginProfessionalScreen';
+import RegisterProfessionalScreen from './components/RegisterProfessionalScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { registerOptions,loginOptions,TabScreenOptions } from './UI/Options';
+import EditPasswordScreen from './components/EditPasswordScreen';
+
 
 
 const Drawer = createDrawerNavigator();
@@ -54,7 +59,7 @@ function AuthStack(){
         duration: 300,
       }}>
         <Tab.Screen name="User" component={AuthStackScreens} options={{ headerShown:false}}/>
-        <Tab.Screen name="Professional" component={AuthStackScreens} options={{ headerShown:false }}/>
+        <Tab.Screen name="Professional" component={AuthProfessionalStackScreens} options={{ headerShown:false }}/>
       </Tab.Navigator>
   );
 };
@@ -78,6 +83,28 @@ function AuthStackScreens(){
   );
 };
 
+function AuthProfessionalStackScreens(){
+  return(
+    <Stack.Navigator>
+      <Stack.Group
+        screenOptions={{
+          presentation: 'modal',
+          headerStyle:{
+            backgroundColor: 'black',
+            title:'',
+          },
+        }}
+      >
+        <Stack.Screen name="LoginProfessional" component={LoginProfessionalScreen}  options={loginOptions}/>
+        <Stack.Screen name="RegisterProfessional" component={RegisterProfessionalScreen} options={registerOptions}/>
+      </Stack.Group>
+    </Stack.Navigator>
+  );
+};
+
+
+
+
 const renderTabBar = props => (
   <TabBar
     {...props}
@@ -98,9 +125,11 @@ function AuthenticatedStack(){
         >
           <Drawer.Screen name="Home" component={HomeScreen} />
           <Drawer.Screen name="Profile" component={ProfileScreen}/>
+          <Drawer.Screen name="Settings" component={SettingsScreen}/>
         </Drawer.Navigator>
       )}
       </Stack.Screen>
+      <Stack.Screen name="EditPassword" component={EditPasswordScreen}/>
       <Stack.Screen name="Details" component={DetailsScreen} />
       <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
     </Stack.Navigator>

@@ -1,10 +1,10 @@
 import { IsNotEmpty, IsStrongPassword } from "class-validator";
 
 export class UserPasswordEdit{
-    @IsNotEmpty()
+    @IsNotEmpty({message:'Old Password cannot be empty!'})
     password: string;
 
     @IsNotEmpty()
-    @IsStrongPassword()
+    @IsStrongPassword({},{message:'New password is not strong enough!'})
     new_password: string;
 }

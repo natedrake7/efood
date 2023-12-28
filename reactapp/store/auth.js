@@ -48,4 +48,20 @@ export async function GetToken(refreshToken){
     {
         console.log(error);
     }
-}
+};
+
+export async function EditPassword(data,accessToken){
+    try{
+        const response = await fetch('http://192.168.1.16:3000/user/edit/password',{method:'POST',headers:
+                                                                                        new Headers({
+                                                                                            'Authorization': `Bearer ${accessToken}`
+                                                                                        }),
+                                                                                        body:data,
+                                                                                        });
+        return await response.json();
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+};

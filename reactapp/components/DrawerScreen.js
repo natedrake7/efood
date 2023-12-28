@@ -24,8 +24,8 @@ function DrawerScreen(props){
             <Text style={styles.header}>Welcome {user.username}!</Text>
                 <DrawerItemList {...props}/>
             </DrawerContentScrollView>
-            <View>
-                <Button style={styles.header} onPress={HandleLogout} title="Logout"/>
+            <View style={styles.button}>
+                <Button onPress={HandleLogout} title="Logout"/>
             </View>
         </SafeAreaView >
     )
@@ -53,5 +53,10 @@ const styles = StyleSheet.create({
         borderRadius:50,
         marginLeft: 10,
         marginBottom:10,
-    }
+    },
+    button:{
+        width:100,
+        alignSelf:'center',
+        marginBottom:20,
+    },
 })
