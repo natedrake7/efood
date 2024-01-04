@@ -65,3 +65,19 @@ export async function EditPassword(data,accessToken){
         console.log(error);
     }
 };
+
+export async function EditProfile(data,accessToken){
+    try{
+        const response = await fetch('http://192.168.1.16:3000/user/edit',{method:'POST',headers:
+                                                                            new Headers({
+                                                                                'Authorization': `Bearer ${accessToken}`
+                                                                            }),
+                                                                            body:data,
+                                                                            });
+        return await response.json();
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+}

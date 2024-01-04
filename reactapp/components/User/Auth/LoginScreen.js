@@ -1,13 +1,8 @@
 import React, { useState,useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet,Image,Dimensions,KeyboardAvoidingView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { LogIn } from '../store/auth';
-import { AuthContext } from '../store/auth-context';
-import { GetToken } from "../store/auth";
-import * as SplashScreen from 'expo-splash-screen';
-
-
-SplashScreen.preventAutoHideAsync();
+import { LogIn } from '../../../store/context/User/auth';
+import { AuthContext } from '../../../store/context/User/auth-context';
 
 function LoginScreen(){
   const navigation = useNavigation();
@@ -17,8 +12,15 @@ function LoginScreen(){
   const [usernameError, setUsernameError] =  useState('');
   const [passwordError, setPasswordError] =  useState('');
   const [error,setError] = useState('');
-  const [isFetchingToken,setIsFetchingToken] = useState(true);
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setPasswordError('');
+      setUsernameError('');
+      setError('');
+    }, 10000);
+    return () => clearTimeout(timeoutId);
+  }, []);
   
   const handleLogin = async() => {
 
@@ -54,42 +56,9 @@ function LoginScreen(){
   const handleNavigateToRegister = () => {
     navigation.navigate('Register');
   };
-
-
-  useEffect(() => {
-
-    async function GetAccessToken(){
-      try {
-          if(authCtx.refreshToken)
-          {
-            const token = await GetToken(authCtx.refreshToken);
-            token ? authCtx.postAccessToken(token) : authCtx.postAccessToken('');
-          }   
-      } 
-      catch (error) {
-        console.error('Error fetching data:', error);
-      }
-      setIsFetchingToken(false);
-    };
-
-    GetAccessToken();
-
-    const timeoutId = setTimeout(() => {
-      setPasswordError('');
-      setUsernameError('');
-      setError('');
-    }, 10000);
-
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  if(!isFetchingToken)
-  {
-    SplashScreen.hideAsync();
-
     return (
         <KeyboardAvoidingView style={styles.container} behavior='padding'>
-          <Image style={styles.imageContainer} source={require('../images/login-image.png')}/>
+          <Image style={styles.imageContainer} source={require('../../../images/login-image.png')}/>
           <View style={styles.credentialsContainer}>
             <Text style={styles.header}>Login</Text>
             <Text style={styles.inputHeaders}>Username:</Text>
@@ -130,7 +99,6 @@ function LoginScreen(){
             </View>
         </KeyboardAvoidingView>
     );
-  }
 };
 export default LoginScreen;
 

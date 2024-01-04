@@ -1,8 +1,8 @@
 import { useNavigation,useRoute } from '@react-navigation/native';
 import React, { useState,useEffect, useContext,useRef } from 'react';
 import { View, Text, TextInput, StyleSheet,Image, FlatList, ScrollView,Animated,PanResponder } from 'react-native';
-import { GetProfessionalUserById } from '../store/professional';
-import { AuthContext } from '../store/auth-context';
+import { GetProfessionalUserById } from '../../../store/context/User/professional';
+import { AuthContext } from '../../../store/context/User/auth-context';
 import { ActivityIndicator } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaView } from 'react-navigation';
@@ -157,7 +157,7 @@ function DetailsScreen() {
 
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="red" />
+      <ActivityIndicator size="large" color="white" />
     </View>
   );
 

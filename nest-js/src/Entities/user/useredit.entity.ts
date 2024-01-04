@@ -1,11 +1,11 @@
 export class UserEdit{
-    username: string;
+    username?: string;
 
-    firstname: string;
+    firstname?: string;
 
-    lastname: string;
+    lastname?: string;
 
-    email: string;
+    email?: string;
 
-    phonenumber: string;
+    phonenumber?: string;
 }

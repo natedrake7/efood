@@ -1,7 +1,7 @@
 import { Text, View,Image, Button } from "react-native";
 import { DrawerContentScrollView,DrawerItemList } from "@react-navigation/drawer";
 import { StyleSheet } from "react-native";
-import { AuthContext } from "../store/auth-context";
+import { AuthContext } from "../../../store/context/User/auth-context";
 import { useContext } from "react";
 import { SafeAreaView } from "react-navigation";
 
@@ -18,7 +18,7 @@ function DrawerScreen(props){
         <SafeAreaView style={styles.container}>
             <DrawerContentScrollView contentContainerStyle={styles.scrollViewContainer} {...props}>
                 <Image 
-                source={require('../images/foodlab-image.png')}
+                source={require('../../../images/foodlab-image.png')}
                 style={styles.imageContainer}
                 />
             <Text style={styles.header}>Welcome {user.username}!</Text>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         flexDirection:'column',
     },
     scrollViewContainer:{
-        backgroundColor: '#000000ea',
+        backgroundColor: '#121212',
     },
     header:{
         color:'white',

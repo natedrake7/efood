@@ -1,22 +1,25 @@
 import { NavigationContainer,DefaultTheme } from '@react-navigation/native';
-import LoginScreen from './components/LoginScreen';
-import RegisterScreen from './components/RegisterScreen';
-import HomeScreen from './components/HomeScreen';
-import AuthContextProvider, { AuthContext } from './store/auth-context';
+import LoginScreen from './components/User/Auth/LoginScreen';
+import RegisterScreen from './components/User/Auth/RegisterScreen';
+import HomeScreen from './components/User/Authenticated/HomeScreen';
+import AuthContextProvider, { AuthContext } from './store/context/User/auth-context';
 import { useContext} from 'react';
 import * as SplashScreen from 'expo-splash-screen';
-import DetailsScreen from './components/Details';
-import ProductDetailsScreen from './components/ProductDetails';
+import DetailsScreen from './components/User/Authenticated/Details';
+import ProductDetailsScreen from './components/User/Authenticated/ProductDetails';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import ProfileScreen from './components/ProfileScreen';
-import DrawerScreen from './components/DrawerScreen';
-import SettingsScreen from './components/SettingsScreen';
-import LoginProfessionalScreen from './components/LoginProfessionalScreen';
-import RegisterProfessionalScreen from './components/RegisterProfessionalScreen';
+import ProfileScreen from './components/User/Authenticated/ProfileScreen';
+import DrawerScreen from './components/User/Authenticated/DrawerScreen';
+import SettingsScreen from './components/User/Authenticated/SettingsScreen';
+import LoginProfessionalScreen from './components/Professional/LoginProfessionalScreen';
+import RegisterProfessionalScreen from './components/Professional/RegisterProfessionalScreen';
+import EditPasswordScreen from './components/User/Authenticated/EditPasswordScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { registerOptions,loginOptions,TabScreenOptions } from './UI/Options';
-import EditPasswordScreen from './components/EditPasswordScreen';
+import { StatusBar } from 'react-native';
+import CartScreen from './components/User/Authenticated/CartScreen';
+import DipslayCart from './components/User/Authenticated/CartDropdown';
 
 
 
@@ -35,6 +38,7 @@ export default function App(){
   return(
       <>
         <AuthContextProvider>
+          <StatusBar barStyle={'auto'}/>
             <Root/>
         </AuthContextProvider>
       </>
@@ -44,11 +48,16 @@ export default function App(){
 function Navigation(){
   const authCtx = useContext(AuthContext);
 
-  return(
-    <NavigationContainer theme={Theme}>
-      {authCtx.isAuthenticated ? <AuthenticatedStack/> : <AuthStack />}
-    </NavigationContainer>
-  );
+  if(!authCtx.isFetchingToken)
+  {
+    SplashScreen.hideAsync();
+
+    return(
+      <NavigationContainer theme={Theme}>
+        {authCtx.isAuthenticated ? <AuthenticatedStack/> : <AuthStack />}
+      </NavigationContainer>
+    );
+  }
 };
 
 
@@ -103,8 +112,6 @@ function AuthProfessionalStackScreens(){
 };
 
 
-
-
 const renderTabBar = props => (
   <TabBar
     {...props}
@@ -123,15 +130,16 @@ function AuthenticatedStack(){
           drawerPosition="left"
           drawerType="slide"
         >
-          <Drawer.Screen name="Home" component={HomeScreen} />
-          <Drawer.Screen name="Profile" component={ProfileScreen}/>
-          <Drawer.Screen name="Settings" component={SettingsScreen}/>
+          <Drawer.Screen name="Home" component={HomeScreen} options={{headerRight: DipslayCart}}/>
+          <Drawer.Screen name="Profile" component={ProfileScreen} options={{headerRight: DipslayCart}}/>
+          <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerRight: DipslayCart}}/>
         </Drawer.Navigator>
       )}
       </Stack.Screen>
-      <Stack.Screen name="EditPassword" component={EditPasswordScreen}/>
-      <Stack.Screen name="Details" component={DetailsScreen} />
-      <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} />
+      <Stack.Screen name="EditPassword" component={EditPasswordScreen} options={{headerTitle:'',headerRight: DipslayCart}}/>
+      <Stack.Screen name="Details" component={DetailsScreen} options={{headerRight: DipslayCart}}/>
+      <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} options={{headerRight: DipslayCart}}/>
+      <Stack.Screen name="Cart" component={CartScreen} />
     </Stack.Navigator>
   )
 };
@@ -140,20 +148,19 @@ const Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    background: '#000000ea'
+    background: '#121212'
   },
 };
 
 const headerOptions = {
   headerMode: 'float',
 
-  headerStyle: {backgroundColor: '#000000ea'},
+  headerStyle: {backgroundColor: '#121212'},
 
   drawerStyle: {
-    backgroundColor: '#000000ea',
+    backgroundColor: '#121212',
     width: '50%'
   },
-
   drawerActiveTintColor: 'white',
   drawerInactiveTintColor: 'white',
 

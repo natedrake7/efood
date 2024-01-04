@@ -1,8 +1,8 @@
 import React, { useState,useEffect,useContext, useTransition } from 'react';
 import { View, Text, TextInput, Button, StyleSheet,ScrollView } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { Register } from '../store/auth';
-import { AuthContext } from '../store/auth-context';
+import { Register } from '../../store/context/User/auth';
+import { AuthContext } from '../../store/context/User/auth-context';
 import Timetable from './TimetableProp';
 
 

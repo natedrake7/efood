@@ -7,7 +7,7 @@ import { JwtPayload, RefreshJwtPayload } from 'src/Entities/jwt-payload.interfac
 import { UserEdit } from 'src/Entities/user/useredit.entity';
 import { UserPasswordEdit } from 'src/Entities/user/user_password_edit.entity';
 import { UserQueries } from 'src/DbQueries/UserQueries';
-import { isEmail, isPhoneNumber } from 'class-validator';
+import { isEmail, isNotEmpty, isPhoneNumber, maxLength, minLength } from 'class-validator';
 import { User } from 'src/Entities/user/user.entity';
 
 @Injectable()
@@ -57,10 +57,16 @@ export class UserService {
     return {accesstoken,refreshtoken};
   }
 
-  async Edit(user: User,userDto: UserEdit):Promise<{accesstoken: string}>{
+  async Edit(user: User,userDto: UserEdit):Promise<{accesstoken: string} | {property: string,message:string}[]>{
 
     if(!user)
-      throw new UnauthorizedException("User is not registerd!");
+      throw new UnauthorizedException("User is not registered!");
+
+    const errors = this.ValidateEdit(userDto);
+    if(errors.length != 0)
+      return errors;
+
+    const userExistsErrors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
 
     const Edit_user = await this.Queries.UpdateUserById(user.id,userDto);
     const {id,username,firstname,lastname,email,phonenumber} = Edit_user;
@@ -127,6 +133,24 @@ export class UserService {
       if(user.length != 0  && user[0].phonenumber != undefined && user[0].phonenumber == phonenumber && phonenumber != null)
         errors.push("Phonenumber already in use!");
     });
+
+    return errors;
+  }
+
+  ValidateEdit(userDto : UserEdit):{property: string,message:string}[]
+  {
+    const errors:{property: string,message:string}[] = [];
+
+    if(userDto.username != null && (!isNotEmpty(userDto.username) || !minLength(userDto.username,4) || !maxLength(userDto.username,20)))
+      errors.push({property: 'username',message: 'Username must be between 4-20 characters long!'});
+    if(userDto.email != null && !isEmail(userDto.email))
+      errors.push({property: 'email',message: 'Invalid Email Address!'});
+    if(userDto.firstname != null && (!minLength(userDto.firstname,4) || !maxLength(userDto.firstname,20)))
+      errors.push({property:'firstname',message:'Firstname must be between 4-20 characters long!'});
+    if(userDto.lastname != null && (!minLength(userDto.lastname,4) || !maxLength(userDto.lastname,20)))
+      errors.push({property:'lastname',message:'Lastname must be between 4-20 characters long!'});
+    if(userDto.phonenumber != null && !isPhoneNumber(userDto.phonenumber,'GR'))
+      errors.push({property: 'phonenumber',message: 'Invalid Phonenumber (specify region e.g +30 6944444444)!'});
 
     return errors;
   }

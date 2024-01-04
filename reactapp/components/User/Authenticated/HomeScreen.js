@@ -1,13 +1,10 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState,useEffect, useContext } from 'react';
 import { View, Text, TextInput, StyleSheet,Image, FlatList,ActivityIndicator,TouchableOpacity } from 'react-native';
-import { GetProfessionalUsers } from '../store/professional';
-import { AuthContext } from '../store/auth-context';
-import * as SplashScreen from 'expo-splash-screen';
+import {GetProfessionalUsers} from '../../../store/context/User/professional'
+import { AuthContext } from '../../../store/context/User/auth-context';
 import { SafeAreaView } from 'react-navigation';
 import { FontAwesome } from '@expo/vector-icons';
-
-SplashScreen.preventAutoHideAsync();
 
 function HomeScreen() {
   const [isPageReady,setIsPageReady] = useState(false);
@@ -49,10 +46,12 @@ function HomeScreen() {
       setIsPageReady(true);
     }
     GetProfessionals();
-  }, [authCtx.accessToken]);
+  }, [authCtx.accessToken,professionalUsers]);
 
+  //TODO
   const HandleSearch = (searchValue) =>{
     setSearchValue(searchValue);
+   // setProfessionalUsers(professionalUsers.filter(professional => (professional.name === searchValue || professional.type === searchValue)));
   }
 
   const RenderSearchBar = () =>{
@@ -60,6 +59,7 @@ function HomeScreen() {
       <TextInput
         style={styles.input}
         placeholder="Search..."
+        placeholderTextColor={'#ffff'}
         clearButtonMode='always'
         autoCorrect={false}
         value={searchValue}
@@ -110,7 +110,6 @@ function HomeScreen() {
 
   if(isPageReady)
   {
-    SplashScreen.hideAsync();
     return (
       <SafeAreaView style={styles.container}>
         {professionalUsers &&
@@ -127,7 +126,6 @@ function HomeScreen() {
       </SafeAreaView >
     );
   }
-
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="white" />
@@ -146,7 +144,7 @@ function getHours(timeString) {
 
   } else {
     console.error(`Invalid time string: ${timeString}`);
-    return 0; // Return a default value or handle the error as needed
+    return 0;
   }
 }
 
@@ -162,13 +160,11 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     backgroundColor: '#353535c5',
-
-    borderWidth: 1,
     marginBottom: 16,
     paddingHorizontal: 10,
     borderRadius: 10,
-
     color: 'white',
+
     fontSize: 18
   }, 
   backgroundImage:{
@@ -187,7 +183,7 @@ const styles = StyleSheet.create({
   itemsContainer: {
     flexDirection: 'column',
     justifyContent: 'space-between',
-    backgroundColor: '#282828ea', // Use a single background color
+    backgroundColor: '#282828ea',
     
     shadowColor: 'black',
     shadowOffset: { width: 0, height: 2 },

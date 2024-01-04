@@ -2,13 +2,13 @@ import React, { useState,useEffect,useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
-import { AuthContext } from '../store/auth-context';
-
+import { AuthContext } from '../../../store/context/User/auth-context';
+import { EditProfile } from '../../../store/context/User/auth';
+import { ActivityIndicator } from 'react-native';
 
 function ProfileScreen(){
     const authCtx = useContext(AuthContext);
     const navigator = useNavigation();
-    const user = authCtx.getUserInfo();
 
     const [username, setUsername] = useState('');
     const [firstname,setFirstname] = useState('');
@@ -20,10 +20,17 @@ function ProfileScreen(){
     const [lastnameError,setLastnameError] = useState('');
     const [emailError,setEmailError] = useState('');
     const [phonenumberError,setPhonenumberError] = useState('');
-  
+    const [user,setUser] = useState();
+
+    const [isfetchingUser,setIsFetchingUser] = useState(true);
     const [error,setError] = useState('');
+    const [successfullMessage,setSuccessfullMessage] = useState('');
   
     useEffect(() => {
+      setUser(authCtx.getUserInfo());
+
+      setIsFetchingUser(false);
+
       const timeoutId = setTimeout(() => {
         setUsernameError('');
         setFirstnameError('');
@@ -31,20 +38,68 @@ function ProfileScreen(){
         setPhonenumberError('');
         setEmailError('');
         setError('');
+        setSuccessfullMessage('');
       }, 10000);
   
       return () => clearTimeout(timeoutId);
-    }, []);
+    }, [authCtx.accessToken]);
 
-    const handleUpdate  = () =>{
-
+    const handleUpdate  = async() =>{
+      setIsFetchingUser(true);
+        try{
+          const response = await EditProfile(HandleData(),authCtx.accessToken);
+          if(response.statusCode === 401)
+            setError(response.errors);
+          else if(Array.isArray(response))
+          {
+            setUsernameError(response.find(error => error.property === 'username'));
+            setFirstnameError(response.find(error => error.property === 'firstname'));
+            setLastnameError(response.find(error => error.property === 'lastname'));
+            setEmailError(response.find(error => error.property === 'email'));
+            setPhonenumberError(response.find(error => error.property === 'phonenumber'));
+          }
+          else if(response.accesstoken)
+          {
+            setIsFetchingUser(true);
+            authCtx.postAccessToken(response.accesstoken);
+            setSuccessfullMessage('Changes submitted successfully!');
+          }
+        }
+        catch(error)
+        {
+          console.log(error);
+        }
+        setIsFetchingUser(false);
+        setUsername('');
+        setFirstname('');
+        setLastname('');
+        setPhonenumber('');
+        setEmail('');
     }
 
     const handlePasswordEdit = () =>{
         navigator.navigate('EditPassword');
     }
 
-    return(
+    const HandleData = () =>{
+      const data = new FormData();
+      if(username)
+        data.append('username',username);
+      if(firstname)
+        data.append('firstname',firstname);
+      if(lastname)
+        data.append('lastname',lastname);
+      if(email)
+        data.append('email',email);
+      if(phonenumber)
+        data.append('phonenumber',phonenumber);
+      return data;
+    }
+
+    if(!isfetchingUser)
+    {
+      return(
+
         <KeyboardAwareScrollView
             contentContainerStyle={styles.container}
             extraScrollHeight={100} // Adjust this value as needed
@@ -105,6 +160,14 @@ function ProfileScreen(){
         {phonenumberError &&
             <Text style={styles.error}>{phonenumberError.message}</Text>  
         }
+        {
+          error && !successfullMessage &&
+            <Text style={styles.error}>{error}</Text>
+        }
+        {
+          successfullMessage &&
+          <Text style={styles.success}>{successfullMessage}</Text>
+        }
         <TouchableOpacity style={styles.passwordButton} onPress={handlePasswordEdit}>
             <Text style={styles.passwordText}>Change Password</Text>
         </TouchableOpacity>
@@ -114,7 +177,13 @@ function ProfileScreen(){
             </View>
         </View>                 
         </KeyboardAwareScrollView>
-    )
+      )
+    }
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="white" />
+      </View>
+    );
 }
 export default ProfileScreen;
 
@@ -129,6 +198,13 @@ const styles = StyleSheet.create({
       flex: 3,
       padding: 10
     },
+    loadingContainer:{
+      flex: 1,
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop:20,
+    },
     inputHeaders:{
       marginBottom: 10,
       fontSize: 15,
@@ -142,7 +218,6 @@ const styles = StyleSheet.create({
     },
     input: {
       height: 50,
-      borderWidth: 1,
       marginBottom: 16,
       paddingHorizontal: 10,
       width: 400,
@@ -182,6 +257,12 @@ const styles = StyleSheet.create({
       color:'red',
       marginBottom: 10,
       fontSize: 18,
-    }
+    },
+    success:{
+      flexDirection:'row',
+      color:'green',
+      marginBottom: 10,
+      fontSize: 18,
+    },
   });
   

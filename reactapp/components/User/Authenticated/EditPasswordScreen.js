@@ -1,8 +1,8 @@
 import React, { useState,useEffect,useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { AuthContext } from '../store/auth-context';
-import { EditPassword } from '../store/auth';
+import { AuthContext } from '../../../store/context/User/auth-context';
+import { EditPassword } from '../../../store/context/User/auth';
 
 function EditPasswordScreen()
 {

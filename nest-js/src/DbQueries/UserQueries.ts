@@ -4,6 +4,7 @@ import { UserDto } from "src/Entities/user/UserDto";
 import { User } from "src/Entities/user/user.entity";
 import { DataSource } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
+import { isNotEmpty } from "class-validator";
 
 export class UserQueries{
     constructor(@InjectRepository(User)

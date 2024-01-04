@@ -1,9 +1,9 @@
 import React, { useState,useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet,Image,Dimensions,KeyboardAvoidingView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { LogIn } from '../store/auth';
-import { AuthContext } from '../store/auth-context';
-import { GetToken } from "../store/auth";
+import { LogIn } from '../../store/context/User/auth';
+import { AuthContext } from '../../store/context/User/auth-context';
+import { GetToken } from "../../store/context/User/auth";
 import * as SplashScreen from 'expo-splash-screen';
 
 
@@ -90,7 +90,7 @@ function LoginProfessionalScreen()
   
       return (
           <KeyboardAvoidingView style={styles.container} behavior='padding'>
-            <Image style={styles.imageContainer} source={require('../images/login-image.png')}/>
+            <Image style={styles.imageContainer} source={require('../../images/login-image.png')}/>
             <View style={styles.credentialsContainer}>
               <Text style={styles.header}>Login as a Professional</Text>
               <Text style={styles.inputHeaders}>Username:</Text>
