@@ -81,3 +81,34 @@ export async function EditProfile(data,accessToken){
         console.log(error);
     }
 }
+
+export async function GetUserAdresses(accessToken){
+    try{
+        const response = await fetch('http://192.168.1.16:3000/user/address/get',{method:'GET',headers:
+        new Headers({
+            'Authorization': `Bearer ${accessToken}`
+        })});
+
+        return await response.json();
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+}
+
+export async function CreateAddress(data,accessToken){
+    try{
+        const response = await fetch('http://192.168.1.16:3000/user/address/create',{method:'POST',headers:
+                                                                            new Headers({
+                                                                                'Authorization': `Bearer ${accessToken}`
+                                                                            }),
+                                                                            body:data,
+                                                                            });
+        return await response.json();
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+}

@@ -42,7 +42,7 @@ export class UserService {
     const user = await this.Queries.GetUserByUsername(username);
     
     if(!user)
-      throw new UnauthorizedException("User is not registerd!");
+      throw new UnauthorizedException("User is not registered!");
     
     if(!await bcrypt.compare(password,user.password))
       throw new UnauthorizedException("Incorrect User or Password!");

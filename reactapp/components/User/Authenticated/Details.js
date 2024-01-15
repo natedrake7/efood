@@ -79,8 +79,9 @@ function DetailsScreen() {
     );
   }
 
-  const handleAddToCart = (id) =>{
-    
+  const handleAddToCart = (item) =>{
+    item.size = 'medium';
+    authCtx.addToCart(item);
   }
 
   const handlePress = (id) => {
@@ -97,7 +98,7 @@ function DetailsScreen() {
                 <Text style={styles.description}>{item.description}</Text>
             </View>
             <Image source={{ uri: item.image }} style={styles.imageContainer} />
-            <TouchableOpacity style={styles.AddToCartButton} onPress={() => handleAddToCart(item.id)}>
+            <TouchableOpacity style={styles.AddToCartButton} onPress={() => handleAddToCart(item)}>
                 <Text style={styles.plusButtonText}>+</Text>
             </TouchableOpacity>
         </View>
@@ -279,8 +280,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#1a1a1a',
         padding: 5,
         borderRadius: 20,
-        width: 35,
-        height: 35,
+        width: 45,
+        height: 45,
         justifyContent: 'center',
         alignItems: 'center', // Align text horizontally
       },

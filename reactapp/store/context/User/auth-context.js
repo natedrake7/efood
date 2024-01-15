@@ -7,12 +7,15 @@ import { GetToken } from "./auth";
 export const AuthContext = createContext({
     accessToken: '',
     refreshToken: '',
+    cart: [],
     isAuthenticated: false,
     isFetchingToken: false,
     postAccessToken: () => {},
     postRefreshToken: () => {},
     storeRefreshToken: async() => {},
     getUserInfo: () => {},
+    addToCart: () => {},
+    removeFromCart: () => {},
     logout: () => {},
 });
 
@@ -21,6 +24,7 @@ function AuthContextProvider({children}){
     const [accessToken,setAccessToken] = useState();
     const [refreshToken,setRefreshToken] = useState();
     const [isFetchingToken,setIsFetchingToken] = useState(true);
+    const [cart,setCartItem] = useState([]);
 
     useEffect(() => {
         async function GetRefreshTokenFromStorage(){
@@ -66,6 +70,14 @@ function AuthContextProvider({children}){
          return '';
     }
 
+    function addToCart(item) {
+        setCartItem([...cart, item]);
+    }
+    
+    function removeFromCart(itemToRemove) {
+        setCartItem(cart.filter(item => item.id !== itemToRemove.id));
+    }
+
     async function logout(){
         try{
             setAccessToken(null);
@@ -86,6 +98,9 @@ function AuthContextProvider({children}){
         postAccessToken: postAccessToken,
         postRefreshToken: postRefreshToken,
         storeRefreshToken: storeRefreshToken,
+        cart: cart,
+        addToCart: addToCart,
+        removeFromCart: removeFromCart,
         getUserInfo: getUserInfo,
         logout: logout,
     }

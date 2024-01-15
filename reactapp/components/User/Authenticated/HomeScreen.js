@@ -118,7 +118,7 @@ function HomeScreen() {
             data={professionalUsers}
             renderItem={RenderProfessional}
             keyExtractor={(item) => item.id}
-            onScrollToTop={LoadingScreen}
+            onScrollToTop={() => LoadingScreen()}
             showsVerticalScrollIndicator={false}
           >
           </FlatList>

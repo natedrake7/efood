@@ -26,6 +26,10 @@ export class AddressQueries{
                         ];
         return await this.AddressRepository.query(query,values);
     }
+    async CheckAddressExistanceById(id: string,user_id: string):Promise<boolean>{
+        const query = `SELECT EXISTS (SELECT 1 FROM "ProfessionalUser" WHERE id = $1 AND "userId" = $2 LIMIT 1) AS match_found;`;
+        return (await this.AddressRepository.query(query,[id,user_id]))[0];  
+    }
 
     async GetAddressById(id: string,user_id : string):Promise<Address>{
         const query = `SELECT id,address,number,zipcode,city,phonenumber,ringbell,floor FROM "Address"

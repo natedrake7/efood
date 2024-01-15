@@ -148,7 +148,7 @@ function ProfileScreen(){
         />
         {emailError &&
             <Text style={styles.error}>{emailError.message}</Text>  
-        }        
+        }         
         <Text style={styles.inputHeaders}>Phonenumber:</Text>
         <TextInput
             style={styles.input}

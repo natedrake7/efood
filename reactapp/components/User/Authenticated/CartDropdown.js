@@ -1,52 +1,20 @@
-import React,{ useState} from 'react';
-import { View, Text, TouchableOpacity,StyleSheet,Modal,TouchableWithoutFeedback } from 'react-native';
+import React from 'react';
+import { View, TouchableOpacity,StyleSheet,Modal,TouchableWithoutFeedback } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 const CartIcon = ({ onPress }) => {
-    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
     const navigator = useNavigation();
 
     const handlePress = () => {
-      setIsDropdownVisible(!isDropdownVisible);
-      onPress(); 
+      navigator.navigate('Cart');
     };
-
-    const HandleCheckout = () =>{
-        setIsDropdownVisible(false);
-        navigator.navigate('Cart');
-    }
-
     return (
       <View>
         <TouchableOpacity onPress={handlePress} style={{marginRight:12}}>
           <Ionicons name="cart-outline" size={24} color="#fff" />
         </TouchableOpacity>
-  
-        <Modal
-          transparent={true}
-          animationType="fade"
-          visible={isDropdownVisible}
-          onRequestClose={() => setIsDropdownVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setIsDropdownVisible(false)}>
-            <View style={styles.modalOverlay} />
-          </TouchableWithoutFeedback>
-          
-          <View style={styles.dropdownContainer}>
-            <View style={styles.container}>
-                <View style={styles.buttonsContainer}>
-                    <TouchableOpacity onPress={() => console.log('spera')}>
-                        <Text style={styles.text}>Close</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={HandleCheckout}>
-                        <Text style={styles.text}>Checkout</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-          </View>
-        </Modal>
       </View>
     );
 };
@@ -63,8 +31,8 @@ const styles = StyleSheet.create({
         flex:1,
         flexDirection:'column',
         justifyContent:'center',
-        width:300,
-        height: 140,
+        width:120,
+        height: 90,
         padding:16,
         borderRadius:8,
 

@@ -15,14 +15,11 @@ export class OrderService{
                 private AddressQueries: AddressQueries){}
     
     async Create(user: User,orderDto: OrderDto,professionalID: string,completeproducts: {ID :string,count: number,size:string,addonsID :string[]}[],addressID: string):Promise<void>{
-        const professionalUser = await this.ProfessionalUserQueries.GetUserById(professionalID);
         
-        if(!professionalUser)
+        if(!await this.ProfessionalUserQueries.CheckUserExistanceById(professionalID))
             throw new BadRequestException("Professional User doesn't exist!");
 
-        const address = await this.AddressQueries.GetAddressById(addressID,user.id);
-
-        if(!address)
+        if(!await this.AddressQueries.CheckAddressExistanceById(addressID,user.id))
             throw new BadRequestException("Invalid address!");
 
         return await this.OrderQueries.CreateOrder(completeproducts,professionalID,user.id,orderDto,addressID);    

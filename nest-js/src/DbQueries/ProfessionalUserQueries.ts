@@ -39,6 +39,11 @@ export class ProfessionalUserQueries{
         ];
         return (await this.UserRepository.query(query,values))[0];
     }
+    async CheckUserExistanceById(id : string):Promise<boolean> {
+        const query = `SELECT EXISTS (SELECT 1 FROM "ProfessionalUser" WHERE id = $1 LIMIT 1) AS match_found;`;
+        return (await this.UserRepository.query(query,[id]))[0];  
+    }    
+
     async GetUserById(id : string):Promise<ProfessionalUser> { 
         const query = `SELECT id,username,address,type,name,delivery_time,city,zipcode,timetable,email,phonenumber,description,"franchiseUserId","profileImage","backgroundImage" FROM "ProfessionalUser" WHERE id = $1 LIMIT 1;`
         return (await this.UserRepository.query(query,[id]))[0];

@@ -20,6 +20,8 @@ import { registerOptions,loginOptions,TabScreenOptions } from './UI/Options';
 import { StatusBar } from 'react-native';
 import CartScreen from './components/User/Authenticated/CartScreen';
 import DipslayCart from './components/User/Authenticated/CartDropdown';
+import AddressesScreen from './components/User/Authenticated/AddressesScreen';
+import AddAddressScreen from './components/User/Authenticated/AddAddressScreen';
 
 
 
@@ -132,6 +134,7 @@ function AuthenticatedStack(){
         >
           <Drawer.Screen name="Home" component={HomeScreen} options={{headerRight: DipslayCart}}/>
           <Drawer.Screen name="Profile" component={ProfileScreen} options={{headerRight: DipslayCart}}/>
+          <Drawer.Screen name="Addresses" component={AddressesScreen} options={{headerRight: DipslayCart}}/>
           <Drawer.Screen name="Settings" component={SettingsScreen} options={{headerRight: DipslayCart}}/>
         </Drawer.Navigator>
       )}
@@ -140,6 +143,7 @@ function AuthenticatedStack(){
       <Stack.Screen name="Details" component={DetailsScreen} options={{headerRight: DipslayCart}}/>
       <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} options={{headerRight: DipslayCart}}/>
       <Stack.Screen name="Cart" component={CartScreen} />
+      <Stack.Screen name="AddAddress" component={AddAddressScreen} options={{headerRight: DipslayCart}}/>
     </Stack.Navigator>
   )
 };
