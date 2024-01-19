@@ -31,7 +31,7 @@ export class AddressesController{
     }
 
     @Get('get')
-    async GetAddressesByUser(@GetUser() user:User):Promise<Address[]>{
+    async GetAddressesByUser(@GetUser() user: User):Promise<Address[]>{
         return this.addressService.GetAddressesByUserId(user);
     }
 

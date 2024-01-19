@@ -97,6 +97,20 @@ export async function GetUserAdresses(accessToken){
     }
 }
 
+export async function DeleteUserAddress(accessToken,id){
+    try{
+        const response = await fetch('http://192.168.1.16:3000/user/address/delete/' + id,{method:'POST',headers:
+                                                                            new Headers({
+                                                                                'Authorization': `Bearer ${accessToken}`
+                                                                            })});
+        return await response.json();
+    }
+    catch(error)
+    {
+        console.log(error);
+    }
+}
+
 export async function CreateAddress(data,accessToken){
     try{
         const response = await fetch('http://192.168.1.16:3000/user/address/create',{method:'POST',headers:

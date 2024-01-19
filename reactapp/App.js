@@ -22,6 +22,7 @@ import CartScreen from './components/User/Authenticated/CartScreen';
 import DipslayCart from './components/User/Authenticated/CartDropdown';
 import AddressesScreen from './components/User/Authenticated/AddressesScreen';
 import AddAddressScreen from './components/User/Authenticated/AddAddressScreen';
+import AddressScreenDetails from './components/User/Authenticated/AddressDetailsScreen';
 
 
 
@@ -144,6 +145,7 @@ function AuthenticatedStack(){
       <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} options={{headerRight: DipslayCart}}/>
       <Stack.Screen name="Cart" component={CartScreen} />
       <Stack.Screen name="AddAddress" component={AddAddressScreen} options={{headerRight: DipslayCart}}/>
+      <Stack.Screen name="AddressDetails" component={AddressScreenDetails} options={{headerRight: DipslayCart}}/>
     </Stack.Navigator>
   )
 };

@@ -39,10 +39,8 @@ function AddAddressScreen(){
       }, []);
 
       const handleSubmitAddress = async() =>{
-        data = createFormData();
-
         try{
-            const response = await CreateAddress(data,authCtx.accessToken);
+            const response = await CreateAddress(createFormData(),authCtx.accessToken);
             if(Array.isArray(response.errors))
             {
                 setAddressError(response.errors.find(error => error.property === 'address'));
@@ -54,7 +52,7 @@ function AddAddressScreen(){
                 setPhonenumberError(response.errors.find(error => error.property === 'phonenumber'));
             }
             else
-                navigation.goBack();
+                navigation.navigate('Addresses',{success:true});
         }
         catch(error)
         {
@@ -71,7 +69,6 @@ function AddAddressScreen(){
         data.append('floor',floor);
         data.append('ringbell',ringbellName);
         data.append('phonenumber',phonenumber);
-        console.log(data);
 
         return data;
       }
