@@ -126,3 +126,33 @@ export async function CreateAddress(data,accessToken){
         console.log(error);
     }
 }
+
+export async function GetAddressById(accessToken,id){
+    try{
+        const response = await fetch('http://192.168.1.16:3000/user/address/get/' + id,{method:'GET',headers:
+                                                                            new Headers({
+                                                                                'Authorization': `Bearer ${accessToken}`
+                                                                            })});
+        return await response.json();
+    }
+    catch(error)
+    {
+        console.log(error);
+    }   
+}
+
+export async function EditAddress(accessToken,data,id){
+    try{
+        const response = await fetch('http://192.168.1.16:3000/user/address/edit/' + id,{method:'POST',headers:
+                                                                            new Headers({
+                                                                                'Authorization': `Bearer ${accessToken}`
+                                                                            }),
+                                                                            body:data,
+                                                                            });
+        return await response.json();
+    }
+    catch(error)
+    {
+        console.log(error);
+    } 
+}

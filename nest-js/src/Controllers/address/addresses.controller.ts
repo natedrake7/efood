@@ -21,7 +21,7 @@ export class AddressesController{
 
     @Post('edit/:id')
     @FormDataRequest()
-    async Edit(@Param('id') id: string,@Body() addressDto: AddressEdit,@GetUser() user: User):Promise<void>{
+    async Edit(@Param('id') id: string,@Body() addressDto: AddressEdit,@GetUser() user: User):Promise<{property: string,message:string}[] | void>{
         return this.addressService.EditAddressById(id,addressDto,user);
     }
 

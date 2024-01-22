@@ -57,16 +57,20 @@ export class UserService {
     return {accesstoken,refreshtoken};
   }
 
-  async Edit(user: User,userDto: UserEdit):Promise<{accesstoken: string} | {property: string,message:string}[]>{
+  async Edit(user: User,userDto: UserEdit):Promise<{accesstoken: string} | {property: string,message:string}[] | string[]>{
 
     if(!user)
       throw new UnauthorizedException("User is not registered!");
 
     const errors = this.ValidateEdit(userDto);
+
     if(errors.length != 0)
       return errors;
 
     const userExistsErrors = await this.UserExists(userDto.username,userDto.email,userDto.phonenumber);
+
+    if(userExistsErrors.length > 0)
+      return userExistsErrors;
 
     const Edit_user = await this.Queries.UpdateUserById(user.id,userDto);
     const {id,username,firstname,lastname,email,phonenumber} = Edit_user;

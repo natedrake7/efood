@@ -31,7 +31,7 @@ export class UserController {
   @Post('edit')
   @FormDataRequest()
   @UseGuards(UserGuard)
-  async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <{accesstoken: string} | {property: string,message:string}[]>
+  async Edit(@GetUser() user: User,@Body() userDto: UserEdit): Promise <{accesstoken: string} | {property: string,message:string}[] | string[]>
   {
     return this.userService.Edit(user,userDto);
   }

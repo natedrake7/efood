@@ -14,7 +14,6 @@ function AddressesScreen(){
     const authCtx = useContext(AuthContext);
     const navigation = useNavigation();
     const route = useRoute();
-    const isAddressCreationSuccessfull = route.params?.success ?? false;
     const [isPageReady,setIsPageReady] = useState(false);
     const [addresses,setAddresses] = useState([]);
     const [isDeleteConfirmationVisible, setDeleteConfirmationVisible] = useState(false);
@@ -34,9 +33,8 @@ function AddressesScreen(){
 
             setIsPageReady(true);
         };
-
         FetchAddresses();
-    },[refresh,isAddressCreationSuccessfull]);
+    },[refresh,route]);
 
     const RenderFloor = (floor) =>{
         if(floor == 1)
@@ -155,6 +153,7 @@ function AddressesScreen(){
                 keyExtractor={(item) => item.id}
                 onScrollToTop={() => LoadingScreen()}
                 showsVerticalScrollIndicator={false}
+                onRefresh={() => setRefresh(!refresh)}
             />}
                 <TouchableOpacity onPress={() => handleAddAdress()} style={styles.addAddressButton}>
                     <Text style={styles.addAddress}>Add a new Address</Text>

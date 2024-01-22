@@ -1,17 +1,17 @@
 export class AddressEdit{
-    id: string;
+    id?: string;
 
-    address: string;
+    address?: string;
 
-    number : string;
+    number?: string;
 
-    zipcode : string;
+    zipcode?: string;
 
-    city: string;
+    city?: string;
 
-    phonenumber: string;
+    phonenumber?: string;
 
-    ringbell: string;
+    ringbell?: string;
 
-    floor : number;
+    floor?: number;
 }
