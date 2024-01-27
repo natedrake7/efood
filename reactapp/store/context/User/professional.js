@@ -31,3 +31,20 @@ export async function GetProfessionalUserById(AccessToken,id)
         throw new Error(error);
     }
 }
+
+export async function GetProductById(accessToken,id)
+{
+    try{
+        const response = await fetch(`http://192.168.1.16:3000/products/commercial/product/${id}`,
+        {method:'GET',headers:
+            new Headers({
+                'Authorization': `Bearer ${accessToken}`
+            })
+        });
+        return await response.json();
+    }
+    catch(error)
+    {
+        throw new Error(error);
+    }
+}

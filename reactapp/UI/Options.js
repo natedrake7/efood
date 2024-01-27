@@ -1,5 +1,6 @@
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Button } from 'react-native';
+import { Button, TouchableOpacity,Text} from 'react-native';
+import DipslayCart from '../components/User/Authenticated/CartDropdown';
 
 export const registerOptions = ({ navigation,route }) =>({
     headerLeft: () => (
@@ -15,6 +16,20 @@ export const loginOptions = () =>({
     headerRight: () => null,
     title: null,
 });
+
+export const ProductOptions = ({ navigation,route }) =>({
+  headerRight: () => DipslayCart(),
+  headerLeft: () => (
+    <TouchableOpacity onPress={() => navigation.goBack()}>
+      <Ionicons name="arrow-back" color='white' size={26}/>
+      </TouchableOpacity>
+  ),
+  title: 'Product',
+  headerStyle:{
+    backgroundColor:'#121212',
+  }
+});
+
 
 export const TabScreenOptions = ({ route }) => ({
     tabBarIcon: ({ focused, color, size }) => {

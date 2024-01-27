@@ -8,8 +8,9 @@ export const AuthContext = createContext({
     accessToken: '',
     refreshToken: '',
     cart: [],
+    cartLength: 0,
     isAuthenticated: false,
-    isFetchingToken: false,
+    isFetchingToken: true,
     postAccessToken: () => {},
     postRefreshToken: () => {},
     storeRefreshToken: async() => {},
@@ -25,6 +26,7 @@ function AuthContextProvider({children}){
     const [refreshToken,setRefreshToken] = useState();
     const [isFetchingToken,setIsFetchingToken] = useState(true);
     const [cart,setCartItem] = useState([]);
+    const [cartLength,setCartLength] = useState(0);
 
     useEffect(() => {
         async function GetRefreshTokenFromStorage(){
@@ -35,8 +37,8 @@ function AuthContextProvider({children}){
                     postRefreshToken(refreshTokenStorage);
                     const accessToken = await GetToken(refreshTokenStorage);
                     accessToken ? postAccessToken(accessToken) : postAccessToken('');
-                    setIsFetchingToken(false)
                 }
+                setIsFetchingToken(false)
                 }catch (error) {
             console.error('Error fetching data:', error);
             }
@@ -70,12 +72,28 @@ function AuthContextProvider({children}){
          return '';
     }
 
-    function addToCart(item) {
-        setCartItem([...cart, item]);
+    function addToCart(itemToAdd) {
+        const existingItem = cart.find(item => item === itemToAdd);
+
+        if(existingItem)
+            existingItem.count +=1
+        else
+        {
+            itemToAdd.count = 1;
+            itemToAdd.uniqueId = cart.length + 1;
+            setCartItem([...cart, itemToAdd]);
+        }
+        setCartLength(prevLength => prevLength + 1);
     }
     
-    function removeFromCart(itemToRemove) {
-        setCartItem(cart.filter(item => item.id !== itemToRemove.id));
+    function removeFromCart(uniqueId) {
+        const existingItem = cart.find(item => item.uniqueId === uniqueId);
+        
+        if(existingItem.count > 1)
+            existingItem.count--;
+        else
+            setCartItem(cart.filter(item => item.uniqueId != existingItem.uniqueId));
+        setCartLength(prevLength => prevLength - 1);
     }
 
     async function logout(){
@@ -99,6 +117,7 @@ function AuthContextProvider({children}){
         postRefreshToken: postRefreshToken,
         storeRefreshToken: storeRefreshToken,
         cart: cart,
+        cartLength:cartLength,
         addToCart: addToCart,
         removeFromCart: removeFromCart,
         getUserInfo: getUserInfo,

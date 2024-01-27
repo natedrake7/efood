@@ -1,4 +1,2 @@
-1)change color of picker menu on both.
-2)Finish Edit Password,Settings,Profile
-3)Create Cart,
-4)View and Edit Addresses.
+1)Update cart counter
+2)finish cart and create submission.

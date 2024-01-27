@@ -132,7 +132,7 @@ function DetailsScreen() {
       <>
         <Image
           source={{ uri: professionalUser.backgroundImage }}
-          style={{ width: '100%', height: 150, resizeMode: 'cover' }}
+          style={{ width: '100%', height: 150, resizeMode: 'cover',borderRadius: 12 }}
         />
         <SafeAreaView style={styles.container}>
         {professionalUser &&

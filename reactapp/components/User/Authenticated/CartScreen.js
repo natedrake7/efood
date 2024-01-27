@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "../../../store/context/User/auth-context";
 import { FlatList,StyleSheet,Text,View,TouchableOpacity,Image} from "react-native";
 import { SafeAreaView } from "react-navigation";
@@ -6,21 +6,33 @@ import { SafeAreaView } from "react-navigation";
 function  CartScreen(){
     const authCtx = useContext(AuthContext);
 
+    useEffect(() => {
+        
+    },[authCtx.cart]);
+
     const LoadingScreen = () =>{
         return(
          <ActivityIndicator size="large" color="white" />
         );
       }
+    
+    const handleRemoveFromCart = (uniqueId) =>{
+        authCtx.removeFromCart(uniqueId);
+    }
+
+    const handleAddToCart = (item) =>{
+        authCtx.addToCart(item);
+    }
 
     const RenderCartItem = ({item}) =>{
         return(
             <View style={styles.itemsContainer}>
                 <View style={{flexDirection:'row',alignItems:'center'}}>
-                    <TouchableOpacity style={styles.button}>
+                    <TouchableOpacity style={styles.button} onPress={() => handleRemoveFromCart(item.uniqueId)}>
                         <Text style={styles.cartControls}>-</Text>
                     </TouchableOpacity>
-                    <Text style={styles.cartControls}>4</Text>
-                    <TouchableOpacity style={styles.button}>
+                    <Text style={styles.cartControls}>{item.count}</Text>
+                    <TouchableOpacity style={styles.button} onPress={() => handleAddToCart(item)}>
                         <Text style={styles.cartControls}>+</Text>
                     </TouchableOpacity>
                 </View>

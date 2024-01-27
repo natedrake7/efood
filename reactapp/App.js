@@ -16,13 +16,14 @@ import LoginProfessionalScreen from './components/Professional/LoginProfessional
 import RegisterProfessionalScreen from './components/Professional/RegisterProfessionalScreen';
 import EditPasswordScreen from './components/User/Authenticated/EditPasswordScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { registerOptions,loginOptions,TabScreenOptions } from './UI/Options';
+import { registerOptions,loginOptions,TabScreenOptions, ProductOptions } from './UI/Options';
 import { StatusBar } from 'react-native';
 import CartScreen from './components/User/Authenticated/CartScreen';
 import DipslayCart from './components/User/Authenticated/CartDropdown';
 import AddressesScreen from './components/User/Authenticated/AddressesScreen';
 import AddAddressScreen from './components/User/Authenticated/AddAddressScreen';
 import AddressScreenDetails from './components/User/Authenticated/AddressDetailsScreen';
+import ProductSizeScreen from './components/User/Authenticated/Product/ProductSizeScreen';
 
 
 
@@ -35,7 +36,6 @@ SplashScreen.preventAutoHideAsync();
 function Root(){
   return <Navigation/>;
 };
-
 export default function App(){
 
   return(
@@ -54,7 +54,6 @@ function Navigation(){
   if(!authCtx.isFetchingToken)
   {
     SplashScreen.hideAsync();
-
     return(
       <NavigationContainer theme={Theme}>
         {authCtx.isAuthenticated ? <AuthenticatedStack/> : <AuthStack />}
@@ -142,10 +141,20 @@ function AuthenticatedStack(){
       </Stack.Screen>
       <Stack.Screen name="EditPassword" component={EditPasswordScreen} options={{headerTitle:'',headerRight: DipslayCart}}/>
       <Stack.Screen name="Details" component={DetailsScreen} options={{headerRight: DipslayCart}}/>
-      <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} options={{headerRight: DipslayCart}}/>
+      <Stack.Group
+        screenOptions={{
+          presentation: 'modal',
+          headerStyle:{
+            backgroundColor: 'black',
+            title:'',
+          },
+        }}>
+        <Stack.Screen name="ProductDetails" component={ProductDetailsScreen} options={ProductOptions}/>
+        <Stack.Screen name="ProductSize" component={ProductSizeScreen} options={ProductOptions}/>
+      </Stack.Group>
       <Stack.Screen name="Cart" component={CartScreen} />
-      <Stack.Screen name="AddAddress" component={AddAddressScreen} options={{headerRight: DipslayCart}}/>
-      <Stack.Screen name="AddressDetails" component={AddressScreenDetails} options={{headerRight: DipslayCart}}/>
+      <Stack.Screen name="AddAddress" component={AddAddressScreen} options={{headerTitle:'Create Address',headerRight: DipslayCart}}/>
+      <Stack.Screen name="AddressDetails" component={AddressScreenDetails} options={{headerTitle:'Details',headerRight: DipslayCart}}/>
     </Stack.Navigator>
   )
 };
